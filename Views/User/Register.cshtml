@@ -1,0 +1,297 @@
+@model FNS.Models.Register
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="shortcut icon" href="/Logo/cp.png" />
+    <title>ReserveEase - Register</title>
+
+    <link href="../../Default/css/kendo.common.min.css" rel="stylesheet" />
+    <link href="../../Default/css/kendo.default.min.css" rel="stylesheet" />
+    <link href="../../Default/css/fonts.css" rel="stylesheet" />
+    <link href="../../Default/css/styleguide.css" rel="stylesheet" />
+    <link href="../../Default/css/responsive.css" rel="stylesheet" />
+    <link href="../../Default/css/casepoint.comfortable.css" rel="stylesheet" />
+    <link href="../../Default/css/kendo.Yellow.css" rel="stylesheet" />
+    <link href="../../Default/css/Register.css" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/Javascript/Validation_login.js"></script>
+</head>
+
+<body>
+    <div class="Register-bg-wrapper d-flex flex-column">
+        <div class="Register-logo-header d-flex align-items-center">
+            <a href="#" class="Register-logo-wrapper">
+                <img src="/logo/logoo.jpeg" class="Register-logo-img" alt="BookMySeatLogo" style="height: 10ch;" />
+            </a>
+        </div>
+        <div class="Register-graphic-wrapper flex-1 overflow-auto d-flex flex-wrap">
+            <div class="Register-left-wrapper">
+                <div>
+                    <img src="/Logo/cp1.jpg" alt="BookMySeat" class="Register-graphice-img" />
+                </div>
+            </div>
+
+            <div class="Register-right-wrapper" id="loginForm">
+                <div class="loginpage-box-wrapper">
+                    <h2 class="Register-title text-dark font-bold">Register In</h2>
+                    <div class="loginpage-box-content">
+                        <!-- First Name Field -->
+                        <div class="form-group">
+                            <label for="c_firstname" style="display: none;">First Name</label>
+                            <input type="text" class="k-textbox Register-textbox" placeholder="First Name" name="c_firstname" id="c_firstname" asp-for="c_firstname" />
+                            <span class="Register-textbox-icon"><i class="icon-user"></i></span>
+                            <span id="firstNameValidateMessage" class="error-message"></span>
+                        </div>
+
+                        <!-- Last Name Field -->
+                        <div class="form-group">
+                            <label for="c_lastname" style="display: none;">Last Name</label>
+                            <input type="text" class="k-textbox Register-textbox" placeholder="Last Name" name="c_lastname" id="c_lastname" asp-for="c_lastname" />
+                            <span class="Register-textbox-icon"><i class="icon-user"></i></span>
+                            <span id="lastNameValidateMessage" class="error-message"></span>
+                        </div>
+
+                        <!-- Username Field -->
+                        <div class="form-group">
+                            <label for="c_username" style="display: none;">Username</label>
+                            <input type="text" class="k-textbox Register-textbox" placeholder="Username" name="c_username" id="c_username" asp-for="c_username" />
+                            <span class="Register-textbox-icon"><i class="icon-user"></i></span>
+                            <span id="usernameValidateMessage" class="error-message"></span>
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="form-group">
+                            <label for="c_email" style="display: none;">Email</label>
+                            <input type="email" class="k-textbox Register-textbox" placeholder="Email" name="c_email" id="c_email" asp-for="c_email" />
+                            <span class="Register-textbox-icon"><i class="icon-email"></i></span>
+                            <span id="emailIdValidateMessage" class="error-message"></span>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="form-group">
+                            <label for="c_password" style="display: none;">Password</label>
+                            <input type="password" class="k-textbox Register-textbox" placeholder="Password" id="c_password" name="c_password" asp-for="c_password" />
+                            <span class="Register-textbox-icon"><i class="icon-locked"></i></span>
+                            <span id="passwordValidateMessage" class="error-message"></span>
+                        </div>
+
+                        <!-- Confirm Password Field -->
+                        <div class="form-group">
+                            <label for="c_confirmPassword" style="display: none;">Confirm Password</label>
+                            <input type="password" class="k-textbox Register-textbox" placeholder="Confirm Password" id="c_confirmPassword" name="c_confirmPassword" />
+                            <span class="Register-textbox-icon"><i class="icon-locked"></i></span>
+                            <span id="confirmPasswordValidateMessage" class="error-message"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="c_gender" style="display: none;">Gender</label>
+                            <select id="c_gender" name="c_gender" class="k-textbox Register-textbox">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="Register-textbox-icon"><i class="icon-gender"></i></span>
+                            <span id="genderValidateMessage" class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="c_dob" style="display: none;">Date of Birth</label>
+                            <input type="date" class="k-textbox Register-textbox" placeholder="Date of Birth" id="c_dob" name="c_dob" />
+                            <span class="Register-textbox-icon"><i class="icon-calendar"></i></span>
+                            <span id="dobValidateMessage" class="error-message"></span>
+                        </div>
+
+                        <div class="form-group pb-10">
+                            <div class="col-md-offset-2 col-md-20">
+                                <input type="submit" value="Register" id="loginBtn" class="btn btn-primary k-button w100 loginbtn" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            function validateLoginForm() {
+                // Clear previous error messages
+                $('#firstNameValidateMessage').text('');
+                $('#lastNameValidateMessage').text('');
+                $('#usernameValidateMessage').text('');
+                $('#emailIdValidateMessage').text('');
+                $('#passwordValidateMessage').text('');
+                $('#confirmPasswordValidateMessage').text('');
+                $('#genderValidateMessage').text('');
+                $('#dobValidateMessage').text('');
+
+                let isValid = true;
+                const firstName = $('#c_firstname').val().trim();
+                const lastName = $('#c_lastname').val().trim();
+                const username = $('#c_username').val().trim();
+                const email = $('#c_email').val().trim();
+                const password = $('#c_password').val().trim();
+                const confirmPassword = $('#c_confirmPassword').val().trim();
+                const gender = $('#c_gender').val().trim();
+                const dob = $('#c_dob').val().trim();
+
+                // Validate First Name
+                if (firstName === '') {
+                    $('#firstNameValidateMessage').text('First Name is required.').show();
+                    isValid = false;
+                }
+
+                // Validate Last Name
+                if (lastName === '') {
+                    $('#lastNameValidateMessage').text('Last Name is required.').show();
+                    isValid = false;
+                }
+
+                // Validate Username
+                if (username === '') {
+                    $('#usernameValidateMessage').text('Username is required.').show();
+                    isValid = false;
+                }
+
+                // Validate Email
+                if (email === '') {
+                    $('#emailIdValidateMessage').text('Email is required.').show();
+                    isValid = false;
+                } else if (!isValidEmail(email)) {
+                    $('#emailIdValidateMessage').text('Please enter a valid email address.').show();
+                    isValid = false;
+                }
+
+                // Validate Password
+                if (password === '') {
+                    $('#passwordValidateMessage').text('Password is required.').show();
+                    isValid = false;
+                } else if (password.length < 6) {
+                    $('#passwordValidateMessage').text('Password must be at least 6 characters long.').show();
+                    isValid = false;
+                }
+
+                // Validate Confirm Password
+                if (confirmPassword === '') {
+                    $('#confirmPasswordValidateMessage').text('Confirm Password is required.').show();
+                    isValid = false;
+                } else if (password !== confirmPassword) {
+                    $('#confirmPasswordValidateMessage').text('Passwords do not match.').show();
+                    isValid = false;
+                }
+
+                // Validate Gender
+                if (gender === '') {
+                    $('#genderValidateMessage').text('Gender is required.').show();
+                    isValid = false;
+                }
+
+                // Validate Date of Birth
+                if (dob === '') {
+                    $('#dobValidateMessage').text('Date of Birth is required.').show();
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            // Helper function for email format validation
+            function isValidEmail(email) {
+                return true; // Can implement a more detailed email validation here
+            }
+
+            $('#loginBtn').click(function(event) {
+                event.preventDefault();
+
+                if (validateLoginForm()) {
+                    const data = {
+                        c_firstname: $('#c_firstname').val(),
+                        c_lastname: $('#c_lastname').val(),
+                        c_username: $('#c_username').val(),
+                        c_email: $('#c_email').val(),
+                        c_password: $('#c_password').val(),
+                        c_gender: $('#c_gender').val(),
+                        c_dob: $('#c_dob').val()
+                    };
+
+                    $.ajax({
+                        url: '/User/RegisterUser',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Registration Successful',
+                                text: 'You have successfully registered!',
+                                toast: true, // Enable toast style
+                                position: 'top-end', // Position the toast at the top-right
+                                showConfirmButton: false, // No confirm button
+                                timer: 3000, // Auto-close after 3 seconds
+                                timerProgressBar: true // Show progress bar
+                            });
+                            if (response.success) {
+                                console.log("Register successful!");
+                                setTimeout(function() {
+                                    window.location.href = '/User/Improve'; // Redirect on success
+                                }, 3000); // Redirect on success
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Register Failed',
+                                    text: response.message || 'Invalid email or password. Please try again.'
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("AJAX Error:", status, error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred during Register. Please try again later.'
+                            });
+                        }
+                    });
+                } else {
+                    console.log("Validation failed. Please correct the errors.");
+                }
+            });
+
+            // Optional: Hide error messages when user starts typing again
+            $('#c_firstname').on('input', function() {
+                $('#firstNameValidateMessage').text('').hide();
+            });
+            $('#c_lastname').on('input', function() {
+                $('#lastNameValidateMessage').text('').hide();
+            });
+            $('#c_username').on('input', function() {
+                $('#usernameValidateMessage').text('').hide();
+            });
+            $('#c_email').on('input', function() {
+                $('#emailIdValidateMessage').text('').hide();
+            });
+            $('#c_password').on('input', function() {
+                $('#passwordValidateMessage').text('').hide();
+            });
+            $('#c_confirmPassword').on('input', function() {
+                $('#confirmPasswordValidateMessage').text('').hide();
+            });
+            $('#c_gender').on('change', function() {
+                $('#genderValidateMessage').text('').hide();
+            });
+            $('#c_dob').on('change', function() {
+                $('#dobValidateMessage').text('').hide();
+            });
+        });
+    </script>
+
+</body>
+
+</html>

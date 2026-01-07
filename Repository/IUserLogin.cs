@@ -1,0 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
+using FNS.Models;
+
+namespace FNS.Repository
+{
+    public interface IUserLogin
+    {
+        public DataTable LoginUser(string email = "", string password = "");
+        public DataTable RegisterUser(string email = "", string password = "", string firstName = "", string lastName = "", string username = "", string gender = "", DateTime dob = default(DateTime));
+        public DataTable GetUserStreakByEmail(string email = "");
+    }
+}
