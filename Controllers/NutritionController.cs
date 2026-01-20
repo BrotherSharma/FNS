@@ -109,15 +109,15 @@ public class NutritionController : ControllerBase
         {
             var rawText = response.Text.Trim();
 
-    // Step 2: If response.Text is a quoted JSON string, unescape it
-    if (rawText.StartsWith("\"") && rawText.EndsWith("\""))
-    {
-        rawText = JsonSerializer.Deserialize<string>(rawText) ?? rawText;
-    }
+            // Step 2: If response.Text is a quoted JSON string, unescape it
+            if (rawText.StartsWith("\"") && rawText.EndsWith("\""))
+            {
+                rawText = JsonSerializer.Deserialize<string>(rawText) ?? rawText;
+            }
 
-    // Step 3: Now deserialize the actual object
-    var result = JsonSerializer.Deserialize<NutritionResult>(rawText,
-        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            // Step 3: Now deserialize the actual object
+            var result = JsonSerializer.Deserialize<NutritionResult>(rawText,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             return result ?? new NutritionResult();
         }
         catch (JsonException jEx)
