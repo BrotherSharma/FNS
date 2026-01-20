@@ -1,0 +1,287 @@
+@* Partial view: Food Log — simple CSS grid + vanilla JS modal *@
+
+@* Partial view: Food Log — simple CSS grid + vanilla JS modal *@
+<div class="addfood-single" style="width:100%;">
+    <h2 style="margin-top:0;">Foods Details</h2>
+
+    <div class="food-grid-controls" style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+        <input id="foodSearch" type="search" placeholder="Search food, calories, category..." style="flex:1; padding:8px; border:1px solid #ccc; border-radius:6px;" />
+        <div>
+            <button id="addFoodBtn" class="btn">Add Food</button>
+            <button id="exportExcel" class="btn">Export CSV</button>
+        </div>
+    </div>
+
+    <style>
+        /* Table styles */
+        .food-table { width:100%; border-collapse:collapse; font-family:inherit; table-layout:fixed; }
+        .food-table thead th { text-align:left; padding:12px 10px; background:#f6f8f7; color:#1f2d2b; font-weight:600; border-bottom:1px solid #e6e9e8; font-size:13px; }
+        .food-table tbody td { padding:10px 8px; border-bottom:1px solid #f0f2f1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:14px; }
+        .food-table tbody tr:nth-child(even) { background:#fbfcfb; }
+        .food-table-container { width:100%; max-height:420px; overflow:auto; border-radius:8px; border:1px solid #eef0ef; padding:6px; background:#fff; }
+        .fav-star { color:#d3d3d3; cursor:pointer; }
+        .fav-star.active { color:#e6b800; }
+
+        /* Modal overlay */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; z-index:1000; backdrop-filter:blur(2px); }
+
+        /* Modal window: centered and responsive */
+        .modal { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); background:#fff; padding:18px; border-radius:10px; width:700px; max-width:96%; box-shadow:0 24px 48px rgba(31,45,43,0.18); max-height:90vh; overflow:auto; z-index:1001; display:none; }
+        .modal:focus { outline: none; }
+
+        /* Modal header */
+        .modal-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:8px; border-bottom:1px solid #eef0ef; margin-bottom:12px; }
+        .modal-header h3 { margin:0; font-size:20px; color:#20332f; font-weight:700; }
+        .modal-close { background:transparent; border:1px solid transparent; padding:6px 8px; border-radius:6px; cursor:pointer; color:#6a7b77; font-size:16px; }
+        .modal-close:hover { background:#f3f6f5; color:#20332f; }
+
+        /* Form layout: grid for consistent alignment */
+        .form-row { display:grid; grid-template-columns: 1fr 2fr 120px 160px 60px; gap:12px; align-items:end; }
+        .form-row .col { display:flex; flex-direction:column; }
+        label { display:block; margin-bottom:6px; font-weight:600; font-size:13px; color:#344f4b; }
+        .input, textarea, select { width:100%; padding:10px 12px; border:1px solid #d9dedc; border-radius:8px; background:#fff; font-size:14px; color:#16302e; }
+        .input:focus, textarea:focus, select:focus { box-shadow:0 0 0 4px rgba(47,111,99,0.06); border-color:#2f6f63; outline:none; }
+        textarea { min-height:90px; resize:vertical; }
+        .error { color:#b00020; font-size:12px; margin-top:6px; display:none; }
+
+        /* Modal footer / actions */
+        .modal-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
+        .btn { padding:10px 14px; border-radius:8px; border:1px solid #2f6f63; background:#fff; color:#2f6f63; cursor:pointer; font-weight:600; transition:all .12s ease; }
+        .btn:hover { transform:translateY(-1px); box-shadow:0 6px 14px rgba(31,45,43,0.06); }
+        .btn.primary { background:#2f6f63; color:#fff; border-color:transparent; box-shadow:0 8px 20px rgba(47,111,99,0.12); }
+        .btn.secondary { background:#fff; color:#2f6f63; }
+
+        /* Responsive adjustments */
+        @@media (max-width:720px){
+            .form-row { grid-template-columns: 1fr; align-items:stretch; }
+            .modal { width:92%; padding:14px; }
+            .modal-footer { flex-direction:column-reverse; align-items:stretch; }
+            .modal-footer .btn { width:100%; }
+        }
+    </style>
+
+    <div class="section">
+        <div class="food-table-container">
+            <table class="food-table" aria-describedby="foodTableDesc">
+                <caption id="foodTableDesc" style="display:none">Logged foods</caption>
+                <thead>
+                    <tr>
+                            <th style="width:110px">Meal</th>
+                            <th>Food</th>
+                            <th style="width:80px">Amount</th>
+                            <th style="width:120px">Category</th>
+                            <th style="width:180px">Notes</th>
+                            <th style="width:50px">Fav</th>
+                    </tr>
+                </thead>
+                <tbody id="foodLogBody">
+                    <tr class="placeholder-row"><td colspan="6" style="text-align:center; color:#666; padding:12px;">No entries yet.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal overlay and dialog -->
+    <div id="modalOverlay" class="modal-overlay" aria-hidden="true"></div>
+    <div id="addModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+        <div class="modal-header">
+            <h3 id="addModalTitle">Add Food</h3>
+            <button id="modalClose" class="modal-close" aria-label="Close">✕</button>
+        </div>
+        <form id="addModalForm">
+            <div class="form-row">
+                <!-- Date removed as requested -->
+                <div class="col">
+                    <label for="modalMeal">Meal</label>
+                    <select id="modalMeal" name="meal" class="input">
+                        <option>Breakfast</option>
+                        <option>Lunch</option>
+                        <option>Dinner</option>
+                        <option>Snack</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="col" style="flex:2 1 220px; min-width:160px;">
+                    <label for="modalFoodName">Food Name</label>
+                    <input id="modalFoodName" name="food" type="text" class="input" required />
+                    <div class="error" data-for="modalFoodName">Food name is required.</div>
+                </div>
+                <div class="col">
+                    <label for="modalAmount">Amount</label>
+                    <input id="modalAmount" name="amount" type="number" step="any" class="input" required />
+                    <div class="error" data-for="modalAmount">Enter amount &gt; 0.</div>
+                </div>
+                <div class="col">
+                    <label for="modalCategory">Category</label>
+                    <select id="modalCategory" name="category" class="input">
+                        <option>Vegetable</option>
+                        <option>Fruit</option>
+                        <option>Grain</option>
+                        <option>Dairy</option>
+                        <option>Beverage</option>
+                        <option>Snack</option>
+                        <option>Restaurant</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="col" style="flex:0 0 60px; min-width:50px; text-align:center;">
+                    <label for="modalFav">Fav</label><br />
+                    <input id="modalFav" name="fav" type="checkbox" style="transform:scale(1.1); margin-top:6px;" />
+                </div>
+            </div>
+            <div style="margin-top:8px;">
+                <label for="modalNotes">Notes (optional)</label>
+                <textarea id="modalNotes" name="notes" rows="2" class="input" style="margin-top:6px;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="modalCancel" class="btn secondary">Cancel</button>
+                <button type="submit" class="btn primary">Add Food</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const addFoodBtn = document.getElementById('addFoodBtn');
+    const exportBtn = document.getElementById('exportExcel');
+    const search = document.getElementById('foodSearch');
+    const tbody = document.getElementById('foodLogBody');
+    const modal = document.getElementById('addModal');
+    const overlay = document.getElementById('modalOverlay');
+    const modalForm = document.getElementById('addModalForm');
+    const modalClose = document.getElementById('modalClose');
+    const modalCancel = document.getElementById('modalCancel');
+
+    // Ensure overlay and modal are direct children of <body> so fixed positioning centers correctly
+    try {
+        if (overlay && overlay.parentNode !== document.body) document.body.appendChild(overlay);
+        if (modal && modal.parentNode !== document.body) document.body.appendChild(modal);
+    } catch (err) {
+        console.warn('Could not move modal elements to body:', err);
+    }
+
+    let lastFocused = null;
+
+    function openModal(){
+        lastFocused = document.activeElement;
+        overlay.style.display = 'block';
+        modal.style.display = 'block';
+        overlay.setAttribute('aria-hidden', 'false');
+        // ensure modal is focusable and focus it
+        modal.setAttribute('tabindex', '-1');
+        const first = modal.querySelector('input, select, textarea, button');
+        if (first) first.focus();
+        document.body.style.overflow = 'hidden';
+        trapFocus(modal);
+        modal.focus();
+    }
+
+    function closeModal(){
+        overlay.style.display = 'none';
+        modal.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        releaseFocusTrap();
+        if (lastFocused) lastFocused.focus();
+    }
+
+    addFoodBtn.addEventListener('click', openModal);
+    modalClose.addEventListener('click', closeModal);
+    modalCancel.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+
+    // ESC to close
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modal.style.display === 'block') closeModal(); });
+
+    function escapeHtml(str){ if (!str) return ''; return String(str).replace(/[&<>\\"'`]/g, function (s) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','\\"':'&quot;',"'":'&#39;','`':'&#x60;'})[s]; }); }
+
+    function addRow(data){
+        // remove placeholder
+        const placeholder = tbody.querySelector('.placeholder-row');
+        if (placeholder) placeholder.remove();
+        const tr = document.createElement('tr');
+        const favHtml = data.fav ? '<span class="fav-star active">★</span>' : '<span class="fav-star">☆</span>';
+        tr.innerHTML = `
+            <td style="max-width:110px">${escapeHtml(data.meal || '')}</td>
+            <td>${escapeHtml(data.food || '')}</td>
+            <td>${escapeHtml(data.amount || '')}</td>
+            <td>${escapeHtml(data.category || '')}</td>
+            <td title="${escapeHtml(data.notes || '')}">${escapeHtml(data.notes || '')}</td>
+            <td style="text-align:center">${favHtml}</td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    modalForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        // simple validation
+        const food = document.getElementById('modalFoodName');
+        const amount = document.getElementById('modalAmount');
+        let valid = true;
+        if (!food.value.trim()){ showErrorFor(food, true); valid = false; } else showErrorFor(food, false);
+        if (Number(amount.value) <= 0 || amount.value === ''){ showErrorFor(amount, true); valid = false; } else showErrorFor(amount, false);
+        if (!valid) return;
+        const data = {
+            meal: document.getElementById('modalMeal').value,
+            food: food.value.trim(),
+            amount: amount.value,
+            category: document.getElementById('modalCategory').value,
+            notes: document.getElementById('modalNotes').value,
+            fav: document.getElementById('modalFav').checked
+        };
+        addRow(data);
+        closeModal();
+        modalForm.reset();
+    });
+
+    function showErrorFor(input, show){
+        const err = modal.querySelector('.error[data-for="'+input.id+'"]');
+        if (err) err.style.display = show ? 'block' : 'none';
+    }
+
+    // Export CSV
+    exportBtn.addEventListener('click', function(){
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        if (!rows.length) { alert('No data to export'); return; }
+        const headers = Array.from(document.querySelectorAll('.food-table thead th')).map(h => h.innerText.trim());
+        const csv = [headers.join(',')];
+        rows.forEach(r => {
+            if (r.classList.contains('placeholder-row')) return;
+            const cols = Array.from(r.querySelectorAll('td')).map(td => '"' + td.innerText.replace(/"/g,'""') + '"');
+            csv.push(cols.join(','));
+        });
+        const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'food_log_'+new Date().toISOString().slice(0,10)+'.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Search
+    search.addEventListener('input', function(){
+        const q = (search.value || '').toLowerCase().trim();
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(r => {
+            if (r.classList.contains('placeholder-row')) return;
+            r.style.display = q === '' ? '' : (r.innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none');
+        });
+    });
+
+    // Simple focus trap implementation
+    let focusable = null;
+    let firstFocusable = null;
+    let lastFocusable = null;
+    function trapFocus(container){
+        focusable = container.querySelectorAll('a[href], button, textarea, input, select');
+        if (!focusable.length) return;
+        firstFocusable = focusable[0];
+        lastFocusable = focusable[focusable.length-1];
+        container.addEventListener('keydown', handleKeydown);
+    }
+    function releaseFocusTrap(){ if (modal) modal.removeEventListener('keydown', handleKeydown); }
+    function handleKeydown(e){
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey){ if (document.activeElement === firstFocusable){ e.preventDefault(); lastFocusable.focus(); } }
+        else { if (document.activeElement === lastFocusable){ e.preventDefault(); firstFocusable.focus(); } }
+    }
+});
+</script>
