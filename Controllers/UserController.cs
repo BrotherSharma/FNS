@@ -31,10 +31,6 @@ namespace FNS.Controllers
             return View();
 
         }
-        // public IActionResult Improve()
-        // {
-        //     return View();
-        // }
         [HttpPost]
         public IActionResult Authenticate([FromBody] JsonElement credentials)
         {

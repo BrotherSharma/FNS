@@ -1,4 +1,8 @@
-@* @model FNS.Models.FoodLog *@
+@{
+    ViewData["Title"] = "Personalized Nutrition Form";
+    string Name = ViewBag.Name;
+    string Email = ViewBag.Email;
+}
 <!DOCTYPE html>
 <html>
 
@@ -32,16 +36,15 @@
 
             <table class="table table-bordered table-striped">
                 <thead>
-                    <tr>
-                        <th>Meal</th>
-                        <th>Food</th>
-                        <th>Amount</th>
-                        <th>Category</th>
-                        <th>Notes</th>
-                    </tr>
+                            <tr>
+                                <th>Meal</th>
+                                <th>Food</th>
+                                <th>Notes</th>
+                                <th>Date</th>
+                            </tr>
                 </thead>
                 <tbody id="foodLogBody">
-                    <tr><td colspan="5" class="text-center text-muted">No entries yet.</td></tr>
+                    <tr><td colspan="4" class="text-center text-muted">No entries yet.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -90,42 +93,100 @@
 
     <script>
         $(document).ready(function () {
-    // FIX: Move the modal element to the end of the body tag
-    // This solves the z-index/backdrop overlay issue
-    $('#addModal').appendTo("body"); 
+        $('#addModal').appendTo("body"); 
 
-    const addModal = new bootstrap.Modal(document.getElementById('addModal'));
+        const addModal = new bootstrap.Modal(document.getElementById('addModal'));
+        const userEmail = '@Email';
+        let foodItems = [];
 
-    $('#addFoodBtn').click(function () {
-        addModal.show();
-    });
-
-    $('#addModalForm').submit(function (e) {
-        e.preventDefault();
-        const food = $('#modalFoodName').val();
-        const meal = $('#modalMeal').val();
-        const notes = $('#modalNotes').val();
-
-        const newRow = `<tr>
-            <td>${meal}</td>
-            <td>${food}</td>
-            <td>-</td>
-            <td>-</td>
-            <td>${notes}</td>
-        </tr>`;
-
-        // Remove placeholder if exists
-        if ($('#foodLogBody tr').length === 1 && $('#foodLogBody tr td').hasClass('text-center')) {
-            $('#foodLogBody').html('');
+        function renderFoodLog(items) {
+            const $body = $('#foodLogBody');
+            $body.empty();
+            if (!items || items.length === 0) {
+                $body.append('<tr><td colspan="4" class="text-center text-muted">No entries yet.</td></tr>');
+                return;
+            }
+            for (let i = 0; i < items.length; i++) {
+                const it = items[i];
+                // order: Meal | Food | Notes | Date (date last)
+                const row = `<tr><td>${$('<div/>').text(it.meal).html()}</td><td>${$('<div/>').text(it.foodName).html()}</td><td>${$('<div/>').text(it.notes).html()}</td><td>${$('<div/>').text(it.date || '').html()}</td></tr>`;
+                $body.append(row);
+            }
         }
 
-        $('#foodLogBody').append(newRow);
+        function getFilteredItems(query) {
+            if (!query) return foodItems;
+            const q = query.trim().toLowerCase();
+            return foodItems.filter(it =>
+                ((it.foodName || '').toLowerCase().includes(q)) ||
+                ((it.meal || '').toLowerCase().includes(q)) ||
+                ((it.notes || '').toLowerCase().includes(q))
+            );
+        }
 
-        addModal.hide();
-        // Reset the form
-        $('#addModalForm')[0].reset();
+        function loadFoodLog(email) {
+            $.get('/FoodLog/List', { email: email })
+                .done(function (res) {
+                    if (res && res.success === false) {
+                        console.error('Failed to load food log:', res.message);
+                        foodItems = [];
+                        renderFoodLog([]);
+                        return;
+                    }
+                    foodItems = res || [];
+                    renderFoodLog(getFilteredItems($('#foodSearch').val() || ''));
+                })
+                .fail(function () {
+                    foodItems = [];
+                    renderFoodLog([]);
+                });
+        }
+
+        function debounce(fn, wait) { let t; return function() { const args = arguments; const ctx = this; clearTimeout(t); t = setTimeout(function(){ fn.apply(ctx, args); }, wait); }; }
+
+        $('#foodSearch').on('input', debounce(function () {
+            const q = $(this).val() || '';
+            renderFoodLog(getFilteredItems(q));
+        }, 250));
+
+        $('#addFoodBtn').click(function () {
+            addModal.show();
+        });
+
+        $('#addModalForm').submit(function (e) {
+            e.preventDefault();
+            const data = {
+                foodName: $('#modalFoodName').val(),
+                meal: $('#modalMeal').val(),
+                notes: $('#modalNotes').val(),
+                email: userEmail
+            };
+
+            $.ajax({
+                url: '/FoodLog/Save',
+                type: 'POST',
+                data: data,
+                success: function (res) {
+                    if (res && res.success) {
+                        addModal.hide();
+                        $('#addModalForm')[0].reset();
+                        loadFoodLog(userEmail);
+                        Swal.fire('Saved', 'Food saved successfully', 'success');
+                    } else {
+                        Swal.fire('Error', res?.message || 'Save failed', 'error');
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'Something went wrong', 'error');
+                }
+            });
+        });
+
+        // initial load
+        if (userEmail && userEmail.length > 0) {
+            loadFoodLog(userEmail);
+        }
     });
-});
 
     </script>
 </body>
