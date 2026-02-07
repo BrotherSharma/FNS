@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nutrition Dashboard</title>
 
     <!-- External Resources -->
@@ -15,6 +15,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root { --primary-color: #2e5942; }
+        .btn-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
+        button:not(.theme-toggle) { background-color: var(--primary-color) !important; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .header { background-color: var(--primary-color); display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
+        .header h1 { color: white; margin: 0; }
+        .profile-name { color: white; display: flex; align-items: center; gap: 10px; }
+        .sidebar { background-color: var(--primary-color); }
+        .sidebar a { color: white; }
+        .theme-selector { margin-left: 8px; padding: 2px 6px; border-radius: 4px; color: #333; }
+        .profile-container { color: #333; }
+        .edit-btn { background-color: var(--primary-color) !important; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .stat-box { border: 2px solid var(--primary-color); border-radius: 8px; padding: 15px; text-align: center; }
+        .stat-box h4 { color: var(--primary-color); margin: 0; font-size: 24px; }
+        .stat-box p { color: #666; margin: 5px 0 0 0; }
+        .referral-section button { background-color: var(--primary-color) !important; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        form button[type="submit"] { background-color: var(--primary-color) !important; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        
+        .goal-card { background: linear-gradient(135deg, rgba(46, 89, 66, 0.1) 0%, rgba(46, 89, 66, 0.05) 100%); border-left: 4px solid var(--primary-color); padding: 20px; border-radius: 8px; margin: 15px 0; }
+        .goal-card h3 { color: var(--primary-color); margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .goal-card h3::before { content: "🎯"; font-size: 24px; }
+        .goal-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; }
+        .goal-stat { background: white; padding: 12px; border-radius: 6px; text-align: center; border: 1px solid #e0e0e0; }
+        .goal-stat-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+        .goal-stat-value { font-size: 18px; font-weight: bold; color: var(--primary-color); }
+        .motd-box { background: white; border-radius: 6px; padding: 15px; border: 1px solid #e0e0e0; margin-top: 12px; }
+        .motd-box::before { content: "💡 "; }
+        .motd-box { color: #555; font-style: italic; font-size: 14px; line-height: 1.5; }
+        
+        .theme-dropdown { position: relative; display: inline-block; margin-left: auto; }
+        .theme-toggle { border: none !important; color: white !important; font-size: 16px; cursor: pointer; padding: 8px 12px; border-radius: 4px; font-weight: bold; transition: background-color 0.3s ease; }
+        .theme-toggle:hover { opacity: 0.8; }
+        .theme-menu { display: none; position: absolute; right: 0; top: 45px; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; min-width: 160px; overflow: hidden; }
+        .theme-menu.show { display: block; }
+        .theme-menu a { display: block; padding: 12px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px; transition: background-color 0.2s ease; }
+        .theme-menu a:hover { background-color: #f5f5f5; }
+        .theme-menu a[data-color="#2e5942"]::before { content: "🟢 "; }
+        .theme-menu a[data-color="#d9534f"]::before { content: "🔴 "; }
+        .theme-menu a[data-color="#0d6efd"]::before { content: "🔵 "; }
+        .theme-menu a[data-color="#6f42c1"]::before { content: "🟣 "; }
+        .theme-menu a[data-color="#fd7e14"]::before { content: "🟠 "; }
+    </style>
 
 </head>
 
@@ -33,312 +76,511 @@
         <!-- Header -->
         <div class="header">
             <h1>Nutrition Tracker</h1>
-            <div class="profile-name">@Name</div>
+            <div class="profile-name">@Name
+                <div class="theme-dropdown">
+                    <button class="theme-toggle" title="Select theme color">▼</button>
+                    <div class="theme-menu" id="themeMenu">
+                        <a onclick="selectThemeColor('#2e5942')">Green</a>
+                        <a onclick="selectThemeColor('#d9534f')">Red</a>
+                        <a onclick="selectThemeColor('#0d6efd')">Blue</a>
+                        <a onclick="selectThemeColor('#6f42c1')">Purple</a>
+                        <a onclick="selectThemeColor('#fd7e14')">Orange</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Dashboard Section -->
         <div id="dashboard" class="page-section active">
             <h2>Daily Summary</h2>
             <p><strong>Date:</strong> <span id="todayDate"></span></p>
-            <p><strong>Calories Consumed:</strong> 1800 kcal</p>
-            <p><strong>Macros:</strong> Proteins: 90g, Carbs: 200g, Fats: 60g</p>
-            <p><strong>Hydration:</strong> 1.5L</p>
-            <p><strong>Today's Goal:</strong> 2000 kcal, 100g protein, 250g carbs, 70g fat</p>
+            <p><strong>Calories Consumed:</strong> <span id="caloriesConsumed">0</span> kcal</p>
+            <p><strong>Macros:</strong> Proteins: <span id="proteinCount">0</span>g, Carbs: <span
+                id="carbCount">0</span>g, Fats: <span id="fatCount">0</span>g</p>
+                <p><strong>Hydration:</strong> <span id="hydrationAmount">0</span>L</p>
 
-            <div class="chart-row">
-  <div class="chart-box">
-    <canvas id="calorieProgressChart"></canvas>
-  </div>
-  <div class="chart-box">
-    <canvas id="goalCompletionChart"></canvas>
-  </div>
-</div>
-
-
-
-            <div class="section">
-            <h2>Today's Checklist</h2>
-            <div class="checklist">
-                <label><input type="checkbox" checked> Logged All Meals</label>
-                <label><input type="checkbox" checked> Met Water Intake</label>
-                <label><input type="checkbox"> Completed Step Goal</label>
-                <label><input type="checkbox"> Got 8 hrs Sleep</label>
-            </div>
-        </div>
-
-        <div class="section">
-        <h2>Mood Tracker</h2>
-        <div class="mood-tracker">
-            <i class="fas fa-smile" title="Happy" onclick="selectMood('Happy')"></i>
-            <i class="fas fa-meh" title="Neutral" onclick="selectMood('Neutral')"></i>
-            <i class="fas fa-frown" title="Sad" onclick="selectMood('Sad')"></i>
-            <i class="fas fa-grin-stars" title="Excited" onclick="selectMood('Excited')"></i>
-            <i class="fas fa-tired" title="Tired" onclick="selectMood('Tired')"></i>
-            <i class="fas fa-angry" title="Angry" onclick="selectMood('Angry')"></i>
-            <i class="fas fa-flushed" title="Anxious" onclick="selectMood('Anxious')"></i>
-        </div>
-        <div class="mood-reaction-container">
-        <div id="selectedMood" class="mood-message hidden">You are feeling: 😊</div>
-        </div>
-
-        </div>
-
-
-        <div class="section streak">
-            <i class="fas fa-fire"></i>
-            <span id="streakText">Loading streak...</span>
-        </div>
-
-
-        <div class="section">
-            <h2>Suggestions</h2>
-            <p>You’re low on fiber today. Consider adding leafy greens or oatmeal to your next meal.</p>
-        </div>
-
-        <div class="section">
-            <h2>Export Summary</h2>
-            <button onclick="alert('Exported as PDF! (functionality to be implemented)')">Export PDF</button>
-        </div>
-
-        </div>
-
-        <!-- Add Food Section (moved to partial) -->
-        <div id="addFood" class="page-section">
-            @Html.Partial("_AddFoodPartial")
-        </div>
-
-        <!-- Notes Section -->
-        <!-- Notes Section -->
-        <div id="notes" class="page-section">
-            <h2>Nutrition Notes</h2>
-            <textarea id="notesText" rows="6" placeholder="Write your meal plans, reminders or goals..."></textarea>
-            <button onclick="analyzeNutrition()">Analyze & Save Note</button>
-        </div>
-
-
-        <!-- Profile Section -->
-        <div id="profile" class="page-section">
-            <div class="profile-container">
-                <div class="profile-avatar">
-                    <img src="https://avatars.githubusercontent.com/u/583231?v=4" alt="User Avatar">
+                <div class="chart-row">
+                    <div class="chart-box">
+                        <canvas id="calorieProgressChart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="goalCompletionChart"></canvas>
+                    </div>
                 </div>
-                <div class="profile-details">
-                    <div class="profile-header-row">
-                        <div class="profile-info">
-                            <h2> @Name</h2>
-                            <p><strong>Email:</strong> @Email</p>
-                            <p><strong>Goal:</strong> Weight Loss</p>
-                            <p><strong>points:</strong> 23</p>
+
+                <div class="section">
+                    <div class="goal-card">
+                        <h3>Today's Goal</h3>
+                        <div class="goal-stats">
+                            <div class="goal-stat">
+                                <div class="goal-stat-label">Calories</div>
+                                <div class="goal-stat-value" id="goalCalories">2000</div>
+                                <div class="goal-stat-label">kcal</div>
+                            </div>
+                            <div class="goal-stat">
+                                <div class="goal-stat-label">Protein</div>
+                                <div class="goal-stat-value" id="goalProtein">100</div>
+                                <div class="goal-stat-label">g</div>
+                            </div>
+                            <div class="goal-stat">
+                                <div class="goal-stat-label">Carbs</div>
+                                <div class="goal-stat-value" id="goalCarbs">250</div>
+                                <div class="goal-stat-label">g</div>
+                            </div>
+                            <div class="goal-stat">
+                                <div class="goal-stat-label">Fat</div>
+                                <div class="goal-stat-value" id="goalFat">70</div>
+                                <div class="goal-stat-label">g</div>
+                            </div>
                         </div>
-                        <div>
-                            <button onclick="toggleEditProfile()" class="edit-btn">Edit Profile</button>
-                        </div>
+                        <div class="motd-box" id="motd">Message of the day: Keep going!</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Today's Checklist</h2>
+                    <div class="checklist">
+                        <label><input type="checkbox" checked> Logged All Meals</label>
+                        <label><input type="checkbox" checked> Met Water Intake</label>
+                        <label><input type="checkbox"> Completed Step Goal</label>
+                        <label><input type="checkbox"> Got 8 hrs Sleep</label>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Mood Tracker</h2>
+                    <div class="mood-tracker">
+                        <i class="fas fa-smile" title="Happy" onclick="selectMood('Happy')"></i>
+                        <i class="fas fa-meh" title="Neutral" onclick="selectMood('Neutral')"></i>
+                        <i class="fas fa-frown" title="Sad" onclick="selectMood('Sad')"></i>
+                        <i class="fas fa-grin-stars" title="Excited" onclick="selectMood('Excited')"></i>
+                        <i class="fas fa-tired" title="Tired" onclick="selectMood('Tired')"></i>
+                        <i class="fas fa-angry" title="Angry" onclick="selectMood('Angry')"></i>
+                        <i class="fas fa-flushed" title="Anxious" onclick="selectMood('Anxious')"></i>
+                    </div>
+                    <div class="mood-reaction-container">
+                        <div id="selectedMood" class="mood-message hidden">You are feeling: 😊</div>
                     </div>
 
-                    <div class="profile-stats">
-                        <div class="stat-box">
-                            <h4>12</h4>
-                            <p>Days Completed</p>
+                </div>
+
+
+
+                <div class="section streak">
+                    <i class="fas fa-fire"></i>
+                    <span id="streakText">Loading streak...</span>
+                </div>
+
+
+                <div class="section">
+                    <h2>Suggestions</h2>
+                    <p id="suggestionsText">Loading suggestions based on your nutrition...</p>
+                </div>
+
+                <div class="section">
+                    <h2>Export Summary</h2>
+                    <button onclick="alert('Exported as PDF! (functionality to be implemented)')">Export PDF</button>
+                </div>
+
+
+
+            </div>
+
+            <!-- Add Food Section (moved to partial) -->
+            <div id="addFood" class="page-section">
+                @Html.Partial("_AddFoodPartial")
+            </div>
+
+            <!-- Notes Section -->
+            <!-- Notes Section -->
+            <div id="notes" class="page-section">
+                <h2>Nutrition Notes</h2>
+                <textarea id="notesText" rows="6" placeholder="Write your meal plans, reminders or goals..."></textarea>
+                <button class="btn-primary" onclick="analyzeNutrition()">Analyze & Save Note</button>
+            </div>
+
+
+            <!-- Profile Section -->
+            <div id="profile" class="page-section">
+                <div class="profile-container">
+                    <div class="profile-avatar">
+                        <img src="https://avatars.githubusercontent.com/u/583231?v=4" alt="User Avatar">
+                    </div>
+                    <div class="profile-details">
+                        <div class="profile-header-row">
+                            <div class="profile-info">
+                                <h2> @Name</h2>
+                                <p><strong>Email:</strong> @Email</p>
+                                <p><strong>Goal:</strong> Weight Loss</p>
+                                <p><strong>points:</strong> 23</p>
+                            </div>
+                            <div>
+                                <button onclick="toggleEditProfile()" class="edit-btn">Edit Profile</button>
+                            </div>
                         </div>
-                        <div class="stat-box">
-                            <h4>18</h4>
-                            <p>Days Remaining</p>
+
+                        <div class="profile-stats">
+                            <div class="stat-box">
+                                <h4>12</h4>
+                                <p>Days Completed</p>
+                            </div>
+                            <div class="stat-box">
+                                <h4>18</h4>
+                                <p>Days Remaining</p>
+                            </div>
+                            <div class="stat-box">
+                                <h4>🔥 6</h4>
+                                <p>Current Streak</p>
+                            </div>
                         </div>
-                        <div class="stat-box">
-                            <h4>🔥 6</h4>
-                            <p>Current Streak</p>
-                        </div>
+
+                        <!-- Edit Profile Toggle Button -->
+                        @* <button onclick="toggleEditProfile()">Edit Profile</button> *@
+                    </div>
+                </div>
+
+                <!-- Edit Profile Form (Initially Hidden) -->
+                <div id="editProfileForm" style="display: none; margin-top: 30px;">
+                    <h3>Edit Your Profile</h3>
+                    <form>
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" value=@Name>
+
+                        <label for="goal">Goal:</label>
+                        <input type="text" id="goal" value="Weight Loss">
+
+                        <button type="submit" onclick="event.preventDefault(); alert('Profile Updated!')">Save
+                            Changes</button>
+                        </form>
                     </div>
 
-                    <!-- Edit Profile Toggle Button -->
-                    @* <button onclick="toggleEditProfile()">Edit Profile</button> *@
+                    <!-- Suggest Friend & Earn Rewards -->
+                    <div class="referral-section">
+                        <h3>Refer a Friend 🎉</h3>
+                        <p>Invite your friends and earn rewards when they sign up!</p>
+                        <input type="text" placeholder="Enter friend’s email">
+                        <button onclick="alert('Invitation Sent!')">Send Invite</button>
+                        <p style="margin-top: 10px;"><strong>Reward:</strong> 100 points for each successful referral 💎</p>
+                    </div>
+                </div>
+
+
+
+                <!-- Logout Section -->
+                <div id="logout" class="page-section">
+                    <h2>Logout</h2>
+                    <p> Have a healthy day!</p>
+                    <form id="logoutForm" method="post">
+                        <button type="submit" class="btn btn-primary">Logout</button>
+                    </form>
                 </div>
             </div>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-            <!-- Edit Profile Form (Initially Hidden) -->
-            <div id="editProfileForm" style="display: none; margin-top: 30px;">
-                <h3>Edit Your Profile</h3>
-                <form>
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" value=@Name>
+            <!-- Scripts -->
+            <script>
+                document.addEventListener("DOMContentLoaded", async () => {
+                // Set today's date
+                const todayDateElement = document.getElementById('todayDate');
+                if (todayDateElement) {
+                    const today = new Date();
+                    todayDateElement.textContent = today.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                }
+                 // Fetch and display user streak dynamically
+                try {
+                    debugger;
+                    const userEmail = '@ViewBag.Email';
+                    const response = await fetch(`/User/streak?email=${encodeURIComponent(userEmail)}`);
 
-                    <label for="goal">Goal:</label>
-                    <input type="text" id="goal" value="Weight Loss">
+                    if (!response.ok) throw new Error("Failed to fetch streak");
 
-                    <button type="submit" onclick="event.preventDefault(); alert('Profile Updated!')">Save Changes</button>
-                </form>
-            </div>
+                    const streakCount = await response.json(); // this will be the integer directly
+                    document.getElementById("streakText").textContent = `${streakCount}-day healthy streak! 🔥`;
 
-            <!-- Suggest Friend & Earn Rewards -->
-            <div class="referral-section">
-                <h3>Refer a Friend 🎉</h3>
-                <p>Invite your friends and earn rewards when they sign up!</p>
-                <input type="text" placeholder="Enter friend’s email">
-                <button onclick="alert('Invitation Sent!')">Send Invite</button>
-                <p style="margin-top: 10px;"><strong>Reward:</strong> 100 points for each successful referral 💎</p>
-            </div>
-        </div>
+                } catch (err) {
+                    console.error("Error loading streak:", err);
+                    document.getElementById("streakText").textContent = "Could not load streak 😕";
+                }
+                
+                // Calorie Progress Chart
+                const calorieCtx = document.getElementById('calorieProgressChart').getContext('2d');
+                const calorieChart = new Chart(calorieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Consumed', 'Remaining'],
+                        datasets: [{
+                            data: [0, 2000],
+                            backgroundColor: [getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#2e5942', '#cccccc'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: { display: true, text: 'Calorie Intake Progress' }
+                        }
+                    }
+                });
 
 
+                // Goal Completion Chart
+                const goalCtx = document.getElementById('goalCompletionChart').getContext('2d');
+                const goalChart = new Chart(goalCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Consumed', 'Remaining'],
+                        datasets: [{
+                            label: 'Calories',
+                            data: [0, 2000],
+                            backgroundColor: [getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#2e5942', '#cccccc']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: { display: true, text: 'Daily Progress' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
 
-        <!-- Logout Section -->
-        <div id="logout" class="page-section">
-            <h2>Logout</h2>
-            <p> Have a healthy day!</p>
-            <form id="logoutForm" method="post" >
-                <button type="submit" class="btn btn-primary">Logout</button>
-            </form>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                // Analyze nutrition notes
+                window.analyzeNutrition = function () {
+                const note = document.getElementById("notesText").value;
+                if (!note.trim()) return alert("Please enter a food description.");
 
-    <!-- Scripts -->
-    <script>
-document.addEventListener("DOMContentLoaded", async () => {
-    // Set current date
-    const currentDate = new Date();
-    document.getElementById("todayDate").textContent = currentDate.toDateString();
-
-    // Fetch and display user streak dynamically
-    try {
-        debugger;
-        const userEmail = '@ViewBag.Email';
-        const response = await fetch(`/User/streak?email=${encodeURIComponent(userEmail)}`);
-
-        if (!response.ok) throw new Error("Failed to fetch streak");
-
-        const streakCount = await response.json(); // this will be the integer directly
-        document.getElementById("streakText").textContent = `${streakCount}-day healthy streak! 🔥`;
-
-    } catch (err) {
-        console.error("Error loading streak:", err);
-        document.getElementById("streakText").textContent = "Could not load streak 😕";
-    }
-
-    // Calorie Progress Chart
-    const calorieCtx = document.getElementById('calorieProgressChart').getContext('2d');
-    const totalCaloriesGoal = 2000;
-    const consumedCalories = 1800;
-    const remainingCalories = totalCaloriesGoal - consumedCalories;
-    new Chart(calorieCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Consumed', 'Remaining'],
-            datasets: [{
-                data: [consumedCalories, remainingCalories],
-                backgroundColor: ['#2e5942', '#cccccc'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: { display: true, text: 'Calorie Intake Progress' }
-            }
-        }
-    });
-
-    // Goal Completion Chart
-    const goalCtx = document.getElementById('goalCompletionChart').getContext('2d');
-    const totalDays = 30;
-    const daysCompleted = 12;
-    const daysLeft = totalDays - daysCompleted;
-    new Chart(goalCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Completed', 'Remaining'],
-            datasets: [{
-                label: 'Days',
-                data: [daysCompleted, daysLeft],
-                backgroundColor: ['#2e5942', '#cccccc']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: { display: true, text: 'Goal Completion (30-Day Plan)' }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-        }
-    });
-
-    // Analyze nutrition notes
-    window.analyzeNutrition = function() {
-        const note = document.getElementById("notesText").value;
-        if (!note.trim()) return alert("Please enter a food description.");
-
-        fetch('/api/nutrition/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ description: note })
-        })
-        .then(res => res.json())
-        .then(data => {
-            Swal.fire({
+                fetch('/api/nutrition/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description: note })
+                })
+                .then(res => res.json())
+                .then(data => {
+                Swal.fire({
                 icon: 'success',
                 title: 'Nutrition Analysis Complete!',
                 html: `<strong>Calories:</strong> ${data.calories} kcal<br/>
-                       <strong>Protein:</strong> ${data.protein} g<br/>
-                       <strong>Carbs:</strong> ${data.carbs} g<br/>
-                       <strong>Fats:</strong> ${data.fat} g`
-            });
-        })
-        .catch(err => { console.error(err); alert("Something went wrong!"); });
-    }
+                <strong>Protein:</strong> ${data.protein} g<br/>
+                <strong>Carbs:</strong> ${data.carbs} g<br/>
+                <strong>Fats:</strong> ${data.fat} g`
+                });
+                })
+                .catch(err => { console.error(err); alert("Something went wrong!"); });
+                }
 
-    // Mood Tracker
-    window.selectMood = function(mood) {
-        const moodDisplay = document.getElementById('selectedMood');
-        const icons = document.querySelectorAll('.mood-tracker i');
-        icons.forEach(icon => icon.classList.remove('selected'));
+                // Mood Tracker
+                window.selectMood = function (mood) {
+                const moodDisplay = document.getElementById('selectedMood');
+                const icons = document.querySelectorAll('.mood-tracker i');
+                icons.forEach(icon => icon.classList.remove('selected'));
 
-        const selectedIcon = Array.from(icons).find(el => el.title === mood);
-        if (selectedIcon) selectedIcon.classList.add('selected');
+                const selectedIcon = Array.from(icons).find(el => el.title === mood);
+                if (selectedIcon) selectedIcon.classList.add('selected');
 
-        const moodEmojis = {
-            "Happy": "😊", "Neutral": "😐", "Sad": "😢",
-            "Excited": "🤩", "Tired": "😴", "Angry": "😠", "Anxious": "😰"
-        };
-        const emoji = moodEmojis[mood] || "";
-        moodDisplay.textContent = `You are feeling: ${emoji} ${mood}`;
-        moodDisplay.classList.remove('show', 'hidden');
-        void moodDisplay.offsetWidth; // restart animation
-        moodDisplay.classList.add('show');
-        setTimeout(() => { moodDisplay.classList.remove('show'); moodDisplay.classList.add('hidden'); }, 5000);
-    }
+                const moodEmojis = {
+                "Happy": "😊", "Neutral": "😐", "Sad": "😢",
+                "Excited": "🤩", "Tired": "😴", "Angry": "😠", "Anxious": "😰"
+                };
+                const emoji = moodEmojis[mood] || "";
+                moodDisplay.textContent = `You are feeling: ${emoji} ${mood}`;
+                moodDisplay.classList.remove('show', 'hidden');
+                void moodDisplay.offsetWidth; // restart animation
+                moodDisplay.classList.add('show');
+                setTimeout(() => { moodDisplay.classList.remove('show'); moodDisplay.classList.add('hidden'); }, 5000);
+                }
 
-    // Section switching
-    window.switchSection = function(sectionId) {
-        document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
-    }
+                // Section switching
+                window.switchSection = function (sectionId) {
+                document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+                document.getElementById(sectionId).classList.add('active');
+                }
 
-    // Edit profile toggle
-    window.toggleEditProfile = function() {
-        const form = document.getElementById('editProfileForm');
-        form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
+                // Edit profile toggle
+                window.toggleEditProfile = function () {
+                const form = document.getElementById('editProfileForm');
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                }
 
-    // Logout form
-    document.getElementById("logoutForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-        Swal.fire({
-            icon: 'info', title: 'We’ll Miss You!', text: 'Keep nourishing your body!',
-            toast: true, position: 'top-end', showConfirmButton: false, timer: 4000, timerProgressBar: true
-        });
-        setTimeout(() => { window.location.href = '/User/Logout'; }, 4000);
-    });
+                // Logout form
+                document.getElementById("logoutForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+                Swal.fire({
+                icon: 'info', title: 'We’ll Miss You!', text: 'Keep nourishing your body!',
+                toast: true, position: 'top-end', showConfirmButton: false, timer: 4000, timerProgressBar: true
+                });
+                setTimeout(() => { window.location.href = '/User/Logout'; }, 4000);
+                });
 
-    // Redirect default user if needed
-    const Name = '@Name';
-    const Email = '@Email';
-    if (Name === "user" || Email === "user@gmail.com") window.location.href = '/Home/Index';
-});
-</script>
+                // Redirect default user if needed
+                const Name = '@Name';
+                const Email = '@Email';
+                if (Name === "user" || Email === "user@gmail.com") window.location.href = '/Home/Index';
 
-</body>
-</html>
+                // Load today's nutrition summary from server
+                async function loadDailyNutrition() {
+                try {
+                if (!Email || Email.length === 0) {
+                console.warn('Email is empty, skipping nutrition load');
+                return;
+                }
+                const resp = await fetch(`/api/nutrition/daily?email=${encodeURIComponent(Email)}`);
+                if (!resp.ok) {
+                console.warn('Failed to fetch daily nutrition:', resp.status, resp.statusText);
+                return;
+                }
+                const data = await resp.json();
+                console.log('Loaded daily nutrition:', data);
+                // Expecting { calories, protein, carbs, fat }
+                document.getElementById('caloriesConsumed').textContent = data.calories ?? 0;
+                document.getElementById('proteinCount').textContent = data.protein ?? 0;
+                document.getElementById('carbCount').textContent = data.carbs ?? 0;
+                document.getElementById('fatCount').textContent = data.fat ?? 0;
+                // hydration not provided by AI; default to 0 unless included
+                document.getElementById('hydrationAmount').textContent = data.hydration ?? 0;
+                
+                // Update charts with real data
+                updateChartsWithData(data.calories ?? 0);
+                } catch (err) {
+                console.error('Error loading daily nutrition:', err);
+                }
+                }
+                
+                // Update charts based on consumed calories and goal
+                async function updateChartsWithData(consumedCals) {
+                try {
+                if (!Email || Email.length === 0) return;
+                const goalResp = await fetch(`/api/nutrition/goal?email=${encodeURIComponent(Email)}`);
+                if (!goalResp.ok) return;
+                const goalData = await goalResp.json();
+                const goalCalories = goalData.calories ?? 2000;
+                const remainingCalories = Math.max(0, goalCalories - consumedCals);
+                
+                // Update calorie doughnut chart
+                if (calorieChart && calorieChart.data && calorieChart.data.datasets) {
+                    calorieChart.data.datasets[0].data = [consumedCals, remainingCalories];
+                    calorieChart.update();
+                }
+                
+                // Update goal bar chart (consumed vs remaining)
+                if (goalChart && goalChart.data && goalChart.data.datasets) {
+                    goalChart.data.datasets[0].data = [consumedCals, remainingCalories];
+                    goalChart.data.labels = ['Consumed', 'Remaining to Goal'];
+                    goalChart.update();
+                }
+                } catch (err) { console.error('Failed to update charts', err); }
+                }
+
+                // Load user's goal targets and message
+                async function loadUserGoal() {
+                try {
+                if (!Email || Email.length === 0) return;
+                const resp = await fetch(`/api/nutrition/goal?email=${encodeURIComponent(Email)}`);
+                if (!resp.ok) return;
+                const d = await resp.json();
+                document.getElementById('goalCalories').textContent = d.calories ?? 2000;
+                document.getElementById('goalProtein').textContent = d.protein ?? 100;
+                document.getElementById('goalCarbs').textContent = d.carbs ?? 250;
+                document.getElementById('goalFat').textContent = d.fat ?? 70;
+                if (d.message) document.getElementById('motd').textContent = d.message;
+                } catch (err) { console.error('Failed to load user goal', err); }
+                }
+                
+                // Load dynamic suggestions based on current nutrition
+                async function loadSuggestions() {
+                try {
+                if (!Email || Email.length === 0) return;
+                const resp = await fetch(`/api/nutrition/suggestions?email=${encodeURIComponent(Email)}`);
+                if (!resp.ok) {
+                console.warn('Failed to fetch suggestions');
+                return;
+                }
+                const data = await resp.json();
+                if (data.suggestion) {
+                    document.getElementById('suggestionsText').textContent = data.suggestion;
+                }
+                } catch (err) { console.error('Failed to load suggestions', err); }
+                }
+
+                loadDailyNutrition();
+                loadUserGoal();
+                loadSuggestions();
+                
+                // Theme dropdown toggle
+                const themeToggle = document.querySelector('.theme-toggle');
+                const themeMenu = document.getElementById('themeMenu');
+                themeToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    themeMenu.classList.toggle('show');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function () {
+                    themeMenu.classList.remove('show');
+                });
+                
+                // Select theme color
+                window.selectThemeColor = function (color) {
+                    localStorage.setItem('themeColor', color);
+                    applyTheme(color);
+                    themeMenu.classList.remove('show');
+                }
+                
+                // Theme handling
+                function getLighterColor(color) {
+                    const colorMap = {
+                        '#2e5942': '#2e5942',  // Green - keep as is
+                        '#d9534f': '#ff9999',  // Red - lighter red
+                        '#0d6efd': '#66b3ff',  // Blue - lighter blue
+                        '#6f42c1': '#b399ff',  // Purple - lighter purple
+                        '#fd7e14': '#ffb84d'   // Orange - lighter orange
+                    };
+                    return colorMap[color] || color;
+                }
+
+                function applyTheme(color) {
+                    if (!color) return;
+                    const lightColor = getLighterColor(color);
+                    document.documentElement.style.setProperty('--primary-color', color);
+                    // Update header background with light color
+                    document.querySelector('.header').style.backgroundColor = lightColor;
+                    // Sidebar uses primary color (same as graphs)
+                    document.querySelector('.sidebar').style.backgroundColor = color;
+                    // Update theme toggle button to match header (lighter color)
+                    const themeToggle = document.querySelector('.theme-toggle');
+                    if (themeToggle) {
+                        themeToggle.style.backgroundColor = lightColor;
+                    }
+                    // update charts colors with original color
+                    try {
+                        const primary = color;
+                        if (calorieChart && calorieChart.data && calorieChart.data.datasets) {
+                            calorieChart.data.datasets[0].backgroundColor = [primary, '#cccccc'];
+                            calorieChart.update();
+                        }
+                        if (goalChart && goalChart.data && goalChart.data.datasets) {
+                            goalChart.data.datasets[0].backgroundColor = [primary, '#cccccc'];
+                            goalChart.update();
+                        }
+                    } catch (e) { console.error('Failed to update charts for theme', e); }
+                }
+
+                // Load saved theme or use default
+                try {
+                    const saved = localStorage.getItem('themeColor') || getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#2e5942';
+                    applyTheme(saved);
+                } catch { /* ignore */ }
+                });
+            </script>
+
+        </body>
+
+    </html>
