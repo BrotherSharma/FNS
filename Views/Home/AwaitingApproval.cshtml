@@ -1,0 +1,244 @@
+@{
+    ViewData["Title"] = "Awaiting Approval - ReserveEase";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/Logo/cp.png" />
+    <title>Awaiting Approval - ReserveEase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 550px;
+            padding: 45px 35px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .step {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: 600;
+        }
+
+        .step-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .activity-log {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            color: #666;
+        }
+
+        .activity-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .activity-icon {
+            margin-right: 10px;
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .button-group {
+            margin-top: 35px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1.5px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e9e9e9;
+        }
+
+        .contact-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">⏳</div>
+        <h1>Awaiting Approval</h1>
+        <p class="subtitle">Your payment is under admin review</p>
+
+        <div class="info-box">
+            <strong>What's happening?</strong>
+            <p>Your payment has been successfully processed. An admin is currently reviewing your request. This process typically takes within 24 hours.</p>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">✓</div>
+                <div class="step-title">Payment Submitted</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-title">Under Review</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-title">Get Access</div>
+            </div>
+        </div>
+
+        <div class="activity-log">
+            <strong style="display: block; margin-bottom: 12px; color: #333;">📋 Status Update</strong>
+            <div class="activity-item">
+                <span class="activity-icon">📧</span>
+                <div>Confirmation email has been sent to <strong>@ViewBag.Email</strong></div>
+            </div>
+            <div class="activity-item">
+                <span class="activity-icon">👁️</span>
+                <div>Admin has been notified and is reviewing your payment</div>
+            </div>
+            <div class="activity-item">
+                <span class="activity-icon">📬</span>
+                <div>You will receive a notification email once approved or rejected</div>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <strong>💡 Tip:</strong> Check your email inbox and spam folder for updates from our team.
+        </div>
+
+        <div class="button-group">
+            <button class="btn-secondary" onclick="window.location.href = '/User/Logout'">Logout</button>
+        </div>
+    </div>
+</body>
+</html>

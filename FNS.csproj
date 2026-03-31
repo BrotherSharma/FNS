@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Disable generation of native apphost (FNS.exe) to avoid file locking during builds/watch -->
     <UseAppHost>false</UseAppHost>

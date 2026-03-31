@@ -31,6 +31,10 @@ namespace FNS.Controllers
             return View();
 
         }
+        public IActionResult Improve()
+        {
+            return View();
+        }
         [HttpPost]
         public IActionResult Authenticate([FromBody] JsonElement credentials)
         {
@@ -94,7 +98,7 @@ namespace FNS.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View(); // This will look for Register.cshtml in Views/User/Register.cshtml
+            return View(); 
         }
 
         [HttpPost]
@@ -141,24 +145,33 @@ namespace FNS.Controllers
             if (string.IsNullOrEmpty(email))
                 return BadRequest(new { message = "Email is required" });
 
-            DataTable streakTable = _userLogin.GetUserStreakByEmail(email); // return int or calculate streak
+            DataTable streakTable = _userLogin.GetUserStreakByEmail(email);
 
             if (streakTable == null || streakTable.Rows.Count == 0)
                 return NotFound(new { message = "User not found" });
 
+            DataRow row = streakTable.Rows[0];
+
             int streakCount = 0;
-            if (streakTable.Rows[0].Table.Columns.Contains("daysCount"))
+            if (streakTable.Columns.Contains("daysCount"))
             {
-                streakCount = Convert.ToInt32(streakTable.Rows[0]["daysCount"]);
+                streakCount = Convert.ToInt32(row["daysCount"]);
             }
             else
             {
-                // Fallback to first column if column name differs
-                streakCount = Convert.ToInt32(streakTable.Rows[0][0]);
+                streakCount = Convert.ToInt32(row[0]);
             }
 
-            return Ok(streakCount);
+            // Get DOB and Goal
+            string dob = row.Table.Columns.Contains("c_dob") ? row["c_dob"]?.ToString() : null;
+            string goal = row.Table.Columns.Contains("c_goal") ? row["c_goal"]?.ToString() : null;
 
+            return Ok(new
+            {
+                streak = streakCount,
+                dob = dob,
+                goal = goal
+            });
         }
 
 
