@@ -212,7 +212,7 @@
                                 <h2> @Name</h2>
                                 <p><strong>Email:</strong> @Email</p>
                                 <p><strong>Goal:</strong> Weight Loss</p>
-                                <p><strong>points:</strong> 23</p>
+                                <p><strong>Age:</strong> <span id="Age">0</span></p>
                             </div>
                             <div>
                                 <button onclick="toggleEditProfile()" class="edit-btn">Edit Profile</button>
@@ -229,8 +229,9 @@
                                 <p>Days Remaining</p>
                             </div>
                             <div class="stat-box">
-                                <h4>🔥 6</h4>
-                                <p>Current Streak</p>
+                                <h4 id="streakTextprofile">Loading streak...</h4>
+                                <p>Current Streak</p> 
+                                
                             </div>
                         </div>
 
@@ -293,18 +294,39 @@
                 }
                  // Fetch and display user streak dynamically
                 try {
-                    debugger;
-                    const userEmail = '@ViewBag.Email';
-                    const response = await fetch(`/User/streak?email=${encodeURIComponent(userEmail)}`);
+    const userEmail = '@ViewBag.Email';
+    var response = await fetch(`/User/streak?email=${encodeURIComponent(userEmail)}`);
+    debugger;
 
-                    if (!response.ok) throw new Error("Failed to fetch streak");
+    if (!response.ok) throw new Error("Failed to fetch streak");
 
-                    const streakCount = await response.json(); // this will be the integer directly
-                    document.getElementById("streakText").textContent = `${streakCount}-day healthy streak! 🔥`;
+    const data = await response.json(); // now this is an object
 
-                } catch (err) {
+    const streakCount = data.streak;
+    const dob = data.dob;
+    const goal = data.goal;
+
+    // Calculate Age from DOB
+    let Age = "";
+    if (dob) {
+        const birthDate = new Date(dob);
+        const today = new Date();
+        Age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDatefstr())) {
+            Age--;
+        }
+    }
+
+    document.getElementById("streakText").textContent = `${streakCount}-day healthy streak! 🔥`;
+    document.getElementById("streakTextprofile").textContent = `🔥 ${streakCount}`;
+    document.getElementById("Age").textContent = `${Age}`;
+    document.getElementById("goal").textContent = `${goal}`;
+
+} catch (err) {
                     console.error("Error loading streak:", err);
                     document.getElementById("streakText").textContent = "Could not load streak 😕";
+                    document.getElementById("streakTextprofile").textContent = "Could not load streak 😕";
                 }
                 
                 // Calorie Progress Chart

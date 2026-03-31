@@ -96,7 +96,7 @@ namespace FNS.Repository
                 _con.Open();
 
                 string query = @"
-                    SELECT c_createddate FROM public.t_user where c_email = @Email ";
+                    select * from t_user users inner join t_healthinfo h on h.c_email = users.c_email where users.c_email = @Email ";
 
                 using (NpgsqlCommand cmd = new NpgsqlCommand(query, _con))
                 {

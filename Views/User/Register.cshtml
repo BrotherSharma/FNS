@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
 
     <style>
-        body { background: #f1f5f9; }
+        body { background: #f1f5f9; overflow: auto}
         .card-center { max-width: 520px; margin: 48px auto; padding: 20px; border-radius: 8px; background: #fff; box-shadow: 0 6px 20px rgba(16,24,40,0.06); }
         .brand-logo { height:48px; display:block; margin: 0 auto 8px; }
         .form-control { height: calc(2.2em + .75rem + 2px); }
@@ -31,53 +31,48 @@
             <h3 class="text-center mb-3">Create Account</h3>
 
             <form id="registerForm" method="post" novalidate>
-                @Html.AntiForgeryToken()
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <input asp-for="c_firstname" class="form-control" placeholder="First name" autocomplete="given-name" />
-                        <span id="firstNameValidateMessage" class="error-message"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <input asp-for="c_lastname" class="form-control" placeholder="Last name" autocomplete="family-name" />
-                        <span id="lastNameValidateMessage" class="error-message"></span>
-                    </div>
+                
+                <div class="mt-2">
+                    <input asp-for="c_firstname" class="form-control" placeholder="First name" autocomplete="given-name" />
+                    <span id="firstNameValidateMessage" class="error-message" hidden></span>
+                </div>
+                <div class="mt-2">
+                    <input asp-for="c_lastname" class="form-control" placeholder="Last name" autocomplete="family-name" />
+                    <span id="lastNameValidateMessage" class="error-message" hidden></span>
                 </div>
 
                 <div class="mt-2">
                     <input asp-for="c_username" class="form-control" placeholder="Username" autocomplete="username" />
-                    <span id="usernameValidateMessage" class="error-message"></span>
+                    <span id="usernameValidateMessage" class="error-message" hidden></span>
                 </div>
 
                 <div class="mt-2">
-                    <input asp-for="c_email" type="email" class="form-control" placeholder="Email" autocomplete="email" />
-                    <span id="emailIdValidateMessage" class="error-message"></span>
+                    <input asp-for="c_email" type="email" class="form-control" placeholder="Email" autocomplete="email" style="margin-bottom: 20px; border: 1px solid #ccc;" />
+                    <span id="emailIdValidateMessage" class="error-message" hidden></span>
                 </div>
 
-                <div class="row g-2 mt-2">
-                    <div class="col-md-6">
-                        <input asp-for="c_password" type="password" class="form-control" placeholder="Password" autocomplete="new-password" />
-                        <span id="passwordValidateMessage" class="error-message"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <input type="password" class="form-control" placeholder="Confirm password" id="c_confirmPassword" name="c_confirmPassword" autocomplete="new-password" />
-                        <span id="confirmPasswordValidateMessage" class="error-message"></span>
-                    </div>
+                <div class="mt-2">
+                    <input asp-for="c_password" type="password" class="form-control" placeholder="Password" autocomplete="new-password" style="margin-bottom: 20px; border: 1px solid #ccc;" />
+                    <span id="passwordValidateMessage" class="error-message" hidden></span>
                 </div>
 
-                <div class="row g-2 mt-2">
-                    <div class="col-md-6">
-                        <select id="c_gender" name="c_gender" class="form-control">
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <span id="genderValidateMessage" class="error-message"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <input type="date" class="form-control" id="c_dob" name="c_dob" autocomplete="bday" />
-                        <span id="dobValidateMessage" class="error-message"></span>
-                    </div>
+                <div class="mt-2">
+                    <input type="password" class="form-control" placeholder="Confirm password" id="c_confirmPassword" name="c_confirmPassword" autocomplete="new-password" style="margin-bottom: 20px; border: 1px solid #ccc;" />
+                    <span id="confirmPasswordValidateMessage" class="error-message" hidden></span>
+                </div>
+
+                <div class="mt-2">
+                    <select id="c_gender" name="c_gender" class="form-control" style="margin-bottom: 20px; border: 1px solid #ccc;">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span id="genderValidateMessage" class="error-message" hidden></span>
+                </div>
+                <div class="mt-2">
+                    <input type="date" class="form-control" id="c_dob" name="c_dob" placeholder="Date of Birth" style="margin-bottom: 20px; border: 1px solid #ccc;" />
+                    <span id="dobValidateMessage" class="error-message" hidden></span>
                 </div>
 
                 <div class="d-grid gap-2 mt-3">
@@ -114,16 +109,53 @@
                 const gender = $('#c_gender').val().trim();
                 const dob = $('#c_dob').val().trim();
 
-                if (!first) { $('#firstNameValidateMessage').text('First name is required.'); ok = false; }
-                if (!last) { $('#lastNameValidateMessage').text('Last name is required.'); ok = false; }
-                if (!user) { $('#usernameValidateMessage').text('Username is required.'); ok = false; }
-                if (!email) { $('#emailIdValidateMessage').text('Email is required.'); ok = false; }
-                if (!pass) { $('#passwordValidateMessage').text('Password is required.'); ok = false; }
-                else if (pass.length < 6) { $('#passwordValidateMessage').text('Password must be at least 6 characters.'); ok = false; }
-                if (!conf) { $('#confirmPasswordValidateMessage').text('Confirm your password.'); ok = false; }
-                else if (pass !== conf) { $('#confirmPasswordValidateMessage').text('Passwords do not match.'); ok = false; }
-                if (!gender) { $('#genderValidateMessage').text('Gender is required.'); ok = false; }
-                if (!dob) { $('#dobValidateMessage').text('Date of birth is required.'); ok = false; }
+                if (!first) {
+                    $('#firstNameValidateMessage').text('First name is required.').removeAttr('hidden');
+                    ok = false;
+                }
+
+                if (!last) {
+                    $('#lastNameValidateMessage').text('Last name is required.').removeAttr('hidden');
+                    ok = false;
+                }
+
+                if (!user) {
+                    $('#usernameValidateMessage').text('Username is required.').removeAttr('hidden');
+                    ok = false;
+                }
+
+                if (!email) {
+                    $('#emailIdValidateMessage').text('Email is required.').removeAttr('hidden');
+                    ok = false;
+                }
+
+                if (!pass) {
+                    $('#passwordValidateMessage').text('Password is required.').removeAttr('hidden');
+                    ok = false;
+                }
+                else if (pass.length < 6) {
+                    $('#passwordValidateMessage').text('Password must be at least 6 characters.').removeAttr('hidden');
+                    ok = false;
+                }
+
+                if (!conf) {
+                    $('#confirmPasswordValidateMessage').text('Confirm your password.').removeAttr('hidden');
+                    ok = false;
+                }
+                else if (pass !== conf) {
+                    $('#confirmPasswordValidateMessage').text('Passwords do not match.').removeAttr('hidden');
+                    ok = false;
+                }
+
+                if (!gender) {
+                    $('#genderValidateMessage').text('Gender is required.').removeAttr('hidden');
+                    ok = false;
+                }
+
+                if (!dob) {
+                    $('#dobValidateMessage').text('Date of birth is required.').removeAttr('hidden');
+                    ok = false;
+                }
 
                 return ok;
             }

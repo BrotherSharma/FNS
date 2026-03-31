@@ -3,13 +3,10 @@ using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// ✅ Add distributed memory cache
 builder.Services.AddDistributedMemoryCache();
 
-// ✅ Add session support
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
