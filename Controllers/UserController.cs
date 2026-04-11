@@ -7,7 +7,6 @@ using FNS.Models;
 using FNS.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using FNS.Models;
 using System.Data;
 using System.Text.Json.Serialization;
 using System.Text.Json;

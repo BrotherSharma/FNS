@@ -41,9 +41,9 @@ namespace FNS.Repository
                 _con.Close();
                 return userTable;
             }
-            catch(Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
         public DataTable RegisterUser(string email, string password, string firstName, string lastName, string username, string gender, DateTime dob)

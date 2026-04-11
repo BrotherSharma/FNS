@@ -1,40 +1,250 @@
 ﻿@{
+    ViewData["Title"] = "Home Page";
     string Name = ViewBag.Name;
     string Email = ViewBag.Email;
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nutrition Dashboard</title>
-
-    <!-- External Resources -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/site.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <title>Nutrition Tracker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
-        :root { --primary-color: #2e5942; }
+        :root { 
+            --primary-color: #2e5942;
+            --primary-color-dark: #1a3a2c;
+            --primary-color-light: rgba(46, 89, 66, 0.1);
+            --primary-color-lighter: rgba(46, 89, 66, 0.05);
+            --primary-color-shadow: rgba(46, 89, 66, 0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { display: flex; font-family: 'Nunito', sans-serif; background: #f5f5f5; }
+        
+        /* SIDEBAR STYLING */
+        .sidebar { 
+            width: 250px; 
+            background: linear-gradient(180deg, var(--primary-color) 0%, rgba(46, 89, 66, 0.7) 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar a { 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 14px 20px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+        
+        .sidebar a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: white;
+        }
+        
+        .sidebar a.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            border-left-color: white;
+            font-weight: 700;
+        }
+        
+        .sidebar a i { font-size: 18px; width: 24px; }
+        
+        /* MAIN CONTENT */
+        .main-content { 
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, var(--primary-color) 0%, rgba(46, 89, 66, 0.8) 100%);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header h1 { color: white; margin: 0; font-size: 28px; }
+        .profile-name { color: white; display: flex; align-items: center; gap: 15px; }
+        .profile-name-text { font-size: 14px; font-weight: 500; letter-spacing: 0.5px; }
+        
+        .theme-dropdown { position: relative; display: inline-block; }
+        
+        /* PAGE SECTIONS */
+        .page-section { 
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .page-section.active { display: block; }
+        
+        @* @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        } *@
+        
+        .page-section h2 { 
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        /* DAILY SUMMARY SECTION */
+        .daily-summary-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, rgba(46, 89, 66, 0.8) 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(46, 89, 66, 0.2);
+        }
+
+        .daily-summary-header h2 {
+            color: white;
+            margin: 0 0 20px 0;
+            font-size: 28px;
+        }
+
+        .daily-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .stat-icon {
+            font-size: 20px;
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.85;
+            display: block;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 600;
+            display: block;
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .chart-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .chart-box:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+        }
+
+        .chart-box h4 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* BUTTONS */
         .btn-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
-        button:not(.theme-toggle) { background-color: var(--primary-color) !important; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-        .header { background-color: var(--primary-color); display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
-        .header h1 { color: white; margin: 0; }
-        .profile-name { color: white; display: flex; align-items: center; gap: 10px; }
-        .sidebar { background-color: var(--primary-color); }
-        .sidebar a { color: white; }
+        button:not(.theme-toggle) { background-color: var(--primary-color) !important; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; transition: 0.3s ease; }
+        button:not(.theme-toggle):hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(46, 89, 66, 0.3); }
+        
         .theme-selector { margin-left: 8px; padding: 2px 6px; border-radius: 4px; color: #333; }
         .profile-container { color: #333; }
         .edit-btn { background-color: var(--primary-color) !important; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-        .stat-box { border: 2px solid var(--primary-color); border-radius: 8px; padding: 15px; text-align: center; }
+        
+        /* STAT BOXES */
+        .stat-box { 
+            border: 2px solid var(--primary-color); 
+            border-radius: 8px; 
+            padding: 20px; 
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-box:hover { box-shadow: 0 4px 12px rgba(46, 89, 66, 0.15); transform: translateY(-2px); }
         .stat-box h4 { color: var(--primary-color); margin: 0; font-size: 24px; }
         .stat-box p { color: #666; margin: 5px 0 0 0; }
+        
         .referral-section button { background-color: var(--primary-color) !important; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
         form button[type="submit"] { background-color: var(--primary-color) !important; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
         
-        .goal-card { background: linear-gradient(135deg, rgba(46, 89, 66, 0.1) 0%, rgba(46, 89, 66, 0.05) 100%); border-left: 4px solid var(--primary-color); padding: 20px; border-radius: 8px; margin: 15px 0; }
+        /* GOAL CARD */
+        .goal-card { 
+            background: linear-gradient(135deg, rgba(46, 89, 66, 0.1) 0%, rgba(46, 89, 66, 0.05) 100%); 
+            border-left: 4px solid var(--primary-color); 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin: 15px 0;
+        }
+        
         .goal-card h3 { color: var(--primary-color); margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
         .goal-card h3::before { content: "🎯"; font-size: 24px; }
         .goal-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; }
@@ -45,30 +255,442 @@
         .motd-box::before { content: "💡 "; }
         .motd-box { color: #555; font-style: italic; font-size: 14px; line-height: 1.5; }
         
-        .theme-dropdown { position: relative; display: inline-block; margin-left: auto; }
-        .theme-toggle { border: none !important; color: white !important; font-size: 16px; cursor: pointer; padding: 8px 12px; border-radius: 4px; font-weight: bold; transition: background-color 0.3s ease; }
-        .theme-toggle:hover { opacity: 0.8; }
-        .theme-menu { display: none; position: absolute; right: 0; top: 45px; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; min-width: 160px; overflow: hidden; }
+        /* THEME DROPDOWN */
+        .theme-dropdown { position: relative; display: inline-block; }
+        .theme-toggle { 
+            border: none !important; 
+            color: white !important; 
+            font-size: 14px; 
+            cursor: pointer; 
+            padding: 8px 14px; 
+            border-radius: 4px; 
+            font-weight: 500; 
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .theme-toggle:hover { 
+            background-color: rgba(255, 255, 255, 0.3) !important;
+            transform: translateY(-1px);
+        }
+        .theme-menu { 
+            display: none; 
+            position: absolute; 
+            right: 0; 
+            top: 45px; 
+            background: white; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+            z-index: 1000; 
+            min-width: 160px; 
+            overflow: hidden; 
+        }
         .theme-menu.show { display: block; }
-        .theme-menu a { display: block; padding: 12px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px; transition: background-color 0.2s ease; }
+        .theme-menu a { 
+            display: block; 
+            padding: 12px 16px; 
+            color: #333; 
+            text-decoration: none; 
+            cursor: pointer; 
+            font-size: 14px; 
+            transition: background-color 0.2s ease; 
+        }
         .theme-menu a:hover { background-color: #f5f5f5; }
         .theme-menu a[data-color="#2e5942"]::before { content: "🟢 "; }
         .theme-menu a[data-color="#d9534f"]::before { content: "🔴 "; }
         .theme-menu a[data-color="#0d6efd"]::before { content: "🔵 "; }
         .theme-menu a[data-color="#6f42c1"]::before { content: "🟣 "; }
         .theme-menu a[data-color="#fd7e14"]::before { content: "🟠 "; }
+
+        /* CHECKLIST STYLING */
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .checklist label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-weight: 400;
+            color: #333;
+        }
+
+        .checklist label:hover {
+            background: #e9ecef;
+            border-color: var(--primary-color);
+        }
+
+        .checklist input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+
+        /* MOOD TRACKER STYLING */
+        .mood-tracker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .mood-tracker i {
+            font-size: 36px;
+            cursor: pointer;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            color: var(--primary-color);
+        }
+
+        .mood-tracker i:hover {
+            background: linear-gradient(135deg, var(--primary-color) 0%, rgba(46, 89, 66, 0.8) 100%);
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(46, 89, 66, 0.3);
+        }
+
+        .mood-reaction-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .mood-message {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--primary-color);
+            padding: 12px 20px;
+            background: rgba(46, 89, 66, 0.05);
+            border-radius: 6px;
+            display: none;
+        }
+
+        .mood-message.show {
+            display: inline-block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .mood-message.hidden {
+            display: none;
+        }
+
+        /* STREAK STYLING */
+        .streak {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+            color: white;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px var(--primary-color-shadow);
+        }
+
+        .streak i {
+            margin-right: 8px;
+        }
+
+        /* EDIT PROFILE FORM STYLING */
+        #editProfileForm {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-top: 30px;
+        }
+
+        #editProfileForm h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        #editProfileForm form {
+            display: grid;
+            gap: 15px;
+        }
+
+        #editProfileForm label {
+            color: #333;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #editProfileForm input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        #editProfileForm input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 89, 66, 0.1);
+        }
+
+        /* REFERRAL SECTION */
+        .referral-section {
+            background: linear-gradient(135deg, var(--primary-color-light) 0%, var(--primary-color-lighter) 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .referral-section h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .referral-section input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .referral-section button {
+            background-color: var(--primary-color) !important;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .referral-section button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 89, 66, 0.3);
+        }
+
+        /* TEXTAREA STYLING */
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 89, 66, 0.1);
+        }
+
+        /* PROFILE STYLING */
+        .profile-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .profile-avatar {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-avatar img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color);
+            box-shadow: 0 4px 12px rgba(46, 89, 66, 0.2);
+        }
+
+        .profile-header-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 25px;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-info h2 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 28px;
+        }
+
+        .profile-info p {
+            color: #555;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(46, 89, 66, 0.05) 0%, rgba(46, 89, 66, 0.02) 100%);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            box-shadow: 0 4px 12px rgba(46, 89, 66, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .stat-box h4 {
+            color: var(--primary-color);
+            margin: 0 0 8px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .stat-box p {
+            color: #666;
+            margin: 0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* QUICK STATS STYLING */
+        .quick-stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 15px var(--primary-color-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .stat-card-value {
+            font-size: 32px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .stat-card-label {
+            font-size: 14px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* SUGGESTIONS STYLING */
+        .suggestions-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .suggestion-item {
+            background: white;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .suggestion-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
     </style>
-
 </head>
-
 <body>
-    <!-- Sidebar -->
+    <!-- Sidebar Navigation -->
     <div class="sidebar">
-        <a href="#" onclick="switchSection('dashboard')"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="#" onclick="switchSection('addFood')"><i class="fas fa-utensils"></i> Add Food</a>
-        <a href="#" onclick="switchSection('notes')"><i class="fas fa-sticky-note"></i> Notes</a>
-        <a href="#" onclick="switchSection('profile')"><i class="fas fa-user"></i> Profile</a>
-        <a href="#" onclick="switchSection('logout')"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <a href="#" class="nav-link active" data-section="dashboard" onclick="event.preventDefault(); switchSection('dashboard')">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="#" class="nav-link" data-section="dailySummary" onclick="event.preventDefault(); switchSection('dailySummary')">
+            <i class="fas fa-chart-line"></i> Daily Summary
+        </a>
+        <a href="#" class="nav-link" data-section="todayGoal" onclick="event.preventDefault(); switchSection('todayGoal')">
+            <i class="fas fa-bullseye"></i> Today's Goal
+        </a>
+        <a href="#" class="nav-link" data-section="todayChecklist" onclick="event.preventDefault(); switchSection('todayChecklist')">
+            <i class="fas fa-tasks"></i> Today's Checklist
+        </a>
+        <a href="#" class="nav-link" data-section="addFood" onclick="event.preventDefault(); switchSection('addFood')">
+            <i class="fas fa-utensils"></i> Add Food
+        </a>
+        <a href="#" class="nav-link" data-section="notes" onclick="event.preventDefault(); switchSection('notes')">
+            <i class="fas fa-sticky-note"></i> Notes
+        </a>
+        <a href="#" class="nav-link" data-section="profile" onclick="event.preventDefault(); switchSection('profile')">
+            <i class="fas fa-user"></i> Profile
+        </a>
+        <a href="#" class="nav-link" data-section="quickStats" onclick="event.preventDefault(); switchSection('quickStats')">
+            <i class="fas fa-bolt"></i> Quick Stats
+        </a>
+        <a href="#" class="nav-link" data-section="moodTracker" onclick="event.preventDefault(); switchSection('moodTracker')">
+            <i class="fas fa-smile"></i> Mood Tracker
+        </a>
+        <a href="#" class="nav-link" data-section="suggestions" onclick="event.preventDefault(); switchSection('suggestions')">
+            <i class="fas fa-lightbulb"></i> Suggestions
+        </a>
+        <a href="#" class="nav-link" data-section="progressCharts" onclick="event.preventDefault(); switchSection('progressCharts')">
+            <i class="fas fa-chart-bar"></i> Progress Charts
+        </a>
+        <a href="#" class="nav-link" data-section="logout" onclick="event.preventDefault(); switchSection('logout')">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
     </div>
 
     <!-- Main Content -->
@@ -76,10 +698,13 @@
         <!-- Header -->
         <div class="header">
             <h1>Nutrition Tracker</h1>
-            <div class="profile-name">@Name
+            <div class="profile-name">
+                <span class="profile-name-text">@Name</span>
                 <div class="theme-dropdown">
-                    <button class="theme-toggle" title="Select theme color">▼</button>
-                    <div class="theme-menu" id="themeMenu">
+                    <button class="theme-toggle" title="Select theme color">
+                        <i class="fas fa-palette"></i>
+                    </button>
+                    <div class="theme-menu" id="themeMenu" style="color: black;">
                         <a onclick="selectThemeColor('#2e5942')">Green</a>
                         <a onclick="selectThemeColor('#d9534f')">Red</a>
                         <a onclick="selectThemeColor('#0d6efd')">Blue</a>
@@ -92,103 +717,105 @@
 
         <!-- Dashboard Section -->
         <div id="dashboard" class="page-section active">
-            <h2>Daily Summary</h2>
-            <p><strong>Date:</strong> <span id="todayDate"></span></p>
-            <p><strong>Calories Consumed:</strong> <span id="caloriesConsumed">0</span> kcal</p>
-            <p><strong>Macros:</strong> Proteins: <span id="proteinCount">0</span>g, Carbs: <span
-                id="carbCount">0</span>g, Fats: <span id="fatCount">0</span>g</p>
-                <p><strong>Hydration:</strong> <span id="hydrationAmount">0</span>L</p>
-
-                <div class="chart-row">
-                    <div class="chart-box">
-                        <canvas id="calorieProgressChart"></canvas>
-                    </div>
-                    <div class="chart-box">
-                        <canvas id="goalCompletionChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="goal-card">
-                        <h3>Today's Goal</h3>
-                        <div class="goal-stats">
-                            <div class="goal-stat">
-                                <div class="goal-stat-label">Calories</div>
-                                <div class="goal-stat-value" id="goalCalories">2000</div>
-                                <div class="goal-stat-label">kcal</div>
-                            </div>
-                            <div class="goal-stat">
-                                <div class="goal-stat-label">Protein</div>
-                                <div class="goal-stat-value" id="goalProtein">100</div>
-                                <div class="goal-stat-label">g</div>
-                            </div>
-                            <div class="goal-stat">
-                                <div class="goal-stat-label">Carbs</div>
-                                <div class="goal-stat-value" id="goalCarbs">250</div>
-                                <div class="goal-stat-label">g</div>
-                            </div>
-                            <div class="goal-stat">
-                                <div class="goal-stat-label">Fat</div>
-                                <div class="goal-stat-value" id="goalFat">70</div>
-                                <div class="goal-stat-label">g</div>
-                            </div>
-                        </div>
-                        <div class="motd-box" id="motd">Message of the day: Keep going!</div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2>Today's Checklist</h2>
-                    <div class="checklist">
-                        <label><input type="checkbox" checked> Logged All Meals</label>
-                        <label><input type="checkbox" checked> Met Water Intake</label>
-                        <label><input type="checkbox"> Completed Step Goal</label>
-                        <label><input type="checkbox"> Got 8 hrs Sleep</label>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2>Mood Tracker</h2>
-                    <div class="mood-tracker">
-                        <i class="fas fa-smile" title="Happy" onclick="selectMood('Happy')"></i>
-                        <i class="fas fa-meh" title="Neutral" onclick="selectMood('Neutral')"></i>
-                        <i class="fas fa-frown" title="Sad" onclick="selectMood('Sad')"></i>
-                        <i class="fas fa-grin-stars" title="Excited" onclick="selectMood('Excited')"></i>
-                        <i class="fas fa-tired" title="Tired" onclick="selectMood('Tired')"></i>
-                        <i class="fas fa-angry" title="Angry" onclick="selectMood('Angry')"></i>
-                        <i class="fas fa-flushed" title="Anxious" onclick="selectMood('Anxious')"></i>
-                    </div>
-                    <div class="mood-reaction-container">
-                        <div id="selectedMood" class="mood-message hidden">You are feeling: 😊</div>
-                    </div>
-
-                </div>
-
-
-
-                <div class="section streak">
-                    <i class="fas fa-fire"></i>
-                    <span id="streakText">Loading streak...</span>
-                </div>
-
-
-                <div class="section">
-                    <h2>Suggestions</h2>
-                    <p id="suggestionsText">Loading suggestions based on your nutrition...</p>
-                </div>
-
-                <div class="section">
-                    <h2>Export Summary</h2>
-                    <button onclick="alert('Exported as PDF! (functionality to be implemented)')">Export PDF</button>
-                </div>
-
-
-
+            <h2>Dashboard Overview</h2>
+            <div class="section">
+                <h3>Welcome to Your Nutrition Tracker</h3>
+                <p>Track your daily nutrition, set goals, and maintain a healthy lifestyle. Use the tabs on the left to access different features:</p>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                    <li><strong>Daily Summary</strong> - View your daily nutrition intake and progress</li>
+                    <li><strong>Today's Goal</strong> - Check your nutrition targets for the day</li>
+                    <li><strong>Today's Checklist</strong> - Track your daily health tasks</li>
+                    <li><strong>Add Food</strong> - Log your meals and snacks</li>
+                    <li><strong>Notes</strong> - Write nutrition notes and analysis</li>
+                    <li><strong>Profile</strong> - Manage your profile and settings</li>
+                </ul>
             </div>
+        </div>
+
+        <!-- Daily Summary Section -->
+        <div id="dailySummary" class="page-section">
+            <div class="daily-summary-header">
+                <h2>Daily Summary</h2>
+                <div class="daily-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">📅</span>
+                        <span class="stat-label">Date</span>
+                        <span class="stat-value" id="todayDate">Loading...</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🔥</span>
+                        <span class="stat-label">Calories Consumed</span>
+                        <span class="stat-value"><span id="caloriesConsumed">0</span> kcal</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🥗</span>
+                        <span class="stat-label">Macros</span>
+                        <span class="stat-value">P: <span id="proteinCount">0</span>g | C: <span id="carbCount">0</span>g | F: <span id="fatCount">0</span>g</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">💧</span>
+                        <span class="stat-label">Hydration</span>
+                        <span class="stat-value"><span id="hydrationAmount">0</span>L</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section streak">
+                <i class="fas fa-fire"></i>
+                <span id="streakText">Loading streak...</span>
+            </div>
+        </div>
+
+        <!-- Today's Goal Section -->
+        <div id="todayGoal" class="page-section">
+            <h2>Today's Goal</h2>
+            <div class="section">
+                <div class="goal-card">
+                    <h3>Your Daily Nutrition Targets</h3>
+                    <div class="goal-stats">
+                        <div class="goal-stat">
+                            <div class="goal-stat-label">Calories</div>
+                            <div class="goal-stat-value" id="goalCalories">2000</div>
+                            <div class="goal-stat-label">kcal</div>
+                        </div>
+                        <div class="goal-stat">
+                            <div class="goal-stat-label">Protein</div>
+                            <div class="goal-stat-value" id="goalProtein">100</div>
+                            <div class="goal-stat-label">g</div>
+                        </div>
+                        <div class="goal-stat">
+                            <div class="goal-stat-label">Carbs</div>
+                            <div class="goal-stat-value" id="goalCarbs">250</div>
+                            <div class="goal-stat-label">g</div>
+                        </div>
+                        <div class="goal-stat">
+                            <div class="goal-stat-label">Fat</div>
+                            <div class="goal-stat-value" id="goalFat">70</div>
+                            <div class="goal-stat-label">g</div>
+                        </div>
+                    </div>
+                    <div class="motd-box" id="motd">Message of the day: Keep going!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Checklist Section -->
+        <div id="todayChecklist" class="page-section">
+            <h2>Today's Checklist</h2>
+            <div class="section">
+                <p>Complete your daily health tasks to stay on track:</p>
+                <div class="checklist">
+                    <label><input type="checkbox" checked> Logged All Meals</label>
+                    <label><input type="checkbox" checked> Met Water Intake</label>
+                    <label><input type="checkbox"> Completed Step Goal</label>
+                    <label><input type="checkbox"> Got 8 hrs Sleep</label>
+                </div>
+            </div>
+        </div>
 
             <!-- Add Food Section (moved to partial) -->
             <div id="addFood" class="page-section">
-                @Html.Partial("_AddFoodPartial")
+                <partial name="_AddFoodPartial" />
             </div>
 
             <!-- Notes Section -->
@@ -267,6 +894,81 @@
 
 
 
+                <!-- Quick Stats Section -->
+                <div id="quickStats" class="page-section">
+                    <h2>Quick Stats</h2>
+                    <div class="quick-stats-container">
+                        <div class="stat-card">
+                            <div class="stat-card-label">Calories Today</div>
+                            <div class="stat-card-value" id="dashboardCalories">0</div>
+                            <div class="stat-card-label">kcal</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-label">Current Streak</div>
+                            <div class="stat-card-value" id="dashboardStreak">0</div>
+                            <div class="stat-card-label">days 🔥</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mood Tracker Section -->
+                <div id="moodTracker" class="page-section">
+                    <h2>How are you feeling today?</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Track your daily mood to better understand your nutrition habits</p>
+                    <div class="mood-tracker">
+                        <i class="fas fa-smile" title="Happy" onclick="selectMood('Happy')"></i>
+                        <i class="fas fa-meh" title="Neutral" onclick="selectMood('Neutral')"></i>
+                        <i class="fas fa-frown" title="Sad" onclick="selectMood('Sad')"></i>
+                        <i class="fas fa-grin-stars" title="Excited" onclick="selectMood('Excited')"></i>
+                        <i class="fas fa-tired" title="Tired" onclick="selectMood('Tired')"></i>
+                        <i class="fas fa-angry" title="Angry" onclick="selectMood('Angry')"></i>
+                        <i class="fas fa-flushed" title="Anxious" onclick="selectMood('Anxious')"></i>
+                    </div>
+                    <div class="mood-reaction-container">
+                        <div id="selectedMood" class="mood-message">You are feeling: 😊</div>
+                    </div>
+                </div>
+
+                <!-- Suggestions Section -->
+                <div id="suggestions" class="page-section">
+                    <h2>Personalized Suggestions</h2>
+                    <p style="color: #666; margin-bottom: 20px;">AI-powered recommendations based on your nutrition intake</p>
+                    <ul class="suggestions-list" id="suggestionsList">
+                        <li class="suggestion-item">
+                            <div class="suggestion-title">💧 Increase Hydration</div>
+                            <div class="suggestion-desc">You're tracking well! Remember to drink at least 8 glasses of water daily for optimal performance.</div>
+                        </li>
+                        <li class="suggestion-item">
+                            <div class="suggestion-title">🥗 Boost Vegetable Intake</div>
+                            <div class="suggestion-desc">Add more colorful vegetables to your meals. They're rich in vitamins and minerals essential for health.</div>
+                        </li>
+                        <li class="suggestion-item">
+                            <div class="suggestion-title">🍗 Balance Protein Intake</div>
+                            <div class="suggestion-desc">Include lean proteins like chicken, fish, or legumes in every meal for sustained energy.</div>
+                        </li>
+                        <li class="suggestion-item">
+                            <div class="suggestion-title">🏃 Match Activity Levels</div>
+                            <div class="suggestion-desc">Adjust your calorie intake based on your daily activity. More active days may need more fuel!</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Progress Charts Section -->
+                <div id="progressCharts" class="page-section">
+                    <h2>Progress Charts</h2>
+                    <p style="color: #666; margin-bottom: 30px;">Visualize your nutrition and fitness progress</p>
+                    <div class="chart-row">
+                        <div class="chart-box">
+                            <h4>Calorie Intake Progress</h4>
+                            <canvas id="calorieProgressChart"></canvas>
+                        </div>
+                        <div class="chart-box">
+                            <h4>Daily Progress</h4>
+                            <canvas id="goalCompletionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Logout Section -->
                 <div id="logout" class="page-section">
                     <h2>Logout</h2>
@@ -281,7 +983,7 @@
             <!-- Scripts -->
             <script>
                 document.addEventListener("DOMContentLoaded", async () => {
-                // Set today's date
+                // Set today's date in Daily Summary section
                 const todayDateElement = document.getElementById('todayDate');
                 if (todayDateElement) {
                     const today = new Date();
@@ -291,6 +993,17 @@
                         month: 'long', 
                         day: 'numeric' 
                     });
+                }
+                
+                // Update dashboard quick stats
+                async function updateDashboardStats() {
+                    try {
+                        const resp = await fetch(`/api/nutrition/daily?email=${encodeURIComponent(Email)}`);
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            document.getElementById('dashboardCalories').textContent = data.calories ?? 0;
+                        }
+                    } catch (err) { console.error('Failed to update dashboard stats', err); }
                 }
                  // Fetch and display user streak dynamically
                 try {
@@ -422,8 +1135,13 @@
 
                 // Section switching
                 window.switchSection = function (sectionId) {
+                // Remove active class from all sections and nav links
                 document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                
+                // Add active class to selected section and corresponding nav link
                 document.getElementById(sectionId).classList.add('active');
+                document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
                 }
 
                 // Edit profile toggle
@@ -535,6 +1253,20 @@
                 loadDailyNutrition();
                 loadUserGoal();
                 loadSuggestions();
+                updateDashboardStats();
+                
+                // Update dashboard streak
+                async function updateDashboardStreak() {
+                    try {
+                        const userEmail = '@ViewBag.Email';
+                        const response = await fetch(`/User/streak?email=${encodeURIComponent(userEmail)}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            document.getElementById('dashboardStreak').textContent = data.streak ?? 0;
+                        }
+                    } catch (err) { console.error('Error loading dashboard streak:', err); }
+                }
+                updateDashboardStreak();
                 
                 // Theme dropdown toggle
                 const themeToggle = document.querySelector('.theme-toggle');
@@ -570,17 +1302,27 @@
 
                 function applyTheme(color) {
                     if (!color) return;
-                    const lightColor = getLighterColor(color);
                     document.documentElement.style.setProperty('--primary-color', color);
-                    // Update header background with light color
-                    document.querySelector('.header').style.backgroundColor = lightColor;
-                    // Sidebar uses primary color (same as graphs)
-                    document.querySelector('.sidebar').style.backgroundColor = color;
-                    // Update theme toggle button to match header (lighter color)
+                    
+                    // Update header background with gradient using CSS variables
+                    const header = document.querySelector('.header');
+                    if (header) {
+                        header.style.background = `linear-gradient(135deg, ${color} 0%, rgba(46, 89, 66, 0.8) 100%)`;
+                    }
+                    
+                    // Update sidebar background with gradient using CSS variables
+                    const sidebar = document.querySelector('.sidebar');
+                    if (sidebar) {
+                        sidebar.style.background = `linear-gradient(180deg, ${color} 0%, rgba(46, 89, 66, 0.7) 100%)`;
+                    }
+                    
+                    // Update theme toggle button to match color
                     const themeToggle = document.querySelector('.theme-toggle');
                     if (themeToggle) {
-                        themeToggle.style.backgroundColor = lightColor;
+                        themeToggle.style.backgroundColor = color;
+                        themeToggle.style.color = 'white';
                     }
+                    
                     // update charts colors with original color
                     try {
                         const primary = color;

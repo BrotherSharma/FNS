@@ -14,7 +14,7 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
         var name = HttpContext.Session.GetString("Name");
         var email = HttpContext.Session.GetString("Email");
