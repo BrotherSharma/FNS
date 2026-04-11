@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\FNS.props" />
-</Project>
