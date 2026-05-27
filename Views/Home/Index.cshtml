@@ -24,20 +24,72 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { display: flex; font-family: 'Nunito', sans-serif; background: #f5f5f5; }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            min-height: 77px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 14px 30px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, rgba(46, 89, 66, 0.8) 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .app-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .app-brand h1 {
+            color: white;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: 0.4px;
+            margin: 0;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+        }
         
         /* SIDEBAR STYLING */
         .sidebar { 
-            width: 250px; 
+            width: 280px; 
             background: linear-gradient(180deg, var(--primary-color) 0%, rgba(46, 89, 66, 0.7) 100%);
-            min-height: 100vh;
-            padding: 20px 0;
+            min-height: calc(100vh - 77px);
+            padding: 12px 0 20px;
             position: fixed;
             left: 0;
-            top: 0;
+            top: 77px;
             overflow-y: auto;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 100;
         }
-        
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-color);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+        }
+
+        .brand-logo i {
+            font-size: 22px;
+        }
+
         .sidebar a { 
             display: flex;
             align-items: center;
@@ -69,25 +121,14 @@
         
         /* MAIN CONTENT */
         .main-content { 
-            margin-left: 250px;
-            width: calc(100% - 250px);
+            margin-left: 280px;
+            padding-top: 77px;
+            width: calc(100% - 280px);
             min-height: 100vh;
             overflow-y: auto;
             overflow-x: hidden;
         }
         
-        .header { 
-            background: linear-gradient(135deg, var(--primary-color) 0%, rgba(46, 89, 66, 0.8) 100%);
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 20px 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        
-        .header h1 { color: white; margin: 0; font-size: 28px; }
         .profile-name { color: white; display: flex; align-items: center; gap: 15px; }
         .profile-name-text { font-size: 14px; font-weight: 500; letter-spacing: 0.5px; }
         
@@ -341,6 +382,79 @@
             width: 18px;
             height: 18px;
             accent-color: var(--primary-color);
+        }
+
+        .checklist-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .checklist-date {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .checklist-date input {
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 9px 12px;
+            color: #333;
+        }
+
+        .checklist-table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e6ece9;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .checklist-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 560px;
+        }
+
+        .checklist-table th,
+        .checklist-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #edf1ef;
+            text-align: left;
+            color: #333;
+        }
+
+        .checklist-table th {
+            background: rgba(46, 89, 66, 0.08);
+            color: var(--primary-color);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .checklist-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .checklist-table input[type="checkbox"] {
+            width: 19px;
+            height: 19px;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .checklist-status {
+            font-weight: 600;
+            color: #777;
+        }
+
+        .checklist-status.done {
+            color: var(--primary-color);
         }
 
         /* MOOD TRACKER STYLING */
@@ -654,9 +768,82 @@
             color: #666;
             line-height: 1.5;
         }
+
+        @@media (max-width: 768px) {
+            body {
+                display: block;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+                top: 0;
+                padding-bottom: 10px;
+            }
+
+            .app-header {
+                position: relative;
+                flex-wrap: wrap;
+                min-height: auto;
+                padding: 14px 20px;
+            }
+
+            .brand-logo {
+                width: 40px;
+                height: 40px;
+                flex-basis: 40px;
+            }
+
+            .app-brand h1 {
+                font-size: 23px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 0;
+                width: 100%;
+            }
+
+            .page-section {
+                padding: 20px;
+            }
+
+            .daily-stats,
+            .chart-row,
+            .quick-stats-container,
+            .profile-header-row {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Main Header -->
+    <div class="app-header">
+        <div class="app-brand">
+            <span class="brand-logo" aria-label="Nitringo logo">
+                <i class="fas fa-leaf"></i>
+            </span>
+            <h1>Nutrition Tracker</h1>
+        </div>
+        <div class="profile-name">
+            <span class="profile-name-text">@Name</span>
+            <div class="theme-dropdown">
+                <button class="theme-toggle" title="Select theme color">
+                    <i class="fas fa-palette"></i>
+                </button>
+                <div class="theme-menu" id="themeMenu" style="color: black;">
+                    <a onclick="selectThemeColor('#2e5942')">Green</a>
+                    <a onclick="selectThemeColor('#d9534f')">Red</a>
+                    <a onclick="selectThemeColor('#0d6efd')">Blue</a>
+                    <a onclick="selectThemeColor('#6f42c1')">Purple</a>
+                    <a onclick="selectThemeColor('#fd7e14')">Orange</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar Navigation -->
     <div class="sidebar">
         <a href="#" class="nav-link active" data-section="dashboard" onclick="event.preventDefault(); switchSection('dashboard')">
@@ -699,26 +886,6 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
-        <div class="header">
-            <h1>Nutrition Tracker</h1>
-            <div class="profile-name">
-                <span class="profile-name-text">@Name</span>
-                <div class="theme-dropdown">
-                    <button class="theme-toggle" title="Select theme color">
-                        <i class="fas fa-palette"></i>
-                    </button>
-                    <div class="theme-menu" id="themeMenu" style="color: black;">
-                        <a onclick="selectThemeColor('#2e5942')">Green</a>
-                        <a onclick="selectThemeColor('#d9534f')">Red</a>
-                        <a onclick="selectThemeColor('#0d6efd')">Blue</a>
-                        <a onclick="selectThemeColor('#6f42c1')">Purple</a>
-                        <a onclick="selectThemeColor('#fd7e14')">Orange</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Dashboard Section -->
         <div id="dashboard" class="page-section active">
             <h2>Dashboard Overview</h2>
@@ -807,12 +974,28 @@
         <div id="todayChecklist" class="page-section">
             <h2>Today's Checklist</h2>
             <div class="section">
-                <p>Complete your daily health tasks to stay on track:</p>
-                <div class="checklist">
-                    <label><input type="checkbox" checked> Logged All Meals</label>
-                    <label><input type="checkbox" checked> Met Water Intake</label>
-                    <label><input type="checkbox"> Completed Step Goal</label>
-                    <label><input type="checkbox"> Got 8 hrs Sleep</label>
+                <div class="checklist-toolbar">
+                    <p style="margin: 0;">Complete your daily health tasks to stay on track:</p>
+                    <div class="checklist-date">
+                        <label for="checklistDate">Date</label>
+                        <input type="date" id="checklistDate">
+                    </div>
+                </div>
+                <div class="checklist-table-wrap">
+                    <table class="checklist-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Done</th>
+                                <th>Task</th>
+                                <th style="width: 160px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checklistTableBody">
+                            <tr>
+                                <td colspan="3">Loading checklist...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -920,7 +1103,13 @@
                 <!-- Mood Tracker Section -->
                 <div id="moodTracker" class="page-section">
                     <h2>How are you feeling today?</h2>
-                    <p style="color: #666; margin-bottom: 20px;">Track your daily mood to better understand your nutrition habits</p>
+                    <div class="checklist-toolbar">
+                        <p style="color: #666; margin: 0;">Track your daily mood to better understand your nutrition habits</p>
+                        <div class="checklist-date">
+                            <label for="moodDate">Date</label>
+                            <input type="date" id="moodDate">
+                        </div>
+                    </div>
                     <div class="mood-tracker">
                         <i class="fas fa-smile" title="Happy" onclick="selectMood('Happy')"></i>
                         <i class="fas fa-meh" title="Neutral" onclick="selectMood('Neutral')"></i>
@@ -932,6 +1121,11 @@
                     </div>
                     <div class="mood-reaction-container">
                         <div id="selectedMood" class="mood-message">You are feeling: 😊</div>
+                    </div>
+                    <div class="section" style="margin-top: 20px;">
+                        <label for="moodReason" style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">Reason or note <span style="color: #777; font-weight: 400;">(optional)</span></label>
+                        <textarea id="moodReason" rows="4" placeholder="Write why you feel this way today..."></textarea>
+                        <button type="button" class="btn-primary" onclick="saveCurrentMoodReason()" style="margin-top: 12px;">Save Note</button>
                     </div>
                 </div>
 
@@ -1010,6 +1204,186 @@
                             document.getElementById('dashboardCalories').textContent = data.calories ?? 0;
                         }
                     } catch (err) { console.error('Failed to update dashboard stats', err); }
+                }
+
+                const checklistDateInput = document.getElementById('checklistDate');
+                const checklistTableBody = document.getElementById('checklistTableBody');
+                const checklistEmail = '@Email';
+
+                function toDateInputValue(date) {
+                    const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                    return offsetDate.toISOString().split('T')[0];
+                }
+
+                function renderChecklist(items) {
+                    if (!checklistTableBody) return;
+
+                    checklistTableBody.innerHTML = '';
+                    items.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>
+                                <input type="checkbox"
+                                       class="checklist-toggle"
+                                       data-task-key="${item.taskKey}"
+                                       data-task-label="${item.taskLabel}"
+                                       ${item.isCompleted ? 'checked' : ''}>
+                            </td>
+                            <td>${item.taskLabel}</td>
+                            <td>
+                                <span class="checklist-status ${item.isCompleted ? 'done' : ''}">
+                                    ${item.isCompleted ? 'Completed' : 'Pending'}
+                                </span>
+                            </td>`;
+                        checklistTableBody.appendChild(row);
+                    });
+                }
+
+                async function loadChecklist() {
+                    if (!checklistDateInput || !checklistTableBody || !checklistEmail) return;
+
+                    checklistTableBody.innerHTML = '<tr><td colspan="3">Loading checklist...</td></tr>';
+                    try {
+                        const resp = await fetch(`/api/nutrition/checklist?email=${encodeURIComponent(checklistEmail)}&date=${encodeURIComponent(checklistDateInput.value)}`);
+                        if (!resp.ok) throw new Error('Failed to load checklist');
+                        const data = await resp.json();
+                        renderChecklist(data.items || []);
+                    } catch (err) {
+                        console.error('Failed to load checklist', err);
+                        checklistTableBody.innerHTML = '<tr><td colspan="3">Could not load checklist.</td></tr>';
+                    }
+                }
+
+                async function saveChecklist() {
+                    if (!checklistDateInput || !checklistEmail) return;
+
+                    const items = Array.from(document.querySelectorAll('.checklist-toggle')).map(input => ({
+                        taskKey: input.dataset.taskKey,
+                        taskLabel: input.dataset.taskLabel,
+                        isCompleted: input.checked
+                    }));
+
+                    try {
+                        const resp = await fetch('/api/nutrition/checklist', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: checklistEmail,
+                                checklistDate: checklistDateInput.value,
+                                items
+                            })
+                        });
+                        if (!resp.ok) throw new Error('Failed to save checklist');
+                    } catch (err) {
+                        console.error('Failed to save checklist', err);
+                        Swal.fire({ icon: 'error', title: 'Checklist Error', text: 'Could not save checklist. Please try again.' });
+                    }
+                }
+
+                if (checklistDateInput) {
+                    checklistDateInput.value = toDateInputValue(new Date());
+                    checklistDateInput.addEventListener('change', loadChecklist);
+                }
+
+                if (checklistTableBody) {
+                    checklistTableBody.addEventListener('change', async event => {
+                        if (!event.target.classList.contains('checklist-toggle')) return;
+                        const row = event.target.closest('tr');
+                        const status = row?.querySelector('.checklist-status');
+                        if (status) {
+                            status.textContent = event.target.checked ? 'Completed' : 'Pending';
+                            status.classList.toggle('done', event.target.checked);
+                        }
+                        await saveChecklist();
+                    });
+                }
+
+                const moodDateInput = document.getElementById('moodDate');
+                const moodReasonInput = document.getElementById('moodReason');
+                const moodEmail = '@Email';
+                let currentMood = '';
+                const moodEmojis = {
+                    "Happy": "😊", "Neutral": "😐", "Sad": "😢",
+                    "Excited": "🤩", "Tired": "😴", "Angry": "😠", "Anxious": "😰"
+                };
+
+                function renderMood(mood, reason = '') {
+                    const moodDisplay = document.getElementById('selectedMood');
+                    const icons = document.querySelectorAll('.mood-tracker i');
+                    icons.forEach(icon => icon.classList.remove('selected'));
+                    currentMood = mood || '';
+                    if (moodReasonInput) {
+                        moodReasonInput.value = reason || '';
+                    }
+
+                    if (!mood) {
+                        if (moodDisplay) {
+                            moodDisplay.textContent = 'No mood selected for this date';
+                            moodDisplay.classList.remove('show');
+                            moodDisplay.classList.add('hidden');
+                        }
+                        return;
+                    }
+
+                    const selectedIcon = Array.from(icons).find(el => el.title === mood);
+                    if (selectedIcon) selectedIcon.classList.add('selected');
+
+                    const emoji = moodEmojis[mood] || "";
+                    if (moodDisplay) {
+                        moodDisplay.textContent = `You are feeling: ${emoji} ${mood}`;
+                        moodDisplay.classList.remove('hidden');
+                        moodDisplay.classList.add('show');
+                    }
+                }
+
+                async function loadMood() {
+                    if (!moodDateInput || !moodEmail) return;
+
+                    try {
+                        const resp = await fetch(`/api/nutrition/mood?email=${encodeURIComponent(moodEmail)}&date=${encodeURIComponent(moodDateInput.value)}`);
+                        if (!resp.ok) throw new Error('Failed to load mood');
+                        const data = await resp.json();
+                        renderMood(data.mood || '', data.reason || '');
+                    } catch (err) {
+                        console.error('Failed to load mood', err);
+                    }
+                }
+
+                async function saveMood(mood) {
+                    if (!moodDateInput || !moodEmail) return;
+                    const reason = moodReasonInput ? moodReasonInput.value.trim() : '';
+
+                    try {
+                        const resp = await fetch('/api/nutrition/mood', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: moodEmail,
+                                moodDate: moodDateInput.value,
+                                mood,
+                                reason
+                            })
+                        });
+                        if (!resp.ok) throw new Error('Failed to save mood');
+                    } catch (err) {
+                        console.error('Failed to save mood', err);
+                        Swal.fire({ icon: 'error', title: 'Mood Error', text: 'Could not save mood. Please try again.' });
+                    }
+                }
+
+                window.saveCurrentMoodReason = async function () {
+                    if (!currentMood) {
+                        Swal.fire({ icon: 'info', title: 'Select Mood', text: 'Please select a mood before saving a note.' });
+                        return;
+                    }
+
+                    await saveMood(currentMood);
+                    Swal.fire({ icon: 'success', title: 'Mood note saved', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+                }
+
+                if (moodDateInput) {
+                    moodDateInput.value = toDateInputValue(new Date());
+                    moodDateInput.addEventListener('change', loadMood);
                 }
                  // Fetch and display user streak dynamically
                 try {
@@ -1132,23 +1506,8 @@
 
                 // Mood Tracker
                 window.selectMood = function (mood) {
-                const moodDisplay = document.getElementById('selectedMood');
-                const icons = document.querySelectorAll('.mood-tracker i');
-                icons.forEach(icon => icon.classList.remove('selected'));
-
-                const selectedIcon = Array.from(icons).find(el => el.title === mood);
-                if (selectedIcon) selectedIcon.classList.add('selected');
-
-                const moodEmojis = {
-                "Happy": "😊", "Neutral": "😐", "Sad": "😢",
-                "Excited": "🤩", "Tired": "😴", "Angry": "😠", "Anxious": "😰"
-                };
-                const emoji = moodEmojis[mood] || "";
-                moodDisplay.textContent = `You are feeling: ${emoji} ${mood}`;
-                moodDisplay.classList.remove('show', 'hidden');
-                void moodDisplay.offsetWidth; // restart animation
-                moodDisplay.classList.add('show');
-                setTimeout(() => { moodDisplay.classList.remove('show'); moodDisplay.classList.add('hidden'); }, 5000);
+                    renderMood(mood);
+                    saveMood(mood);
                 }
 
                 // Section switching
@@ -1160,6 +1519,12 @@
                 // Add active class to selected section and corresponding nav link
                 document.getElementById(sectionId).classList.add('active');
                 document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+                if (sectionId === 'todayChecklist') {
+                    loadChecklist();
+                }
+                if (sectionId === 'moodTracker') {
+                    loadMood();
+                }
                 }
 
                 // Edit profile toggle
@@ -1314,6 +1679,8 @@
                 loadUserGoal();
                 loadSuggestions();
                 updateDashboardStats();
+                loadChecklist();
+                loadMood();
                 
                 // Update dashboard streak
                 async function updateDashboardStreak() {
@@ -1365,7 +1732,7 @@
                     document.documentElement.style.setProperty('--primary-color', color);
                     
                     // Update header background with gradient using CSS variables
-                    const header = document.querySelector('.header');
+                    const header = document.querySelector('.app-header');
                     if (header) {
                         header.style.background = `linear-gradient(135deg, ${color} 0%, rgba(46, 89, 66, 0.8) 100%)`;
                     }

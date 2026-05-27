@@ -1,4 +1,5 @@
 using FNS.Repository;
+using FNS.Services;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddHttpClient();
 // Register the UserLogin service with scoped lifetime
 builder.Services.AddScoped<IUserLogin, UserLogin>();
 builder.Services.AddScoped<IImprove, Improve>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddDistributedMemoryCache();
 

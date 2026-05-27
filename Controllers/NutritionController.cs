@@ -39,6 +39,28 @@ public class ModelNutritionResponse
     public List<ItemNutrition> Items { get; set; }
 }
 
+public class ChecklistItemRequest
+{
+    public string TaskKey { get; set; } = string.Empty;
+    public string TaskLabel { get; set; } = string.Empty;
+    public bool IsCompleted { get; set; }
+}
+
+public class ChecklistSaveRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public DateTime ChecklistDate { get; set; }
+    public List<ChecklistItemRequest> Items { get; set; } = new();
+}
+
+public class MoodSaveRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public DateTime MoodDate { get; set; }
+    public string Mood { get; set; } = string.Empty;
+    public string Reason { get; set; } = string.Empty;
+}
+
 [Route("api/nutrition")]
 [ApiController]
 public class NutritionController : ControllerBase
@@ -288,6 +310,275 @@ public class NutritionController : ControllerBase
             _logger.LogError(ex, "Failed to generate suggestions for {Email}", email);
             return StatusCode(500, new { message = "Failed to generate suggestions." });
         }
+    }
+
+    [HttpGet("checklist")]
+    public async Task<IActionResult> GetChecklist([FromQuery] string email, [FromQuery] DateTime? date)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return BadRequest(new { message = "Email is required." });
+        }
+
+        try
+        {
+            var checklistDate = (date ?? DateTime.Today).Date;
+            var connStr = _configuration.GetConnectionString("DefaultConnection");
+            await using var conn = new Npgsql.NpgsqlConnection(connStr);
+            await conn.OpenAsync();
+            await EnsureChecklistTableAsync(conn);
+
+            var items = GetDefaultChecklistItems()
+                .ToDictionary(item => item.TaskKey, item => item);
+
+            const string query = @"
+                SELECT c_task_key, c_task_label, c_is_completed
+                FROM public.t_daily_checklist
+                WHERE c_email = @Email AND c_checklist_date = @ChecklistDate
+                ORDER BY c_id;";
+
+            await using var cmd = new Npgsql.NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@Email", email);
+            cmd.Parameters.AddWithValue("@ChecklistDate", checklistDate);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var key = reader["c_task_key"].ToString() ?? string.Empty;
+                if (string.IsNullOrEmpty(key)) continue;
+
+                items[key] = new ChecklistItemRequest
+                {
+                    TaskKey = key,
+                    TaskLabel = reader["c_task_label"].ToString() ?? key,
+                    IsCompleted = reader["c_is_completed"] != DBNull.Value && Convert.ToBoolean(reader["c_is_completed"])
+                };
+            }
+
+            return Ok(new
+            {
+                email,
+                checklistDate = checklistDate.ToString("yyyy-MM-dd"),
+                items = items.Values.Select(item => new
+                {
+                    taskKey = item.TaskKey,
+                    taskLabel = item.TaskLabel,
+                    isCompleted = item.IsCompleted
+                })
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load checklist for {Email}", email);
+            return StatusCode(500, new { message = "Failed to load checklist." });
+        }
+    }
+
+    [HttpPost("checklist")]
+    public async Task<IActionResult> SaveChecklist([FromBody] ChecklistSaveRequest request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.Email))
+        {
+            return BadRequest(new { message = "Email is required." });
+        }
+
+        if (request.Items == null || request.Items.Count == 0)
+        {
+            return BadRequest(new { message = "Checklist items are required." });
+        }
+
+        try
+        {
+            var checklistDate = request.ChecklistDate == default ? DateTime.Today : request.ChecklistDate.Date;
+            var connStr = _configuration.GetConnectionString("DefaultConnection");
+            await using var conn = new Npgsql.NpgsqlConnection(connStr);
+            await conn.OpenAsync();
+            await EnsureChecklistTableAsync(conn);
+
+            const string query = @"
+                INSERT INTO public.t_daily_checklist
+                    (c_email, c_checklist_date, c_task_key, c_task_label, c_is_completed, c_updated_at)
+                VALUES
+                    (@Email, @ChecklistDate, @TaskKey, @TaskLabel, @IsCompleted, NOW())
+                ON CONFLICT (c_email, c_checklist_date, c_task_key)
+                DO UPDATE SET
+                    c_task_label = EXCLUDED.c_task_label,
+                    c_is_completed = EXCLUDED.c_is_completed,
+                    c_updated_at = NOW();";
+
+            foreach (var item in request.Items)
+            {
+                if (string.IsNullOrWhiteSpace(item.TaskKey)) continue;
+
+                await using var cmd = new Npgsql.NpgsqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Email", request.Email);
+                cmd.Parameters.AddWithValue("@ChecklistDate", checklistDate);
+                cmd.Parameters.AddWithValue("@TaskKey", item.TaskKey);
+                cmd.Parameters.AddWithValue("@TaskLabel", item.TaskLabel ?? item.TaskKey);
+                cmd.Parameters.AddWithValue("@IsCompleted", item.IsCompleted);
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            return Ok(new { success = true, message = "Checklist saved successfully." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save checklist for {Email}", request.Email);
+            return StatusCode(500, new { message = "Failed to save checklist." });
+        }
+    }
+
+    [HttpGet("mood")]
+    public async Task<IActionResult> GetMood([FromQuery] string email, [FromQuery] DateTime? date)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return BadRequest(new { message = "Email is required." });
+        }
+
+        try
+        {
+            var moodDate = (date ?? DateTime.Today).Date;
+            var connStr = _configuration.GetConnectionString("DefaultConnection");
+            await using var conn = new Npgsql.NpgsqlConnection(connStr);
+            await conn.OpenAsync();
+            await EnsureMoodTableAsync(conn);
+
+            const string query = @"
+                SELECT c_mood, c_reason
+                FROM public.t_daily_mood
+                WHERE c_email = @Email AND c_mood_date = @MoodDate
+                LIMIT 1;";
+
+            await using var cmd = new Npgsql.NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@Email", email);
+            cmd.Parameters.AddWithValue("@MoodDate", moodDate);
+
+            string mood = string.Empty;
+            string reason = string.Empty;
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                mood = reader["c_mood"]?.ToString() ?? string.Empty;
+                reason = reader["c_reason"]?.ToString() ?? string.Empty;
+            }
+
+            return Ok(new
+            {
+                email,
+                moodDate = moodDate.ToString("yyyy-MM-dd"),
+                mood,
+                reason
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load mood for {Email}", email);
+            return StatusCode(500, new { message = "Failed to load mood." });
+        }
+    }
+
+    [HttpPost("mood")]
+    public async Task<IActionResult> SaveMood([FromBody] MoodSaveRequest request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.Email))
+        {
+            return BadRequest(new { message = "Email is required." });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Mood))
+        {
+            return BadRequest(new { message = "Mood is required." });
+        }
+
+        try
+        {
+            var moodDate = request.MoodDate == default ? DateTime.Today : request.MoodDate.Date;
+            var connStr = _configuration.GetConnectionString("DefaultConnection");
+            await using var conn = new Npgsql.NpgsqlConnection(connStr);
+            await conn.OpenAsync();
+            await EnsureMoodTableAsync(conn);
+
+            const string query = @"
+                INSERT INTO public.t_daily_mood
+                    (c_email, c_mood_date, c_mood, c_reason, c_updated_at)
+                VALUES
+                    (@Email, @MoodDate, @Mood, @Reason, NOW())
+                ON CONFLICT (c_email, c_mood_date)
+                DO UPDATE SET
+                    c_mood = EXCLUDED.c_mood,
+                    c_reason = EXCLUDED.c_reason,
+                    c_updated_at = NOW();";
+
+            await using var cmd = new Npgsql.NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@Email", request.Email);
+            cmd.Parameters.AddWithValue("@MoodDate", moodDate);
+            cmd.Parameters.AddWithValue("@Mood", request.Mood);
+            cmd.Parameters.AddWithValue("@Reason", (object)(request.Reason ?? string.Empty));
+            await cmd.ExecuteNonQueryAsync();
+
+            return Ok(new { success = true, message = "Mood saved successfully." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save mood for {Email}", request.Email);
+            return StatusCode(500, new { message = "Failed to save mood." });
+        }
+    }
+
+    private static List<ChecklistItemRequest> GetDefaultChecklistItems()
+    {
+        return new List<ChecklistItemRequest>
+        {
+            new() { TaskKey = "logged_all_meals", TaskLabel = "Logged All Meals" },
+            new() { TaskKey = "met_water_intake", TaskLabel = "Met Water Intake" },
+            new() { TaskKey = "completed_step_goal", TaskLabel = "Completed Step Goal" },
+            new() { TaskKey = "got_8_hrs_sleep", TaskLabel = "Got 8 hrs Sleep" }
+        };
+    }
+
+    private static async Task EnsureChecklistTableAsync(Npgsql.NpgsqlConnection conn)
+    {
+        const string query = @"
+            CREATE TABLE IF NOT EXISTS public.t_daily_checklist (
+                c_id SERIAL PRIMARY KEY,
+                c_email TEXT NOT NULL,
+                c_checklist_date DATE NOT NULL,
+                c_task_key TEXT NOT NULL,
+                c_task_label TEXT NOT NULL,
+                c_is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+                c_created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                c_updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                CONSTRAINT uq_daily_checklist_user_date_task UNIQUE (c_email, c_checklist_date, c_task_key)
+            );";
+
+        await using var cmd = new Npgsql.NpgsqlCommand(query, conn);
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    private static async Task EnsureMoodTableAsync(Npgsql.NpgsqlConnection conn)
+    {
+        const string query = @"
+            CREATE TABLE IF NOT EXISTS public.t_daily_mood (
+                c_id SERIAL PRIMARY KEY,
+                c_email TEXT NOT NULL,
+                c_mood_date DATE NOT NULL,
+                c_mood TEXT NOT NULL,
+                c_reason TEXT NULL,
+                c_created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                c_updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                CONSTRAINT uq_daily_mood_user_date UNIQUE (c_email, c_mood_date)
+            );";
+
+        await using var cmd = new Npgsql.NpgsqlCommand(query, conn);
+        await cmd.ExecuteNonQueryAsync();
+
+        const string alterQuery = @"
+            ALTER TABLE public.t_daily_mood
+            ADD COLUMN IF NOT EXISTS c_reason TEXT NULL;";
+
+        await using var alterCmd = new Npgsql.NpgsqlCommand(alterQuery, conn);
+        await alterCmd.ExecuteNonQueryAsync();
     }
 
     private async Task<string> GenerateSuggestion(string foodsEaten, string userGoal)

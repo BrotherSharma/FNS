@@ -212,6 +212,165 @@ namespace FNS.Repository
             return resultTable;
         }
 
+        public bool UserExistsByEmail(string email)
+        {
+            try
+            {
+                _con.Open();
+                EnsurePasswordResetTable();
+
+                using (var cmd = new NpgsqlCommand("SELECT COUNT(*) FROM public.t_user WHERE c_email = @Email", _con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                }
+            }
+            finally
+            {
+                if (_con.State == ConnectionState.Open)
+                    _con.Close();
+            }
+        }
+
+        public bool SavePasswordResetToken(string email, string token, DateTime expiresAt)
+        {
+            try
+            {
+                _con.Open();
+                EnsurePasswordResetTable();
+
+                using (var expireOldCmd = new NpgsqlCommand(@"
+                    UPDATE public.t_password_reset
+                    SET c_used = TRUE
+                    WHERE c_email = @Email AND c_used = FALSE;", _con))
+                {
+                    expireOldCmd.Parameters.AddWithValue("@Email", email);
+                    expireOldCmd.ExecuteNonQuery();
+                }
+
+                using (var cmd = new NpgsqlCommand(@"
+                    INSERT INTO public.t_password_reset (c_email, c_token, c_expires_at, c_used, c_created_at)
+                    VALUES (@Email, @Token, @ExpiresAt, FALSE, NOW());", _con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@Token", token);
+                    cmd.Parameters.AddWithValue("@ExpiresAt", expiresAt);
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            finally
+            {
+                if (_con.State == ConnectionState.Open)
+                    _con.Close();
+            }
+        }
+
+        public string GetEmailByValidResetToken(string token)
+        {
+            try
+            {
+                _con.Open();
+                EnsurePasswordResetTable();
+
+                using (var cmd = new NpgsqlCommand(@"
+                    SELECT c_email
+                    FROM public.t_password_reset
+                    WHERE c_token = @Token
+                      AND c_used = FALSE
+                      AND c_expires_at > NOW()
+                    ORDER BY c_created_at DESC
+                    LIMIT 1;", _con))
+                {
+                    cmd.Parameters.AddWithValue("@Token", token);
+                    return cmd.ExecuteScalar()?.ToString();
+                }
+            }
+            finally
+            {
+                if (_con.State == ConnectionState.Open)
+                    _con.Close();
+            }
+        }
+
+        public bool ResetPassword(string token, string newPassword)
+        {
+            try
+            {
+                _con.Open();
+                EnsurePasswordResetTable();
+
+                using (var transaction = _con.BeginTransaction())
+                {
+                    string email;
+                    using (var getEmailCmd = new NpgsqlCommand(@"
+                        SELECT c_email
+                        FROM public.t_password_reset
+                        WHERE c_token = @Token
+                          AND c_used = FALSE
+                          AND c_expires_at > NOW()
+                        ORDER BY c_created_at DESC
+                        LIMIT 1;", _con, transaction))
+                    {
+                        getEmailCmd.Parameters.AddWithValue("@Token", token);
+                        email = getEmailCmd.ExecuteScalar()?.ToString();
+                    }
+
+                    if (string.IsNullOrEmpty(email))
+                    {
+                        transaction.Rollback();
+                        return false;
+                    }
+
+                    using (var updatePasswordCmd = new NpgsqlCommand(@"
+                        UPDATE public.t_user
+                        SET c_password = @Password
+                        WHERE c_email = @Email;", _con, transaction))
+                    {
+                        updatePasswordCmd.Parameters.AddWithValue("@Password", newPassword);
+                        updatePasswordCmd.Parameters.AddWithValue("@Email", email);
+                        if (updatePasswordCmd.ExecuteNonQuery() == 0)
+                        {
+                            transaction.Rollback();
+                            return false;
+                        }
+                    }
+
+                    using (var markUsedCmd = new NpgsqlCommand(@"
+                        UPDATE public.t_password_reset
+                        SET c_used = TRUE
+                        WHERE c_token = @Token;", _con, transaction))
+                    {
+                        markUsedCmd.Parameters.AddWithValue("@Token", token);
+                        markUsedCmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                    return true;
+                }
+            }
+            finally
+            {
+                if (_con.State == ConnectionState.Open)
+                    _con.Close();
+            }
+        }
+
+        private void EnsurePasswordResetTable()
+        {
+            using (var cmd = new NpgsqlCommand(@"
+                CREATE TABLE IF NOT EXISTS public.t_password_reset (
+                    c_id SERIAL PRIMARY KEY,
+                    c_email TEXT NOT NULL,
+                    c_token TEXT NOT NULL,
+                    c_expires_at TIMESTAMP NOT NULL,
+                    c_used BOOLEAN NOT NULL DEFAULT FALSE,
+                    c_created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                );", _con))
+            {
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         // Helper method to execute scalar query (for count or any other scalar query)
         private int ExecuteScalarQuery(string query, params NpgsqlParameter[] parameters)
         {
