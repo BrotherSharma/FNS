@@ -5,12 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using FNS.Models;
 using FNS.Repository;
+using FNS.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using FNS.Models;
 using System.Data;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Security.Cryptography;
 
 namespace FNS.Controllers
 {
@@ -18,10 +19,12 @@ namespace FNS.Controllers
     {
 
         private readonly IUserLogin _userLogin;
+        private readonly IEmailService _emailService;
 
-        public UserController(IUserLogin userLogin)
+        public UserController(IUserLogin userLogin, IEmailService emailService)
         {
             _userLogin = userLogin;
+            _emailService = emailService;
         }
 
 
@@ -68,6 +71,8 @@ namespace FNS.Controllers
                     string name = firstName + " " + lastName;
                     HttpContext.Session.SetString("Name", name);
                     HttpContext.Session.SetString("Email", Email);
+                    HttpContext.Session.SetString("FirstName", firstName);
+                    HttpContext.Session.SetString("LastName", lastName);
                     return Json(new { success = true });
                 }
                 else
@@ -88,6 +93,8 @@ namespace FNS.Controllers
             // Remove user session data
             HttpContext.Session.Remove("Email");
             HttpContext.Session.Remove("Name");
+            HttpContext.Session.Remove("FirstName");
+            HttpContext.Session.Remove("LastName");
 
             return RedirectToAction("Login", "User");
         }
@@ -101,8 +108,97 @@ namespace FNS.Controllers
             return View(); 
         }
 
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
         [HttpPost]
-        public IActionResult RegisterUser([FromBody] JsonElement credentials)
+        public async Task<IActionResult> RequestPasswordReset([FromBody] JsonElement request)
+        {
+            string email = null;
+            if (request.ValueKind == JsonValueKind.Object &&
+                request.TryGetProperty("email", out var emailElement))
+            {
+                email = emailElement.GetString();
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest(new { success = false, message = "Email is required." });
+            }
+
+            if (_userLogin.UserExistsByEmail(email))
+            {
+                string token = GenerateResetToken();
+                DateTime expiresAt = DateTime.Now.AddMinutes(30);
+
+                if (_userLogin.SavePasswordResetToken(email, token, expiresAt))
+                {
+                    string resetUrl = $"{Request.Scheme}://{Request.Host}/User/ResetPassword?token={Uri.EscapeDataString(token)}";
+                    await _emailService.SendPasswordResetEmailAsync(email, resetUrl);
+                }
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "If an account exists for this email, a password reset link has been sent."
+            });
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword([FromQuery] string token)
+        {
+            if (string.IsNullOrWhiteSpace(token) ||
+                string.IsNullOrWhiteSpace(_userLogin.GetEmailByValidResetToken(token)))
+            {
+                ViewBag.IsValidToken = false;
+                ViewBag.Token = "";
+            }
+            else
+            {
+                ViewBag.IsValidToken = true;
+                ViewBag.Token = token;
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ResetPasswordSubmit([FromBody] JsonElement request)
+        {
+            string token = null;
+            string password = null;
+
+            if (request.ValueKind == JsonValueKind.Object)
+            {
+                if (request.TryGetProperty("token", out var tokenElement)) token = tokenElement.GetString();
+                if (request.TryGetProperty("password", out var passwordElement)) password = passwordElement.GetString();
+            }
+
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(password))
+            {
+                return BadRequest(new { success = false, message = "Reset token and new password are required." });
+            }
+
+            if (password.Length < 6)
+            {
+                return BadRequest(new { success = false, message = "Password must be at least 6 characters long." });
+            }
+
+            bool updated = _userLogin.ResetPassword(token, password);
+            if (!updated)
+            {
+                return BadRequest(new { success = false, message = "Reset link is invalid or expired." });
+            }
+
+            return Ok(new { success = true, message = "Password reset successfully. You can now log in." });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterUser([FromBody] JsonElement credentials)
         {
             try
             {
@@ -128,15 +224,35 @@ namespace FNS.Controllers
                 HttpContext.Session.SetString("Name", name);
                 HttpContext.Session.SetString("Email", email);
                 ViewBag.Name = name;
+                ViewBag.FirstName = firstName;
+                ViewBag.LastName = lastName;
                 ViewBag.Email = email;
 
-                return Ok(new { success = true, message = "User registered successfully." });
+                string loginUrl = $"{Request.Scheme}://{Request.Host}/User/Login";
+                bool emailSent = await _emailService.SendRegistrationWelcomeEmailAsync(email, name, loginUrl);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = emailSent
+                        ? "User registered successfully. Welcome email sent."
+                        : "User registered successfully. Welcome email was not sent because email configuration is incomplete.",
+                    emailSent
+                });
 
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { success = false, message = "Internal server error", details = ex.Message });
             }
+        }
+
+        private static string GenerateResetToken()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .TrimEnd('=');
         }
 
         [HttpGet]
@@ -163,8 +279,8 @@ namespace FNS.Controllers
             }
 
             // Get DOB and Goal
-            string dob = row.Table.Columns.Contains("c_dob") ? row["c_dob"]?.ToString() : null;
-            string goal = row.Table.Columns.Contains("c_goal") ? row["c_goal"]?.ToString() : null;
+            string dob = row.Table.Columns.Contains("dob") ? row["dob"]?.ToString() : null;
+            string goal = row.Table.Columns.Contains("goal") ? row["goal"]?.ToString() : null;
 
             return Ok(new
             {
@@ -172,6 +288,47 @@ namespace FNS.Controllers
                 dob = dob,
                 goal = goal
             });
+        }
+
+
+
+
+        [HttpPost]
+        public IActionResult UpdateProfile([FromBody] JsonElement profileData)
+        {
+            try
+            {
+                var email = profileData.GetProperty("email").GetString();
+                var firstName = profileData.GetProperty("firstName").GetString();
+                var lastName = profileData.GetProperty("lastName").GetString();
+                var goal = profileData.GetProperty("goal").GetString();
+
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+                {
+                    return BadRequest(new { success = false, message = "Email, first name, and last name are required." });
+                }
+
+                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal);
+                
+                if (result.Rows.Count > 0 && result.Rows[0]["Status"].ToString() == "Success")
+                {
+                    // Update session with new name values so the profile form reflects updated data after reload
+                    string newName = firstName + " " + lastName;
+                    HttpContext.Session.SetString("Name", newName);
+                    HttpContext.Session.SetString("FirstName", firstName);
+                    HttpContext.Session.SetString("LastName", lastName);
+
+                    return Ok(new { success = true, message = "Profile updated successfully." });
+                }
+                else
+                {
+                    return StatusCode(500, new { success = false, message = result.Rows[0]["Message"].ToString() });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Internal server error", details = ex.Message });
+            }
         }
 
 

@@ -14,9 +14,11 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
         var name = HttpContext.Session.GetString("Name");
+        var firstName = HttpContext.Session.GetString("FirstName");
+        var lastName = HttpContext.Session.GetString("LastName");
         var email = HttpContext.Session.GetString("Email");
         
         if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email))
@@ -28,6 +30,8 @@ public class HomeController : Controller
 
         ViewBag.Name = name;
         ViewBag.Email = email;
+        ViewBag.FirstName = firstName;
+        ViewBag.LastName = lastName;
         return View();
     }
 

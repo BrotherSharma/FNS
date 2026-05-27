@@ -21,10 +21,34 @@
         box-shadow: 0 0 20px rgba(0,0,0,0.08);
         background: #ffffff;
         border: 1px solid #e5ebed;
+        max-height: calc(100vh - 6rem);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .improve-card .card-body {
         padding: 2rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: calc(100vh - 6rem);
+        scrollbar-width: thin;
+        scrollbar-color: #8aa6ba #eef4f7;
+    }
+
+    .improve-card .card-body::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .improve-card .card-body::-webkit-scrollbar-track {
+        background: #eef4f7;
+        border-radius: 999px;
+    }
+
+    .improve-card .card-body::-webkit-scrollbar-thumb {
+        background: #8aa6ba;
+        border: 2px solid #eef4f7;
+        border-radius: 999px;
     }
 
     .improve-form .form-group {
@@ -113,7 +137,7 @@
                                 <!-- Age -->
                                 <div class="form-group">
                                     <label for="age" class="font-weight-bold">Age (years)<span class="required">*</span></label>
-                                    <input type="number" class="form-control" id="age" placeholder="Enter your age" required>
+                                    <input type="number" class="form-control" id="age" placeholder="Enter your age" min="1" required>
                                     <small id="ageHelp" class="form-text text-muted">Your age in years.</small>
                                 </div>
 
@@ -123,15 +147,15 @@
                                     <select class="form-control" id="goal" required>
                                         <option value="">Select Goal</option>
                                         <option value="Weight Loss">Weight Loss</option>
-                                        <option value="Maintenance">Maintenance</option>
-                                        <option value="Gain">Gain</option>
+                                        <option value="Maintain">Maintain</option>
+                                        <option value="Gain">Weight Gain</option>
                                     </select>
                                 </div>
 
                                 <!-- Referral -->
                                 <div class="form-group">
                                     <label for="referral" class="font-weight-bold">Referral</label>
-                                    <input type="text" class="form-control" id="referral" placeholder="How did you hear about us?" required>
+                                    <input type="text" class="form-control" id="referral" placeholder="How did you hear about us?">
                                 </div>
                             </div>
 
@@ -213,12 +237,22 @@
         var email = '@Context.Session.GetString("Email")';
         $('#healthForm').on('submit', function(e) {
             e.preventDefault(); // Prevent the form from submitting normally
-            debugger;
+            var age = Number($('#age').val());
+            if (!age || age < 1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Age',
+                    text: 'Age must be greater than 0.'
+                });
+                $('#age').focus();
+                return;
+            }
+
             // Collect all the form data
             var formData = {
                 weight: $('#weight').val(),
                 height: $('#height').val(),
-                age: $('#age').val(),
+                age: age,
                 goal: $('#goal').val(),
                 referral: $('#referral').val(),
                 diet: $('#diet').val(),
