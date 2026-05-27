@@ -147,14 +147,70 @@ namespace FNS.Repository
             int daysDifference = (today - dateValue.Date).Days;
             DataTable resultDays = new DataTable();
             resultDays.Columns.Add("daysCount", typeof(int));
+            resultDays.Columns.Add("dob", typeof(DateTime));
+            resultDays.Columns.Add("goal", typeof(string));
             DataRow row = resultDays.NewRow();
             row["daysCount"] = daysDifference;
+            row["dob"] = resultTable.Rows[0]["c_dob"];
+            row["goal"] = resultTable.Rows[0]["c_goal"];
             resultDays.Rows.Add(row);
             return resultDays;
         }
 
 
 
+
+        public DataTable UpdateUserProfile(string email, string firstName, string lastName, string goal)
+        {
+            DataTable resultTable = new DataTable();
+            try
+            {
+                _con.Open();
+
+                string query = @"
+                    UPDATE public.t_user
+                    SET c_firstname = @FirstName, c_lastname = @LastName
+                    WHERE c_email = @Email;
+
+                    UPDATE public.t_healthinfo
+                    SET c_goal = @Goal
+                    WHERE c_email = @Email;
+                ";
+
+                using (NpgsqlCommand cmd = new NpgsqlCommand(query, _con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@FirstName", firstName);
+                    cmd.Parameters.AddWithValue("@LastName", lastName);
+                    cmd.Parameters.AddWithValue("@Goal", goal);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+
+                    resultTable.Columns.Add("Status", typeof(string));
+                    resultTable.Columns.Add("Message", typeof(string));
+                    
+                    if (rowsAffected > 0)
+                    {
+                        resultTable.Rows.Add("Success", "Profile updated successfully.");
+                    }
+                    else
+                    {
+                        resultTable.Rows.Add("Error", "User not found.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                resultTable.Columns.Add("Status", typeof(string));
+                resultTable.Columns.Add("Message", typeof(string));
+                resultTable.Rows.Add("Error", $"An error occurred: {ex.Message}");
+            }
+            finally
+            {
+                _con.Close();
+            }
+            return resultTable;
+        }
 
         // Helper method to execute scalar query (for count or any other scalar query)
         private int ExecuteScalarQuery(string query, params NpgsqlParameter[] parameters)

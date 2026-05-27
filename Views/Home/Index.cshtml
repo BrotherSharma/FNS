@@ -2,6 +2,8 @@
     ViewData["Title"] = "Home Page";
     string Name = ViewBag.Name;
     string Email = ViewBag.Email;
+    string FirstName = ViewBag.FirstName ?? "User";
+    string LastName = ViewBag.LastName ?? "";
 }
 
 <!DOCTYPE html>
@@ -70,6 +72,8 @@
             margin-left: 250px;
             width: calc(100% - 250px);
             min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         
         .header { 
@@ -838,7 +842,7 @@
                             <div class="profile-info">
                                 <h2> @Name</h2>
                                 <p><strong>Email:</strong> @Email</p>
-                                <p><strong>Goal:</strong> Weight Loss</p>
+                                <p><strong>Goal:</strong> <span id="goal"></span></p>
                                 <p><strong>Age:</strong> <span id="Age">0</span></p>
                             </div>
                             <div>
@@ -871,15 +875,17 @@
                 <div id="editProfileForm" style="display: none; margin-top: 30px;">
                     <h3>Edit Your Profile</h3>
                     <form>
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" value=@Name>
+                        <label for="editFirstName">First Name:</label>
+                        <input type="text" id="editFirstName" value="@FirstName">
 
-                        <label for="goal">Goal:</label>
-                        <input type="text" id="goal" value="Weight Loss">
+                        <label for="editLastName">Last Name:</label>
+                        <input type="text" id="editLastName" value="@LastName">
 
-                        <button type="submit" onclick="event.preventDefault(); alert('Profile Updated!')">Save
-                            Changes</button>
-                        </form>
+                        <label for="editGoal">Goal:</label>
+                        <input type="text" id="editGoal" value="Weight Loss">
+
+                        <button type="button" onclick="saveProfileChanges()">Save Changes</button>
+                    </form>
                     </div>
 
                     <!-- Suggest Friend & Earn Rewards -->
@@ -1009,7 +1015,6 @@
                 try {
     const userEmail = '@ViewBag.Email';
     var response = await fetch(`/User/streak?email=${encodeURIComponent(userEmail)}`);
-    debugger;
 
     if (!response.ok) throw new Error("Failed to fetch streak");
 
@@ -1021,12 +1026,22 @@
 
     // Calculate Age from DOB
     let Age = "";
+
     if (dob) {
-        const birthDate = new Date(dob);
-        const today = new Date();
+        let [d, m, y] = dob.split(" ")[0].split("-");
+        let birthDate = new Date(y, m - 1, d);
+
+        let today = new Date();
+
         Age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDatefstr())) {
+
+        if (
+            today.getMonth() < birthDate.getMonth() ||
+            (
+                today.getMonth() === birthDate.getMonth() &&
+                today.getDate() < birthDate.getDate()
+            )
+        ) {
             Age--;
         }
     }
@@ -1035,6 +1050,9 @@
     document.getElementById("streakTextprofile").textContent = `🔥 ${streakCount}`;
     document.getElementById("Age").textContent = `${Age}`;
     document.getElementById("goal").textContent = `${goal}`;
+    
+    // Set the edit goal input field with the actual goal from database
+    document.getElementById("editGoal").value = goal || "Weight Loss";
 
 } catch (err) {
                     console.error("Error loading streak:", err);
@@ -1146,8 +1164,50 @@
 
                 // Edit profile toggle
                 window.toggleEditProfile = function () {
-                const form = document.getElementById('editProfileForm');
-                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                    const form = document.getElementById('editProfileForm');
+                    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                }
+
+                // Save profile changes
+                window.saveProfileChanges = async function() {
+                    const firstName = document.getElementById('editFirstName').value.trim();
+                    const lastName = document.getElementById('editLastName').value.trim();
+                    const goal = document.getElementById('editGoal').value.trim();
+                    const email = '@ViewBag.Email';
+
+                    if (!firstName || !lastName || !goal) {
+                        alert('Please fill in all fields');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/User/UpdateProfile', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: email,
+                                firstName: firstName,
+                                lastName: lastName,
+                                goal: goal
+                            })
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('Profile updated successfully!');
+                            document.getElementById('editProfileForm').style.display = 'none';
+                            // Reload the page to reflect changes
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error updating profile:', error);
+                        alert('Error updating profile');
+                    }
                 }
 
                 // Logout form

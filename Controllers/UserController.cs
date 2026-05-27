@@ -67,6 +67,8 @@ namespace FNS.Controllers
                     string name = firstName + " " + lastName;
                     HttpContext.Session.SetString("Name", name);
                     HttpContext.Session.SetString("Email", Email);
+                    HttpContext.Session.SetString("FirstName", firstName);
+                    HttpContext.Session.SetString("LastName", lastName);
                     return Json(new { success = true });
                 }
                 else
@@ -87,6 +89,8 @@ namespace FNS.Controllers
             // Remove user session data
             HttpContext.Session.Remove("Email");
             HttpContext.Session.Remove("Name");
+            HttpContext.Session.Remove("FirstName");
+            HttpContext.Session.Remove("LastName");
 
             return RedirectToAction("Login", "User");
         }
@@ -127,6 +131,8 @@ namespace FNS.Controllers
                 HttpContext.Session.SetString("Name", name);
                 HttpContext.Session.SetString("Email", email);
                 ViewBag.Name = name;
+                ViewBag.FirstName = firstName;
+                ViewBag.LastName = lastName;
                 ViewBag.Email = email;
 
                 return Ok(new { success = true, message = "User registered successfully." });
@@ -162,8 +168,8 @@ namespace FNS.Controllers
             }
 
             // Get DOB and Goal
-            string dob = row.Table.Columns.Contains("c_dob") ? row["c_dob"]?.ToString() : null;
-            string goal = row.Table.Columns.Contains("c_goal") ? row["c_goal"]?.ToString() : null;
+            string dob = row.Table.Columns.Contains("dob") ? row["dob"]?.ToString() : null;
+            string goal = row.Table.Columns.Contains("goal") ? row["goal"]?.ToString() : null;
 
             return Ok(new
             {
@@ -171,6 +177,47 @@ namespace FNS.Controllers
                 dob = dob,
                 goal = goal
             });
+        }
+
+
+
+
+        [HttpPost]
+        public IActionResult UpdateProfile([FromBody] JsonElement profileData)
+        {
+            try
+            {
+                var email = profileData.GetProperty("email").GetString();
+                var firstName = profileData.GetProperty("firstName").GetString();
+                var lastName = profileData.GetProperty("lastName").GetString();
+                var goal = profileData.GetProperty("goal").GetString();
+
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+                {
+                    return BadRequest(new { success = false, message = "Email, first name, and last name are required." });
+                }
+
+                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal);
+                
+                if (result.Rows.Count > 0 && result.Rows[0]["Status"].ToString() == "Success")
+                {
+                    // Update session with new name values so the profile form reflects updated data after reload
+                    string newName = firstName + " " + lastName;
+                    HttpContext.Session.SetString("Name", newName);
+                    HttpContext.Session.SetString("FirstName", firstName);
+                    HttpContext.Session.SetString("LastName", lastName);
+
+                    return Ok(new { success = true, message = "Profile updated successfully." });
+                }
+                else
+                {
+                    return StatusCode(500, new { success = false, message = result.Rows[0]["Message"].ToString() });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Internal server error", details = ex.Message });
+            }
         }
 
 

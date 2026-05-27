@@ -33,6 +33,8 @@ namespace FNS.Controllers
             var result = _logger.SaveHealthInfoAsync(healthInfo, email);
             HttpContext.Session.SetString("Name", name); 
             HttpContext.Session.SetString("Email", email);
+            HttpContext.Session.SetString("FirstName", healthInfo.GetProperty("firstName").GetString());
+            HttpContext.Session.SetString("LastName", healthInfo.GetProperty("lastName").GetString());
 
             if (result)
             {
