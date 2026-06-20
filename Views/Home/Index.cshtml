@@ -817,8 +817,9 @@
             }
         }
     </style>
+    <link href="/css/fns-ui.css" rel="stylesheet" />
 </head>
-<body>
+<body class="dashboard-shell">
     <!-- Main Header -->
     <div class="app-header">
         <div class="app-brand">
@@ -878,9 +879,6 @@
         </a>
         <a href="#" class="nav-link" data-section="progressCharts" onclick="event.preventDefault(); switchSection('progressCharts')">
             <i class="fas fa-chart-bar"></i> Progress Charts
-        </a>
-        <a href="#" class="nav-link" data-section="logout" onclick="event.preventDefault(); switchSection('logout')">
-            <i class="fas fa-sign-out-alt"></i> Logout
         </a>
     </div>
 
@@ -1006,11 +1004,11 @@
             </div>
 
             <!-- Notes Section -->
-            <!-- Notes Section -->
             <div id="notes" class="page-section">
                 <h2>Nutrition Notes</h2>
-                <textarea id="notesText" rows="6" placeholder="Write your meal plans, reminders or goals..."></textarea>
-                <button class="btn-primary" onclick="analyzeNutrition()">Analyze & Save Note</button>
+                <textarea id="foodDescriptionInput" rows="6" placeholder="Write your meal plans, reminders or goals..."></textarea>
+                <button class="btn-primary" id="analyzeFoodButton" onclick="analyzeFood()">Analyze Food</button>
+                <span id="analyzeFoodLoader" style="display:none; margin-left: 10px;">Loading...</span>
             </div>
 
 
@@ -1051,6 +1049,14 @@
 
                         <!-- Edit Profile Toggle Button -->
                         @* <button onclick="toggleEditProfile()">Edit Profile</button> *@
+
+                        <div class="profile-actions">
+                            <form id="logoutForm" method="post">
+                                <button type="submit" class="btn btn-primary profile-logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -1167,15 +1173,6 @@
                             <canvas id="goalCompletionChart"></canvas>
                         </div>
                     </div>
-                </div>
-
-                <!-- Logout Section -->
-                <div id="logout" class="page-section">
-                    <h2>Logout</h2>
-                    <p> Have a healthy day!</p>
-                    <form id="logoutForm" method="post">
-                        <button type="submit" class="btn btn-primary">Logout</button>
-                    </form>
                 </div>
             </div>
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1480,28 +1477,49 @@
                     }
                 });
 
-                // Analyze nutrition notes
-                window.analyzeNutrition = function () {
-                const note = document.getElementById("notesText").value;
-                if (!note.trim()) return alert("Please enter a food description.");
+                // Analyze food description
+                window.analyzeFood = async function () {
+                    const foodDescription = document.getElementById("foodDescriptionInput").value;
+                    const button = document.getElementById("analyzeFoodButton");
+                    const loader = document.getElementById("analyzeFoodLoader");
 
-                fetch('/api/nutrition/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ description: note })
-                })
-                .then(res => res.json())
-                .then(data => {
-                Swal.fire({
-                icon: 'success',
-                title: 'Nutrition Analysis Complete!',
-                html: `<strong>Calories:</strong> ${data.calories} kcal<br/>
-                <strong>Protein:</strong> ${data.protein} g<br/>
-                <strong>Carbs:</strong> ${data.carbs} g<br/>
-                <strong>Fats:</strong> ${data.fat} g`
-                });
-                })
-                .catch(err => { console.error(err); alert("Something went wrong!"); });
+                    if (!foodDescription.trim()) return alert("Please enter a food description.");
+
+                    button.disabled = true;
+                    loader.style.display = "inline-block";
+
+                    try {
+                        const response = await fetch('/api/nutrition/analyze', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ description: foodDescription })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error("Nutrition analysis failed.");
+                        }
+
+                        const data = await response.json();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Nutrition Analysis Complete!',
+                            html: `<strong>Calories:</strong> ${data.calories} kcal<br/>
+                            <strong>Protein:</strong> ${data.protein} g<br/>
+                            <strong>Carbs:</strong> ${data.carbs} g<br/>
+                            <strong>Fats:</strong> ${data.fat} g`
+                        });
+                    } catch (err) {
+                        console.error(err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Something went wrong!',
+                            text: 'Please try again.'
+                        });
+                    } finally {
+                        loader.style.display = "none";
+                        button.disabled = false;
+                    }
                 }
 
                 // Mood Tracker
@@ -1734,13 +1752,13 @@
                     // Update header background with gradient using CSS variables
                     const header = document.querySelector('.app-header');
                     if (header) {
-                        header.style.background = `linear-gradient(135deg, ${color} 0%, rgba(46, 89, 66, 0.8) 100%)`;
+                        header.style.background = `linear-gradient(135deg, ${color} 0%, rgba(15, 118, 110, 0.86) 100%), url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1800&q=80") center / cover`;
                     }
                     
                     // Update sidebar background with gradient using CSS variables
                     const sidebar = document.querySelector('.sidebar');
                     if (sidebar) {
-                        sidebar.style.background = `linear-gradient(180deg, ${color} 0%, rgba(46, 89, 66, 0.7) 100%)`;
+                        sidebar.style.background = `linear-gradient(180deg, ${color} 0%, rgba(16, 52, 39, 0.88) 100%), url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1800&q=80") left center / cover`;
                     }
                     
                     // Update theme toggle button to match color

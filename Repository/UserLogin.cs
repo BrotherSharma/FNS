@@ -46,12 +46,22 @@ namespace FNS.Repository
                 throw;
             }
         }
+
+        private void EnsureProfileImageColumn()
+        {
+            using var cmd = new NpgsqlCommand(@"
+                ALTER TABLE public.t_user
+                ADD COLUMN IF NOT EXISTS c_profile_image_path TEXT NULL;", _con);
+            cmd.ExecuteNonQuery();
+        }
+
         public DataTable RegisterUser(string email, string password, string firstName, string lastName, string username, string gender, DateTime dob)
         {
             DataTable resultTable = new DataTable();
             try
             {
                 _con.Open();
+                EnsureProfileImageColumn();
 
                 string query = @"
                     INSERT INTO public.t_user (c_email, c_password, c_role, c_firstname, c_lastname, c_username, c_gender, c_dob, c_createddate)
@@ -160,16 +170,19 @@ namespace FNS.Repository
 
 
 
-        public DataTable UpdateUserProfile(string email, string firstName, string lastName, string goal)
+        public DataTable UpdateUserProfile(string email, string firstName, string lastName, string goal, string? profileImagePath = null)
         {
             DataTable resultTable = new DataTable();
             try
             {
                 _con.Open();
+                EnsureProfileImageColumn();
 
                 string query = @"
                     UPDATE public.t_user
-                    SET c_firstname = @FirstName, c_lastname = @LastName
+                    SET c_firstname = @FirstName,
+                        c_lastname = @LastName,
+                        c_profile_image_path = COALESCE(@ProfileImagePath, c_profile_image_path)
                     WHERE c_email = @Email;
 
                     UPDATE public.t_healthinfo
@@ -183,6 +196,7 @@ namespace FNS.Repository
                     cmd.Parameters.AddWithValue("@FirstName", firstName);
                     cmd.Parameters.AddWithValue("@LastName", lastName);
                     cmd.Parameters.AddWithValue("@Goal", goal);
+                    cmd.Parameters.AddWithValue("@ProfileImagePath", (object?)profileImagePath ?? DBNull.Value);
 
                     int rowsAffected = cmd.ExecuteNonQuery();
 
@@ -212,11 +226,36 @@ namespace FNS.Repository
             return resultTable;
         }
 
+        public string GetProfileImagePath(string email)
+        {
+            try
+            {
+                _con.Open();
+                EnsureProfileImageColumn();
+
+                using var cmd = new NpgsqlCommand(@"
+                    SELECT c_profile_image_path
+                    FROM public.t_user
+                    WHERE c_email = @Email
+                    LIMIT 1;", _con);
+                cmd.Parameters.AddWithValue("@Email", email);
+
+                var result = cmd.ExecuteScalar();
+                return result == null || result == DBNull.Value ? string.Empty : result.ToString() ?? string.Empty;
+            }
+            finally
+            {
+                if (_con.State == ConnectionState.Open)
+                    _con.Close();
+            }
+        }
+
         public bool UserExistsByEmail(string email)
         {
             try
             {
                 _con.Open();
+                EnsureProfileImageColumn();
                 EnsurePasswordResetTable();
 
                 using (var cmd = new NpgsqlCommand("SELECT COUNT(*) FROM public.t_user WHERE c_email = @Email", _con))

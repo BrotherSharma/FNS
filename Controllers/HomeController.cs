@@ -8,10 +8,12 @@ namespace FNS.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IUserLogin _userLogin;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, IUserLogin userLogin)
     {
         _logger = logger;
+        _userLogin = userLogin;
     }
 
     public IActionResult Index()
@@ -32,6 +34,7 @@ public class HomeController : Controller
         ViewBag.Email = email;
         ViewBag.FirstName = firstName;
         ViewBag.LastName = lastName;
+        ViewBag.ProfileImagePath = string.IsNullOrWhiteSpace(email) ? string.Empty : _userLogin.GetProfileImagePath(email);
         return View();
     }
 

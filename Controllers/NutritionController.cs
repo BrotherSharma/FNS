@@ -10,7 +10,7 @@ using Mscc.GenerativeAI;
 
 
 
-public class FoodNoteRequest
+public class FoodAnalysisRequest
 {
     public string Description { get; set; } = string.Empty;
 }
@@ -152,7 +152,7 @@ public class NutritionController : ControllerBase
             }
 
             var description = string.Join("; ", items);
-            var result = await GetCaloriesFromAI(description);
+            var result = await GetNutritionFromAI(description);
             return Ok(result);
         }
         catch (Exception ex)
@@ -625,7 +625,7 @@ Keep it short and conversational. No bullet points.";
     [ProducesResponseType(typeof(NutritionResult), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> AnalyzeFood([FromBody] FoodNoteRequest input)
+    public async Task<IActionResult> AnalyzeFood([FromBody] FoodAnalysisRequest input)
     {
         if (input == null || string.IsNullOrWhiteSpace(input.Description))
         {
@@ -636,7 +636,7 @@ Keep it short and conversational. No bullet points.";
 
         try
         {
-            var result = await GetCaloriesFromAI(input.Description);
+            var result = await GetNutritionFromAI(input.Description);
             _logger.LogInformation("Successfully analyzed food: Calories={Calories}", result.Calories);
             return Ok(result);
         }
@@ -647,7 +647,7 @@ Keep it short and conversational. No bullet points.";
         }
     }
 
-    private async Task<NutritionResult> GetCaloriesFromAI(string description)
+    private async Task<NutritionResult> GetNutritionFromAI(string description)
     {
         var googleAI = new GoogleAI(apiKey: _geminiApiKey);
         var model = googleAI.GenerativeModel(model: Model.Gemini25Flash);
@@ -702,9 +702,12 @@ Input description: '{description}'
                 ResponseMimeType = "application/json"
             }
         };
+        var response = null as GenerateContentResponse;
+        try
+        {
 
         // ✅ Generate response
-        var response = await model.GenerateContent(request);
+        response = await model.GenerateContent(request);
 
         // Ensure the model returned some text
         if (string.IsNullOrWhiteSpace(response.Text))
@@ -713,8 +716,7 @@ Input description: '{description}'
             return new NutritionResult();
         }
 
-        try
-        {
+        
             var rawText = response.Text.Trim();
 
             // Unwrap quoted JSON if necessary

@@ -7,6 +7,7 @@ using FNS.Models;
 using FNS.Repository;
 using FNS.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text.Json.Serialization;
@@ -20,11 +21,13 @@ namespace FNS.Controllers
 
         private readonly IUserLogin _userLogin;
         private readonly IEmailService _emailService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public UserController(IUserLogin userLogin, IEmailService emailService)
+        public UserController(IUserLogin userLogin, IEmailService emailService, IWebHostEnvironment webHostEnvironment)
         {
             _userLogin = userLogin;
             _emailService = emailService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
 
@@ -294,21 +297,33 @@ namespace FNS.Controllers
 
 
         [HttpPost]
-        public IActionResult UpdateProfile([FromBody] JsonElement profileData)
+        public async Task<IActionResult> UpdateProfile([FromForm] string email, [FromForm] string firstName, [FromForm] string lastName, [FromForm] string goal, [FromForm] IFormFile? profileImage)
         {
             try
             {
-                var email = profileData.GetProperty("email").GetString();
-                var firstName = profileData.GetProperty("firstName").GetString();
-                var lastName = profileData.GetProperty("lastName").GetString();
-                var goal = profileData.GetProperty("goal").GetString();
-
                 if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
                 {
                     return BadRequest(new { success = false, message = "Email, first name, and last name are required." });
                 }
 
-                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal);
+                string? profileImagePath = null;
+                if (profileImage != null && profileImage.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "profile-images");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var extension = Path.GetExtension(profileImage.FileName);
+                    var safeExtension = string.IsNullOrWhiteSpace(extension) ? ".png" : extension.ToLowerInvariant();
+                    var fileName = $"{Guid.NewGuid():N}{safeExtension}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    await using var stream = new FileStream(filePath, FileMode.Create);
+                    await profileImage.CopyToAsync(stream);
+
+                    profileImagePath = $"/uploads/profile-images/{fileName}";
+                }
+
+                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal, profileImagePath);
                 
                 if (result.Rows.Count > 0 && result.Rows[0]["Status"].ToString() == "Success")
                 {
