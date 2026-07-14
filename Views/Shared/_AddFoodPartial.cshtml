@@ -3,151 +3,183 @@
     string Name = ViewBag.Name;
     string Email = ViewBag.Email;
 }
-<!DOCTYPE html>
-<html>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<div class="grid-card" style="min-height: auto; padding: 28px;">
+    <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 20px;">Foods Details</h3>
 
-    <title>Nutrition Tracker</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
-
-    <style>
-        body { background: #f1f5f9; }
-        .food-card { max-width: 800px; margin: 40px auto; padding: 20px; border-radius: 8px; background: #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
-        .modal-custom { max-width: 500px; width: 90%; }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="food-card">
-            <h3 class="mb-3">Foods Details</h3>
-
-            <div class="d-flex mb-3 gap-2">
-                <input type="search" id="foodSearch" class="form-control" placeholder="Search food..." />
-                <button class="btn btn-success" id="addFoodBtn">Add Food</button>
-            </div>
-
-            <table class="table table-bordered table-striped">
-                <thead>
-                            <tr>
-                                <th>Meal</th>
-                                <th>Food</th>
-                                <th>Notes</th>
-                                <th>Date</th>
-                            </tr>
-                </thead>
-                <tbody id="foodLogBody">
-                    <tr><td colspan="4" class="text-center text-muted">No entries yet.</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <!-- Control bar -->
+    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+        <input type="search" id="foodSearch" class="form-control" style="flex-grow: 1; min-height: 42px; border-radius: 12px !important; border: 1px solid var(--border-color) !important; padding: 0 16px !important; font-size: 13px;" placeholder="Search logged food..." />
+        <select id="foodPageSize" class="form-select" style="max-width: 100px; min-height: 42px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <option value="10">10 / page</option>
+            <option value="25">25 / page</option>
+            <option value="50">50 / page</option>
+            <option value="100">100 / page</option>
+        </select>
+        <button class="btn btn-success" id="addFoodBtn" style="background-color: var(--primary) !important; border: none; border-radius: 12px; font-weight: 700; min-height: 42px; padding: 0 20px; cursor: pointer; color: #fff;">Add Food</button>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="addModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-custom">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Food</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addModalForm">
-                        <div class="mb-3">
-                            <label for="modalFoodName" class="form-label">Food Name</label>
-                            <input type="text" class="form-control" id="modalFoodName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalMeal" class="form-label">Meal</label>
-                            <select class="form-select" id="modalMeal">
-                                <option>Breakfast</option>
-                                <option>Lunch</option>
-                                <option>Dinner</option>
-                                <option>Snack</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalNotes" class="form-label">Notes (optional)</label>
-                            <textarea class="form-control" id="modalNotes" rows="3"></textarea>
-                        </div>
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Add Food</button>
-                        </div>
-                    </form>
-                </div>
+    <!-- Log Table -->
+    <div class="checklist-table-wrap" style="margin-bottom: 20px;">
+        <table class="checklist-table table table-hover" style="margin: 0;">
+            <thead>
+                <tr>
+                    <th>Meal</th>
+                    <th>Food</th>
+                    <th>Notes</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="foodLogBody">
+                <tr><td colspan="4" class="text-center text-muted">No entries yet.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div id="foodPaginationInfo" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Showing 0-0 of 0</div>
+        <div class="btn-group" role="group" aria-label="Food pagination">
+            <button type="button" class="btn-profile-outline" id="foodPrevPage" style="padding: 6px 14px; font-size: 12px; border-top-right-radius: 0; border-bottom-right-radius: 0;">Previous</button>
+            <button type="button" class="btn-profile-outline" id="foodNextPage" style="padding: 6px 14px; font-size: 12px; border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none !important;">Next</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dialog -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content" style="border-radius: var(--card-radius); border: 1px solid var(--border-color); box-shadow: var(--card-shadow); overflow: hidden;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 20px 24px; background-color: var(--primary-light);">
+                <h5 class="modal-title" style="font-weight: 800; color: var(--primary); font-size: 16px;">Add Food Log</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size: 12px;"></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <form id="addModalForm">
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+                        <label for="modalFoodName" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Food Name</label>
+                        <input type="text" id="modalFoodName" class="form-control" style="height: 44px; border-radius: 12px !important; border: 1px solid var(--border-color) !important; padding: 0 16px !important; font-size: 14px;" placeholder="e.g. Avocado Toast" required>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+                        <label for="modalMeal" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Meal Category</label>
+                        <select id="modalMeal" class="form-select" style="height: 44px; border-radius: 12px; border: 1px solid var(--border-color); padding: 0 16px; font-size: 14px;">
+                            <option>Breakfast</option>
+                            <option>Lunch</option>
+                            <option>Dinner</option>
+                            <option>Snack</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px;">
+                        <label for="modalNotes" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Notes (optional)</label>
+                        <textarea id="modalNotes" class="form-control" rows="3" style="border-radius: 12px !important; border: 1px solid var(--border-color) !important; padding: 12px 16px !important; font-size: 14px;" placeholder="Add details or quantity..."></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                        <button type="button" class="btn-profile-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="background-color: var(--primary) !important; border: none; border-radius: 12px; font-weight: 700; padding: 10px 24px; color: #fff; cursor: pointer;">Save Log</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Load JQuery only once if not loaded -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script>
-        $(document).ready(function () {
+<script>
+    $(document).ready(function () {
         $('#addModal').appendTo("body"); 
 
         const addModal = new bootstrap.Modal(document.getElementById('addModal'));
         const userEmail = '@Email';
-        let foodItems = [];
+        let foodPage = 1;
+        let foodPageSize = 10;
+        let foodTotalPages = 0;
+        let foodTotalRecords = 0;
 
         function renderFoodLog(items) {
             const $body = $('#foodLogBody');
             $body.empty();
             if (!items || items.length === 0) {
-                $body.append('<tr><td colspan="4" class="text-center text-muted">No entries yet.</td></tr>');
+                $body.append('<tr><td colspan="4" class="text-center text-muted" style="padding: 24px;">No entries logged yet today.</td></tr>');
                 return;
             }
             for (let i = 0; i < items.length; i++) {
                 const it = items[i];
-                // order: Meal | Food | Notes | Date (date last)
-                const row = `<tr><td>${$('<div/>').text(it.meal).html()}</td><td>${$('<div/>').text(it.foodName).html()}</td><td>${$('<div/>').text(it.notes).html()}</td><td>${$('<div/>').text(it.date || '').html()}</td></tr>`;
+                const row = `<tr style="border-bottom: 1px solid var(--border-color);"><td style="font-weight: 600; color: var(--primary);">${$('<div/>').text(it.meal).html()}</td><td style="font-weight: 500;">${$('<div/>').text(it.foodName).html()}</td><td style="color: var(--text-muted);">${$('<div/>').text(it.notes).html()}</td><td style="font-size: 12px; font-weight: 600; color: var(--text-muted);">${$('<div/>').text(it.date || '').html()}</td></tr>`;
                 $body.append(row);
             }
         }
 
-        function getFilteredItems(query) {
-            if (!query) return foodItems;
-            const q = query.trim().toLowerCase();
-            return foodItems.filter(it =>
-                ((it.foodName || '').toLowerCase().includes(q)) ||
-                ((it.meal || '').toLowerCase().includes(q)) ||
-                ((it.notes || '').toLowerCase().includes(q))
-            );
+        function renderPagination() {
+            const from = foodTotalRecords === 0 ? 0 : ((foodPage - 1) * foodPageSize) + 1;
+            const to = Math.min(foodPage * foodPageSize, foodTotalRecords);
+            $('#foodPaginationInfo').text(foodTotalRecords === 0
+                ? 'No logged meals'
+                : `Showing ${from}-${to} of ${foodTotalRecords}`);
+            $('#foodPrevPage').prop('disabled', foodPage <= 1);
+            $('#foodNextPage').prop('disabled', foodPage >= foodTotalPages || foodTotalPages === 0);
         }
 
         function loadFoodLog(email) {
-            $.get('/FoodLog/List', { email: email })
+            const query = $('#foodSearch').val() || '';
+            $.get('/FoodLog/List', { email: email, page: foodPage, pageSize: foodPageSize, search: query })
                 .done(function (res) {
                     if (res && res.success === false) {
                         console.error('Failed to load food log:', res.message);
-                        foodItems = [];
                         renderFoodLog([]);
+                        foodTotalPages = 0;
+                        foodTotalRecords = 0;
+                        renderPagination();
                         return;
                     }
-                    foodItems = res || [];
-                    renderFoodLog(getFilteredItems($('#foodSearch').val() || ''));
+                    const items = res.items || [];
+                    foodPage = res.page || 1;
+                    foodPageSize = res.pageSize || foodPageSize;
+                    foodTotalPages = res.totalPages || 0;
+                    foodTotalRecords = res.totalRecords || 0;
+                    $('#foodPageSize').val(foodPageSize.toString());
+                    renderFoodLog(items);
+                    renderPagination();
                 })
                 .fail(function () {
-                    foodItems = [];
                     renderFoodLog([]);
+                    foodTotalPages = 0;
+                    foodTotalRecords = 0;
+                    renderPagination();
                 });
         }
 
         function debounce(fn, wait) { let t; return function() { const args = arguments; const ctx = this; clearTimeout(t); t = setTimeout(function(){ fn.apply(ctx, args); }, wait); }; }
 
         $('#foodSearch').on('input', debounce(function () {
-            const q = $(this).val() || '';
-            renderFoodLog(getFilteredItems(q));
+            foodPage = 1;
+            loadFoodLog(userEmail);
         }, 250));
+
+        $('#foodPageSize').on('change', function () {
+            foodPageSize = parseInt($(this).val(), 10) || 10;
+            foodPage = 1;
+            loadFoodLog(userEmail);
+        });
+
+        $('#foodPrevPage').on('click', function () {
+            if (foodPage > 1) {
+                foodPage--;
+                loadFoodLog(userEmail);
+            }
+        });
+
+        $('#foodNextPage').on('click', function () {
+            if (foodPage < foodTotalPages) {
+                foodPage++;
+                loadFoodLog(userEmail);
+            }
+        });
 
         $('#addFoodBtn').click(function () {
             addModal.show();
@@ -170,8 +202,30 @@
                     if (res && res.success) {
                         addModal.hide();
                         $('#addModalForm')[0].reset();
+                        foodPage = 1;
                         loadFoodLog(userEmail);
-                        Swal.fire('Saved', 'Food saved successfully', 'success');
+                        
+                        // Show SweetAlert
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Food Logged!',
+                            text: 'Your food log was saved successfully',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                        
+                        // Trigger daily summary update in host window if available
+                        if (typeof window.loadDailyNutrition === 'function') {
+                            window.loadDailyNutrition();
+                        } else if (parent && typeof parent.loadDailyNutrition === 'function') {
+                            parent.loadDailyNutrition();
+                        } else {
+                            // default fallback to page reload or direct call
+                            const todayStrVal = new Date().toDateString();
+                            location.reload();
+                        }
                     } else {
                         Swal.fire('Error', res?.message || 'Save failed', 'error');
                     }
@@ -187,7 +241,4 @@
             loadFoodLog(userEmail);
         }
     });
-
-    </script>
-</body>
-</html>
+</script>

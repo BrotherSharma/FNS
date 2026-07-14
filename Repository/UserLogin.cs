@@ -226,6 +226,50 @@ namespace FNS.Repository
             return resultTable;
         }
 
+        public DataTable UpdateProfileImagePath(string email, string? profileImagePath)
+        {
+            DataTable resultTable = new DataTable();
+            try
+            {
+                _con.Open();
+                EnsureProfileImageColumn();
+
+                using var cmd = new NpgsqlCommand(@"
+                    UPDATE public.t_user
+                    SET c_profile_image_path = @ProfileImagePath
+                    WHERE c_email = @Email;", _con);
+
+                cmd.Parameters.AddWithValue("@Email", email);
+                cmd.Parameters.AddWithValue("@ProfileImagePath", (object?)profileImagePath ?? DBNull.Value);
+
+                int rowsAffected = cmd.ExecuteNonQuery();
+
+                resultTable.Columns.Add("Status", typeof(string));
+                resultTable.Columns.Add("Message", typeof(string));
+
+                if (rowsAffected > 0)
+                {
+                    resultTable.Rows.Add("Success", "Profile image updated successfully.");
+                }
+                else
+                {
+                    resultTable.Rows.Add("Error", "User not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                resultTable.Columns.Add("Status", typeof(string));
+                resultTable.Columns.Add("Message", typeof(string));
+                resultTable.Rows.Add("Error", $"An error occurred: {ex.Message}");
+            }
+            finally
+            {
+                _con.Close();
+            }
+
+            return resultTable;
+        }
+
         public string GetProfileImagePath(string email)
         {
             try

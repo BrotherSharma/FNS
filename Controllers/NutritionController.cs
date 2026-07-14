@@ -706,7 +706,6 @@ Input description: '{description}'
         try
         {
 
-        // ✅ Generate response
         response = await model.GenerateContent(request);
 
         // Ensure the model returned some text
