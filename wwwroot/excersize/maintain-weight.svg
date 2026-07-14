@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Maintain weight balanced fitness</title>
+  <desc id="desc">A balanced exercise scene with yoga, walking, and strength icons.</desc>
+  <rect width="720" height="420" fill="#f4f7fb"/>
+  <rect x="72" y="290" width="576" height="26" rx="13" fill="#c7d7e8"/>
+  <circle cx="360" cy="92" r="34" fill="#3b5f7a"/>
+  <path d="M360 132 L360 224" stroke="#3b5f7a" stroke-width="24" stroke-linecap="round"/>
+  <path d="M360 166 L292 220 M360 166 L428 220" stroke="#3b5f7a" stroke-width="22" stroke-linecap="round"/>
+  <path d="M360 224 L292 292 M360 224 L428 292" stroke="#27445a" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="165" cy="178" r="50" fill="#ffffff" stroke="#3b5f7a" stroke-width="9"/>
+  <path d="M142 178 H188 M165 155 V201" stroke="#3b5f7a" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="555" cy="178" r="50" fill="#ffffff" stroke="#3b5f7a" stroke-width="9"/>
+  <path d="M530 190 C548 160 566 160 586 190" fill="none" stroke="#3b5f7a" stroke-width="10" stroke-linecap="round"/>
+  <text x="76" y="82" fill="#27445a" font-family="Arial, sans-serif" font-size="34" font-weight="700">Balanced Routine</text>
+  <text x="82" y="364" fill="#27445a" font-family="Arial, sans-serif" font-size="22">Move consistently. Recover well.</text>
+</svg>

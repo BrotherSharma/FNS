@@ -147,8 +147,9 @@
             box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
         }
     </style>
+    <link href="/css/fns-ui.css" rel="stylesheet" />
 </head>
-<body>
+<body class="fns-status-shell">
     <div class="container @ViewBag.Status.ToLower()">
         @if (ViewBag.Status == "Approved")
         {

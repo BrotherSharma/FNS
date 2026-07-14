@@ -1,0 +1,455 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+:root {
+  --fns-ink: #13231d;
+  --fns-muted: #596a62;
+  --fns-surface: rgba(255, 255, 255, 0.9);
+  --fns-surface-strong: #ffffff;
+  --fns-border: rgba(23, 34, 28, 0.12);
+  --fns-shadow: 0 18px 50px rgba(19, 35, 29, 0.18);
+  --fns-primary: #1f5f4a;
+  --fns-primary-dark: #103427;
+  --fns-accent: #d86b45;
+  --fns-teal: #0f766e;
+  --fns-gold: #dca43a;
+  --fns-bg-image: url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1800&q=80");
+  --fns-bg-fallback: url("/Logo/cp1.jpg");
+  --fns-font-family: 'Inter', sans-serif;
+}
+
+body.fns-layout-shell {
+  min-height: 100vh;
+  height: auto;
+  overflow: auto;
+  display: block;
+  margin: 0;
+  padding: 0;
+  color: var(--fns-ink);
+  font-family: var(--fns-font-family);
+  font-size: 16px;
+  line-height: 1.5;
+  background:
+    linear-gradient(115deg, rgba(245, 250, 247, 0.74), rgba(222, 242, 234, 0.62)),
+    var(--fns-bg-image) center / cover,
+    var(--fns-bg-fallback) center / cover;
+}
+
+body.fns-layout-shell > .container {
+  width: 100%;
+  max-width: none;
+  padding: 0 1rem;
+}
+
+.fns-auth-shell,
+.fns-payment-shell,
+.fns-status-shell {
+  min-height: 100vh;
+  color: var(--fns-ink);
+  background:
+    linear-gradient(115deg, rgba(13, 38, 31, 0.76), rgba(31, 122, 114, 0.38)),
+    var(--fns-bg-image) center / cover,
+    var(--fns-bg-fallback) center / cover;
+}
+
+.fns-auth-shell {
+  display: flex;
+  align-items: center;
+  padding: 28px 14px;
+}
+
+.fns-auth-shell .container {
+  max-width: 1080px;
+}
+
+.fns-auth-shell .login-card,
+.fns-auth-shell .card-center,
+.fns-auth-shell .reset-card {
+  position: relative;
+  width: min(100%, 520px);
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 34px 36px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 16px;
+  background: var(--fns-surface);
+  box-shadow: var(--fns-shadow);
+  backdrop-filter: blur(14px);
+}
+
+.fns-auth-shell .login-card::before,
+.fns-auth-shell .card-center::before,
+.fns-auth-shell .reset-card::before,
+.fns-payment-shell .payment-container::before,
+.fns-status-shell .container::before {
+  content: "";
+  display: block;
+  width: 54px;
+  height: 4px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--fns-primary), var(--fns-accent), var(--fns-gold));
+}
+
+.fns-auth-shell .brand-logo,
+.fns-auth-shell .login-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  padding: 5px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(23, 34, 28, 0.16);
+}
+
+.fns-auth-shell h3,
+.fns-auth-shell .reset-title {
+  color: var(--fns-primary-dark);
+  font-weight: 800;
+}
+
+.fns-auth-shell .form-control,
+.fns-layout-shell .form-control,
+.dashboard-shell input,
+.dashboard-shell select,
+.dashboard-shell textarea {
+  min-height: 46px;
+  border: 1px solid var(--fns-border) !important;
+  border-radius: 8px !important;
+  background-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 1px 0 rgba(23, 34, 28, 0.04);
+}
+
+.fns-auth-shell .form-control:focus,
+.fns-layout-shell .form-control:focus,
+.dashboard-shell input:focus,
+.dashboard-shell select:focus,
+.dashboard-shell textarea:focus {
+  border-color: var(--fns-teal) !important;
+  box-shadow: 0 0 0 0.2rem rgba(31, 122, 114, 0.14) !important;
+}
+
+.fns-auth-shell .card-center form {
+  display: grid;
+  gap: 12px;
+}
+
+.fns-auth-shell .card-center .mt-2,
+.fns-auth-shell .reset-card .mb-3 {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.fns-auth-shell .card-center .form-control,
+.fns-auth-shell .reset-card .form-control {
+  min-height: 52px;
+  padding: 0.85rem 1rem;
+  font-size: 0.98rem;
+}
+
+.fns-auth-shell .card-center .btn,
+.fns-auth-shell .reset-card .btn {
+  min-height: 52px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.fns-auth-shell .card-center .small,
+.fns-auth-shell .card-center .muted,
+.fns-auth-shell .reset-card .small,
+.fns-auth-shell .reset-card .muted,
+.fns-auth-shell .small-links {
+  font-size: 0.96rem !important;
+  line-height: 1.45;
+}
+
+.fns-auth-shell .small-links a,
+.fns-auth-shell .card-center a,
+.fns-auth-shell .reset-card a {
+  font-size: 0.96rem;
+  font-weight: 600;
+}
+
+.fns-auth-shell .small-links {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.fns-auth-shell .small-links > div {
+  line-height: 1.45;
+}
+
+.fns-auth-shell .card-center .text-center.muted.small {
+  margin-top: 4px !important;
+}
+
+.fns-auth-shell .card-center h3,
+.fns-auth-shell .reset-card h3 {
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem !important;
+}
+
+.fns-auth-shell .reset-card p.muted,
+.fns-auth-shell .card-center .muted {
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.fns-auth-shell .btn-primary,
+.fns-layout-shell .btn-primary,
+.fns-layout-shell .improve-action-btn,
+.dashboard-shell .btn-primary,
+.dashboard-shell button.btn-primary {
+  border: 0 !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--fns-primary), var(--fns-teal)) !important;
+  box-shadow: 0 12px 24px rgba(46, 89, 66, 0.22);
+}
+
+.fns-auth-shell .btn-primary:hover,
+.fns-layout-shell .btn-primary:hover,
+.fns-layout-shell .improve-action-btn:hover,
+.dashboard-shell .btn-primary:hover,
+.dashboard-shell button.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(46, 89, 66, 0.3);
+}
+
+.fns-auth-shell a,
+.fns-layout-shell a {
+  color: var(--fns-teal);
+  font-weight: 600;
+}
+
+.fns-layout-shell .improve-card {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  background: var(--fns-surface);
+  box-shadow: var(--fns-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.fns-layout-shell .improve-title {
+  color: var(--fns-primary-dark);
+}
+
+.dashboard-shell {
+  background-color: var(--bg-canvas, #f8faf9) !important;
+  background-image: none !important;
+  color: var(--fns-ink);
+}
+
+.dashboard-shell .main-content {
+  height: auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.dashboard-shell .app-header {
+  background: linear-gradient(135deg, rgba(16, 52, 39, 0.93), rgba(15, 118, 110, 0.86)) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 26px rgba(23, 34, 28, 0.22);
+}
+
+.dashboard-shell .sidebar {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-right: 1px solid var(--fns-border);
+}
+
+.dashboard-shell .sidebar a {
+  margin: 3px 10px;
+  border-radius: 8px;
+  border-left: 0;
+}
+
+.dashboard-shell .sidebar a:hover,
+.dashboard-shell .sidebar a.active {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-shell .page-section {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+
+.dashboard-shell .page-section h2 {
+  color: var(--fns-primary-dark);
+  font-weight: 800;
+}
+
+.dashboard-shell .section,
+.dashboard-shell .chart-box,
+.dashboard-shell .profile-container,
+.dashboard-shell .stat-card,
+.dashboard-shell .goal-card,
+.dashboard-shell .suggestion-item,
+.dashboard-shell .food-card,
+.dashboard-shell .checklist-table-wrap {
+  border: 1px solid var(--fns-border);
+  border-radius: 8px !important;
+  background: var(--fns-surface);
+  box-shadow: 0 14px 34px rgba(19, 35, 29, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-shell .chart-row {
+  align-items: stretch;
+}
+
+.dashboard-shell .chart-box {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: clamp(320px, 34vw, 420px);
+}
+
+.dashboard-shell .chart-box canvas {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: block;
+}
+
+.dashboard-shell .daily-summary-header,
+.dashboard-shell .goal-progress-card {
+  border-radius: 8px !important;
+  background:
+    linear-gradient(135deg, rgba(31, 95, 74, 0.9), rgba(15, 118, 110, 0.78)),
+    var(--fns-bg-image) center / cover,
+    var(--fns-bg-fallback) center / cover !important;
+  box-shadow: 0 16px 34px rgba(46, 89, 66, 0.22);
+}
+
+.dashboard-shell .stat-item {
+  border-left: 0;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+}
+
+.dashboard-shell .stat-box,
+.dashboard-shell .goal-stat {
+  border: 1px solid rgba(46, 89, 66, 0.12);
+  border-radius: 8px !important;
+  background: rgba(247, 251, 249, 0.94) !important;
+}
+
+.dashboard-shell table {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.dashboard-shell thead th {
+  background: rgba(46, 89, 66, 0.08);
+  color: var(--fns-primary-dark);
+}
+
+.dashboard-shell .mood-tracker i {
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(46, 89, 66, 0.07);
+}
+
+.dashboard-shell .profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--fns-border);
+}
+
+.dashboard-shell .profile-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.dashboard-shell .profile-header-actions form {
+  margin: 0;
+}
+
+.dashboard-shell .profile-actions form {
+  margin: 0;
+}
+
+.dashboard-shell .profile-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 18px;
+  background: var(--primary-color) !important;
+  box-shadow: 0 12px 24px rgba(46, 89, 66, 0.24);
+}
+
+.fns-payment-shell,
+.fns-status-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.fns-payment-shell .payment-container,
+.fns-status-shell .container {
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 8px;
+  background: var(--fns-surface);
+  box-shadow: var(--fns-shadow);
+  backdrop-filter: blur(14px);
+}
+
+.fns-payment-shell .amount-section,
+.fns-payment-shell .btn-pay,
+.fns-status-shell .btn-primary,
+.fns-status-shell .btn-retry,
+.fns-status-shell .step-number {
+  background: linear-gradient(135deg, var(--fns-primary), var(--fns-teal)) !important;
+}
+
+.fns-payment-shell .payment-details,
+.fns-payment-shell .info-section,
+.fns-status-shell .info-box,
+.fns-status-shell .activity-log,
+.fns-status-shell .step,
+.fns-status-shell .contact-info,
+.fns-status-shell .reason-box,
+.fns-status-shell .next-steps {
+  border: 1px solid rgba(46, 89, 66, 0.12);
+  border-left: 4px solid var(--fns-teal);
+  border-radius: 8px;
+  background: rgba(247, 251, 249, 0.94) !important;
+}
+
+.fns-payment-shell .btn-cancel,
+.fns-status-shell .btn-secondary,
+.fns-status-shell .btn-logout {
+  border-radius: 8px;
+  background: #f4f7f5 !important;
+  border: 1px solid var(--fns-border) !important;
+}
+
+@media (max-width: 768px) {
+  .fns-auth-shell,
+  .fns-payment-shell,
+  .fns-status-shell {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .fns-auth-shell .login-card,
+  .fns-auth-shell .card-center,
+  .fns-auth-shell .reset-card,
+  .fns-payment-shell .payment-container,
+  .fns-status-shell .container {
+    padding: 22px;
+  }
+
+  .dashboard-shell {
+    background-color: var(--bg-canvas, #f8faf9) !important;
+    background-image: none !important;
+  }
+}

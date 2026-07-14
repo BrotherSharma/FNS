@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FNS.Controllers
@@ -49,18 +50,65 @@ namespace FNS.Controllers
         }
 
         [HttpGet("List")]
-        public async Task<IActionResult> List([FromQuery] string email)
+        public async Task<IActionResult> List([FromQuery] string email, [FromQuery] int page = 1, [FromQuery] int? pageSize = null, [FromQuery] string search = null)
         {
-            var results = new System.Collections.Generic.List<object>();
+            var results = new List<object>();
+            var defaultPageSize = _configuration.GetValue<int?>("FoodLog:DefaultPageSize") ?? 10;
+            var effectivePageSize = pageSize.GetValueOrDefault(defaultPageSize);
+
+            if (page < 1)
+                page = 1;
+
+            if (effectivePageSize < 1)
+                effectivePageSize = defaultPageSize;
+
+            if (effectivePageSize < 1)
+                effectivePageSize = 10;
+
+            effectivePageSize = Math.Min(effectivePageSize, 100);
+            var offset = (page - 1) * effectivePageSize;
+            var hasSearch = !string.IsNullOrWhiteSpace(search);
+            var searchTerm = hasSearch ? $"%{search.Trim()}%" : string.Empty;
+
+            string whereClause = @"
+                WHERE c_email = @email
+                  AND (
+                      @hasSearch = false
+                      OR c_food_name ILIKE @search
+                      OR c_meal ILIKE @search
+                      OR c_notes ILIKE @search
+                  )";
+
+            string countQuery = $"SELECT COUNT(*) FROM t_food_data {whereClause}";
+
             // select all columns so we can detect a date-like column if present
-            string query = @"SELECT * FROM t_food_data WHERE c_email = @email ORDER BY c_food_name";
+            string query = $@"
+                SELECT *
+                FROM t_food_data
+                {whereClause}
+                ORDER BY c_food_name
+                LIMIT @pageSize OFFSET @offset";
             try
             {
                 var connStr = _configuration.GetConnectionString("DefaultConnection");
                 await using var conn = new NpgsqlConnection(connStr);
                 await conn.OpenAsync();
+
+                var totalRecords = 0;
+                await using (var countCmd = new NpgsqlCommand(countQuery, conn))
+                {
+                    countCmd.Parameters.AddWithValue("email", email ?? (object)DBNull.Value);
+                    countCmd.Parameters.AddWithValue("hasSearch", hasSearch);
+                    countCmd.Parameters.AddWithValue("search", searchTerm);
+                    totalRecords = Convert.ToInt32(await countCmd.ExecuteScalarAsync());
+                }
+
                 await using var cmd = new NpgsqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("email", email ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("hasSearch", hasSearch);
+                cmd.Parameters.AddWithValue("search", searchTerm);
+                cmd.Parameters.AddWithValue("pageSize", effectivePageSize);
+                cmd.Parameters.AddWithValue("offset", offset);
 
                 await using var reader = await cmd.ExecuteReaderAsync();
                 // determine if there is a date-like column name
@@ -104,7 +152,17 @@ namespace FNS.Controllers
                     });
                 }
 
-                return Json(results);
+                var totalPages = (int)Math.Ceiling(totalRecords / (double)effectivePageSize);
+
+                return Json(new
+                {
+                    items = results,
+                    page = page,
+                    pageSize = effectivePageSize,
+                    totalRecords = totalRecords,
+                    totalPages = totalPages,
+                    defaultPageSize = defaultPageSize
+                });
             }
             catch (Exception ex)
             {

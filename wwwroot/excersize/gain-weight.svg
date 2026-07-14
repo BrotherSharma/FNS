@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Gain weight strength training</title>
+  <desc id="desc">A person lifting a barbell for strength and muscle gain.</desc>
+  <rect width="720" height="420" fill="#f8f4ec"/>
+  <path d="M90 314 H630" stroke="#e6d4b8" stroke-width="30" stroke-linecap="round"/>
+  <path d="M124 150 V250 M164 126 V274 M556 126 V274 M596 150 V250 M164 200 H556" stroke="#6b4b2a" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="360" cy="130" r="34" fill="#6b4b2a"/>
+  <path d="M360 172 L360 250" stroke="#6b4b2a" stroke-width="28" stroke-linecap="round"/>
+  <path d="M348 188 L286 224 M372 188 L434 224" stroke="#6b4b2a" stroke-width="24" stroke-linecap="round"/>
+  <path d="M354 250 L306 326 M366 250 L420 326" stroke="#4e351e" stroke-width="26" stroke-linecap="round"/>
+  <rect x="88" y="176" width="54" height="48" rx="10" fill="#4e351e"/>
+  <rect x="578" y="176" width="54" height="48" rx="10" fill="#4e351e"/>
+  <text x="72" y="82" fill="#4e351e" font-family="Arial, sans-serif" font-size="34" font-weight="700">Progressive Strength</text>
+  <text x="82" y="366" fill="#4e351e" font-family="Arial, sans-serif" font-size="22">Lift. Eat. Recover. Repeat.</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Weight loss cardio training</title>
+  <desc id="desc">A person doing energetic cardio movement with a timer and heart-rate line.</desc>
+  <rect width="720" height="420" fill="#eef8f3"/>
+  <circle cx="575" cy="95" r="58" fill="#d8f0e4"/>
+  <path d="M80 330 C180 250 265 385 360 285 C440 200 520 255 640 180" fill="none" stroke="#b7ddca" stroke-width="26" stroke-linecap="round"/>
+  <path d="M96 290 L150 290 L175 240 L212 340 L246 270 L292 270" fill="none" stroke="#2e5942" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="346" cy="128" r="34" fill="#2e5942"/>
+  <path d="M332 180 L290 250 L238 232" fill="none" stroke="#2e5942" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M352 182 L416 228 L478 204" fill="none" stroke="#2e5942" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M296 252 L252 336" fill="none" stroke="#1f3d2f" stroke-width="24" stroke-linecap="round"/>
+  <path d="M308 252 L386 330" fill="none" stroke="#1f3d2f" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="555" cy="248" r="54" fill="#ffffff" stroke="#2e5942" stroke-width="10"/>
+  <path d="M555 248 L555 214 M555 248 L584 265" stroke="#2e5942" stroke-width="9" stroke-linecap="round"/>
+  <text x="72" y="82" fill="#1f3d2f" font-family="Arial, sans-serif" font-size="34" font-weight="700">Cardio + Strength</text>
+</svg>

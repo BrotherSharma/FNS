@@ -7,24 +7,37 @@ using FNS.Models;
 using FNS.Repository;
 using FNS.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace FNS.Controllers
 {
     public class UserController : Controller
     {
+        private const long MaxProfileImageSizeBytes = 1 * 1024 * 1024;
+        private static readonly HashSet<string> AllowedProfileImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".webp"
+        };
 
         private readonly IUserLogin _userLogin;
         private readonly IEmailService _emailService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public UserController(IUserLogin userLogin, IEmailService emailService)
+        public UserController(IUserLogin userLogin, IEmailService emailService, IWebHostEnvironment webHostEnvironment)
         {
             _userLogin = userLogin;
             _emailService = emailService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
 
@@ -255,6 +268,35 @@ namespace FNS.Controllers
                 .TrimEnd('=');
         }
 
+        private static string BuildProfileImageBaseName(string email)
+        {
+            var normalizedEmail = (email ?? string.Empty).Trim().ToLowerInvariant();
+            var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(normalizedEmail));
+            return $"profile-{Convert.ToHexString(hashBytes).ToLowerInvariant().Substring(0, 24)}";
+        }
+
+        private string GetProfileImageFolder()
+        {
+            var folder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+            Directory.CreateDirectory(folder);
+            return folder;
+        }
+
+        private void DeleteProfileImageFiles(string email)
+        {
+            var uploadsFolder = GetProfileImageFolder();
+            var baseFileName = BuildProfileImageBaseName(email);
+
+            foreach (var extension in AllowedProfileImageExtensions)
+            {
+                var filePath = Path.Combine(uploadsFolder, baseFileName + extension);
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+        }
+
         [HttpGet]
         public IActionResult streak([FromQuery] string email)
         {
@@ -294,21 +336,58 @@ namespace FNS.Controllers
 
 
         [HttpPost]
-        public IActionResult UpdateProfile([FromBody] JsonElement profileData)
+        public async Task<IActionResult> UpdateProfile([FromForm] string email, [FromForm] string firstName, [FromForm] string lastName, [FromForm] string goal, [FromForm] IFormFile profileImage = null)
         {
             try
             {
-                var email = profileData.GetProperty("email").GetString();
-                var firstName = profileData.GetProperty("firstName").GetString();
-                var lastName = profileData.GetProperty("lastName").GetString();
-                var goal = profileData.GetProperty("goal").GetString();
-
                 if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
                 {
                     return BadRequest(new { success = false, message = "Email, first name, and last name are required." });
                 }
 
-                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal);
+                string profileImagePath = null;
+                if (profileImage != null && profileImage.Length > 0)
+                {
+                    if (profileImage.Length > MaxProfileImageSizeBytes)
+                    {
+                        return BadRequest(new { success = false, message = "Profile image must be 1 MB or smaller." });
+                    }
+
+                    var extension = Path.GetExtension(profileImage.FileName);
+                    var safeExtension = string.IsNullOrWhiteSpace(extension) ? ".png" : extension.ToLowerInvariant();
+
+                    if (!AllowedProfileImageExtensions.Contains(safeExtension))
+                    {
+                        return BadRequest(new { success = false, message = "Only JPG, JPEG, PNG, GIF, and WEBP images are allowed." });
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(profileImage.ContentType) && !profileImage.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return BadRequest(new { success = false, message = "The selected file must be an image." });
+                    }
+
+                    var uploadsFolder = GetProfileImageFolder();
+
+                    var baseFileName = BuildProfileImageBaseName(email);
+                    foreach (var existingExtension in AllowedProfileImageExtensions)
+                    {
+                        var existingFile = Path.Combine(uploadsFolder, baseFileName + existingExtension);
+                        if (System.IO.File.Exists(existingFile) && !string.Equals(existingFile, Path.Combine(uploadsFolder, baseFileName + safeExtension), StringComparison.OrdinalIgnoreCase))
+                        {
+                            System.IO.File.Delete(existingFile);
+                        }
+                    }
+
+                    var fileName = $"{baseFileName}{safeExtension}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    await using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+                    await profileImage.CopyToAsync(stream);
+
+                    profileImagePath = $"/images/{fileName}";
+                }
+
+                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal, profileImagePath);
                 
                 if (result.Rows.Count > 0 && result.Rows[0]["Status"].ToString() == "Success")
                 {
@@ -324,6 +403,89 @@ namespace FNS.Controllers
                 {
                     return StatusCode(500, new { success = false, message = result.Rows[0]["Message"].ToString() });
                 }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Internal server error", details = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfileImage([FromForm] string email, [FromForm] IFormFile profileImage)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email) || profileImage == null || profileImage.Length == 0)
+                {
+                    return BadRequest(new { success = false, message = "Email and profile image are required." });
+                }
+
+                if (profileImage.Length > MaxProfileImageSizeBytes)
+                {
+                    return BadRequest(new { success = false, message = "Profile image must be 1 MB or smaller." });
+                }
+
+                var extension = Path.GetExtension(profileImage.FileName);
+                var safeExtension = string.IsNullOrWhiteSpace(extension) ? ".png" : extension.ToLowerInvariant();
+
+                if (!AllowedProfileImageExtensions.Contains(safeExtension))
+                {
+                    return BadRequest(new { success = false, message = "Only JPG, JPEG, PNG, GIF, and WEBP images are allowed." });
+                }
+
+                if (!string.IsNullOrWhiteSpace(profileImage.ContentType) && !profileImage.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { success = false, message = "The selected file must be an image." });
+                }
+
+                DeleteProfileImageFiles(email);
+
+                var uploadsFolder = GetProfileImageFolder();
+                var baseFileName = BuildProfileImageBaseName(email);
+                var fileName = $"{baseFileName}{safeExtension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                await using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await profileImage.CopyToAsync(stream);
+                }
+
+                var profileImagePath = $"/images/{fileName}";
+                DataTable result = _userLogin.UpdateProfileImagePath(email, profileImagePath);
+
+                if (result.Rows.Count > 0 && result.Rows[0]["Status"].ToString() == "Success")
+                {
+                    return Ok(new { success = true, message = "Profile image updated successfully.", profileImagePath });
+                }
+
+                return StatusCode(500, new { success = false, message = result.Rows[0]["Message"].ToString() });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Internal server error", details = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult RemoveProfileImage([FromForm] string email)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    return BadRequest(new { success = false, message = "Email is required." });
+                }
+
+                DeleteProfileImageFiles(email);
+
+                DataTable result = _userLogin.UpdateProfileImagePath(email, null);
+
+                if (result.Rows.Count > 0 && result.Rows[0]["Status"].ToString() == "Success")
+                {
+                    return Ok(new { success = true, message = "Profile image removed successfully." });
+                }
+
+                return StatusCode(500, new { success = false, message = result.Rows[0]["Message"].ToString() });
             }
             catch (Exception ex)
             {

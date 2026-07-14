@@ -22,9 +22,10 @@
         .error-message { color: #d9534f; font-size: 0.9rem; margin-top:6px; display:block; }
         .small-links { font-size:0.9rem; }
     </style>
+    <link href="/css/fns-ui.css" rel="stylesheet" />
 </head>
 
-<body>
+<body class="fns-auth-shell">
     <div class="container">
         <div class="login-card">
             <img src="/logo/logoo.jpeg" class="login-logo" alt="Logo" />
@@ -48,7 +49,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between small-links">
-                    <a class="btn btn-link p-0" id="forgotpassword" href="/User/ForgotPassword">Forgot Password?</a>
+                    <a id="forgotpassword" href="/User/ForgotPassword">Forgot Password?</a>
                     <div>Don't have an account? <a href="/User/Register">Register</a></div>
                 </div>
             </div>
