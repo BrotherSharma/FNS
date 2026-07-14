@@ -25,7 +25,8 @@ namespace FNS.Repository
             try
             {
                 _con.Open();
-                string query = "SELECT c_email, c_firstname, c_lastname FROM public.t_user WHERE c_email = @Email AND c_password = @Password";
+                EnsurePremiumColumn();
+                string query = "SELECT c_email, c_firstname, c_lastname, c_is_premium FROM public.t_user WHERE c_email = @Email AND c_password = @Password";
                 DataTable userTable = new DataTable();
 
                 using (NpgsqlCommand cmd = new NpgsqlCommand(query, _con))
@@ -55,6 +56,14 @@ namespace FNS.Repository
             cmd.ExecuteNonQuery();
         }
 
+        private void EnsurePremiumColumn()
+        {
+            using var cmd = new NpgsqlCommand(@"
+                ALTER TABLE public.t_user
+                ADD COLUMN IF NOT EXISTS c_is_premium BOOLEAN DEFAULT FALSE;", _con);
+            cmd.ExecuteNonQuery();
+        }
+
         public DataTable RegisterUser(string email, string password, string firstName, string lastName, string username, string gender, DateTime dob)
         {
             DataTable resultTable = new DataTable();
@@ -62,6 +71,7 @@ namespace FNS.Repository
             {
                 _con.Open();
                 EnsureProfileImageColumn();
+                EnsurePremiumColumn();
 
                 string query = @"
                     INSERT INTO public.t_user (c_email, c_password, c_role, c_firstname, c_lastname, c_username, c_gender, c_dob, c_createddate)
@@ -429,6 +439,31 @@ namespace FNS.Repository
 
                     transaction.Commit();
                     return true;
+                }
+            }
+            finally
+            {
+                if (_con.State == ConnectionState.Open)
+                    _con.Close();
+            }
+        }
+
+        public bool UpgradeUserToPremium(string email)
+        {
+            try
+            {
+                if (_con.State != ConnectionState.Open)
+                    _con.Open();
+                
+                EnsurePremiumColumn();
+
+                using (var cmd = new NpgsqlCommand(@"
+                    UPDATE public.t_user
+                    SET c_is_premium = TRUE
+                    WHERE c_email = @Email;", _con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    return cmd.ExecuteNonQuery() > 0;
                 }
             }
             finally

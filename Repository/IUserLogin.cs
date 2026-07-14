@@ -19,5 +19,6 @@ namespace FNS.Repository
         bool SavePasswordResetToken(string email, string token, DateTime expiresAt);
         string GetEmailByValidResetToken(string token);
         bool ResetPassword(string token, string newPassword);
+        bool UpgradeUserToPremium(string email);
     }
 }

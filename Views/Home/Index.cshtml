@@ -9,6 +9,7 @@
     string ProfileImageSrc = string.IsNullOrWhiteSpace(ProfileImagePath)
         ? DefaultAvatarSrc
         : ProfileImagePath;
+    bool isPremium = Context.Session.GetString("IsPremium") == "True";
 }
 
 <!DOCTYPE html>
@@ -90,6 +91,12 @@
         
         <!-- Floating Header Widget -->
         <div class="top-header-widget">
+            @if (!isPremium)
+            {
+                <a href="#" class="btn-go-premium header-premium-cta" onclick="event.preventDefault(); upgradeToPremium()">
+                    <i class="fas fa-crown"></i> Go Premium
+                </a>
+            }
             <div class="notification-bell" onclick="alert('You are all caught up!')">
                 <i class="far fa-bell"></i>
                 <span class="notification-badge">2</span>
@@ -320,30 +327,40 @@
                 <h2>Exercise</h2>
                 <p>Workouts matched to your goal.</p>
             </div>
-            
-            <div class="grid-card" style="min-height: auto; margin-bottom: 24px;">
-                <div class="exercise-hero" style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: center;">
-                    <div>
-                        <p id="exerciseGoalSummary" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">
-                            Workouts are matched to your current nutrition goal.
-                        </p>
-                        <div class="exercise-tabs" style="display: flex; gap: 8px;">
-                            <button type="button" class="btn-profile-outline active" data-exercise-goal="loss">Weight Loss</button>
-                            <button type="button" class="btn-profile-outline" data-exercise-goal="maintain">Maintain</button>
-                            <button type="button" class="btn-profile-outline" data-exercise-goal="gain">Gain Weight</button>
-                        </div>
+                      <div class="grid-card @(isPremium ? "" : "premium-locked-section")" style="min-height: auto; margin-bottom: 24px;">
+                @if (!isPremium)
+                {
+                    <div class="premium-locked-overlay">
+                        <i class="fas fa-crown"></i>
+                        <h3>Premium Feature</h3>
+                        <p>Unlock curated workout videos tailored to your fitness goals.</p>
+                        <button class="btn-go-premium" onclick="upgradeToPremium()">Upgrade Now</button>
                     </div>
-                    <img id="exerciseHeroImage" src="/excersize/maintain-weight.svg" style="max-height: 140px; object-fit: contain;" alt="Exercise plan">
+                }
+                <div class="@(isPremium ? "" : "blur-content")">
+                    <div class="exercise-hero" style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: center;">
+                        <div>
+                            <p id="exerciseGoalSummary" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">
+                                Workouts are matched to your current nutrition goal.
+                            </p>
+                            <div class="exercise-tabs" style="display: flex; gap: 8px;">
+                                <button type="button" class="btn-profile-outline active" data-exercise-goal="loss">Weight Loss</button>
+                                <button type="button" class="btn-profile-outline" data-exercise-goal="maintain">Maintain</button>
+                                <button type="button" class="btn-profile-outline" data-exercise-goal="gain">Gain Weight</button>
+                            </div>
+                        </div>
+                        <img id="exerciseHeroImage" src="/excersize/maintain-weight.svg" style="max-height: 140px; object-fit: contain;" alt="Exercise plan">
+                    </div>
+    
+                    <div class="premium-card-grid" id="exerciseCards"></div>
+    
+                    <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin: 24px 0 16px 0;">Videos</h3>
+                    <div class="premium-card-grid" id="exerciseVideos"></div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px;">
+                        Start light, warm up first, and stop if you feel pain, dizziness, or unusual shortness of breath.
+                    </p>
                 </div>
             </div>
-
-            <div class="premium-card-grid" id="exerciseCards"></div>
-
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin: 24px 0 16px 0;">Videos</h3>
-            <div class="premium-card-grid" id="exerciseVideos"></div>
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px;">
-                Start light, warm up first, and stop if you feel pain, dizziness, or unusual shortness of breath.
-            </p>
         </div>
 
         <!-- Checklist Section -->
@@ -646,27 +663,75 @@
                 <p class="profile-goal-subtext">You're making great progress towards your goal!</p>
             </div>
 
-            <!-- Referral Friend Section -->
-            <div class="refer-grid">
-                <div class="refer-card">
-                    <div class="refer-left-icon">
-                        <i class="fas fa-gift"></i>
+            <!-- Referral Friend Section — Professional Redesign -->
+            <div class="referral-hero-section @(isPremium ? "" : "premium-locked-section")">
+                @if (!isPremium)
+                {
+                    <div class="premium-locked-overlay">
+                        <i class="fas fa-crown"></i>
+                        <h3>Premium Feature</h3>
+                        <p>Unlock the Rewards Program to invite friends and earn points for premium perks.</p>
+                        <button class="btn-go-premium" onclick="upgradeToPremium()">Upgrade Now</button>
                     </div>
-                    <div class="refer-content">
-                        <h3>Refer a Friend</h3>
-                        <p>Invite your friends to Nutrition Tracker and earn rewards when they sign up!</p>
-                        <div class="refer-points-pill">
-                            <i class="fas fa-gem"></i> Earn 100 points
+                }
+                <div class="@(isPremium ? "" : "blur-content")">
+                    <!-- Gradient Hero Banner -->
+                <div class="referral-hero-banner">
+                    <div class="referral-hero-left">
+                        <div class="referral-badge-pill">
+                            <i class="fas fa-gem"></i> Rewards Program
+                        </div>
+                        <h2 class="referral-hero-title">Share NutrInfo, Earn Together</h2>
+                        <p class="referral-hero-desc">Invite friends and earn <strong>100 points</strong> for every friend who joins. Points unlock premium features, meal plans, and more.</p>
+                        <div class="referral-steps-row">
+                            <div class="referral-step">
+                                <div class="referral-step-num">1</div>
+                                <span>Share your invite link</span>
+                            </div>
+                            <div class="referral-step-arrow"><i class="fas fa-chevron-right"></i></div>
+                            <div class="referral-step">
+                                <div class="referral-step-num">2</div>
+                                <span>Friend signs up</span>
+                            </div>
+                            <div class="referral-step-arrow"><i class="fas fa-chevron-right"></i></div>
+                            <div class="referral-step">
+                                <div class="referral-step-num">3</div>
+                                <span>You earn 100 points</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="referral-hero-right">
+                        <div class="referral-trophy-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="referral-points-display">
+                            <span class="referral-pts-number">100</span>
+                            <span class="referral-pts-label">Points per referral</span>
                         </div>
                     </div>
                 </div>
-                
-                <div class="invite-card">
-                    <h4>Enter your friend's email</h4>
-                    <div class="invite-input-group">
-                        <input type="email" id="referralEmailInput" placeholder="friend@example.com">
-                        <button type="button" class="btn-send-invite" onclick="sendReferralInvite()">Send Invite</button>
+
+                <!-- Invite Form Card -->
+                <div class="referral-invite-card">
+                    <div class="referral-invite-header">
+                        <div class="referral-invite-icon">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <div>
+                            <h4 class="referral-invite-title">Send an Invitation</h4>
+                            <p class="referral-invite-sub">Your friend will receive a personalised invite email from you.</p>
+                        </div>
                     </div>
+                    <div class="referral-form-row">
+                        <div class="referral-input-wrap">
+                            <i class="fas fa-envelope referral-input-icon"></i>
+                            <input type="email" id="referralEmailInput" class="referral-email-input" placeholder="Enter friend's email address">
+                        </div>
+                        <button type="button" class="btn-referral-send" onclick="sendReferralInvite()">
+                            <i class="fas fa-paper-plane"></i> Send Invite
+                        </button>
+                    </div>
+                    <p class="referral-privacy-note"><i class="fas fa-lock"></i> We'll never share your friend's email with third parties.</p>
                 </div>
             </div>
 
@@ -696,6 +761,37 @@
     <!-- SweetAlert and JS scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Go Premium function
+        window.upgradeToPremium = async function () {
+            try {
+                // Show loading state
+                Swal.fire({
+                    title: 'Upgrading to Premium...',
+                    text: 'Please wait while we unlock your features.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                const resp = await fetch('/User/UpgradeUser', { method: 'POST' });
+                const data = await resp.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Welcome to Premium! 👑',
+                        text: 'Your new features have been unlocked.',
+                        confirmButtonColor: '#0f4c3a'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Upgrade Failed', text: data.message });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server.' });
+            }
+        };
+
         // Global function - defined outside DOMContentLoaded so inline onclick handlers can access it immediately
         function switchSection(sectionId) {
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -749,15 +845,44 @@ const Email = '@Email';
                 loadDailyNutrition();
             };
 
-            // Referral trigger
-            window.sendReferralInvite = function () {
+            // Referral trigger — sends a real email via backend
+            window.sendReferralInvite = async function () {
                 const input = document.getElementById('referralEmailInput');
-                if (!input || !input.value.trim()) {
-                    Swal.fire('Input Error', 'Please enter a valid email address.', 'info');
+                const friendEmail = input ? input.value.trim() : '';
+                if (!friendEmail) {
+                    Swal.fire({ icon: 'info', title: 'Email Required', text: 'Please enter your friend\'s email address.' });
                     return;
                 }
-                Swal.fire('Invitation Sent!', `We sent a referral email to ${input.value}.`, 'success');
-                input.value = '';
+
+                // Show loading state
+                const btn = document.querySelector('.btn-referral-send');
+                const originalHtml = btn ? btn.innerHTML : '';
+                if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...'; btn.disabled = true; }
+
+                try {
+                    const resp = await fetch('/User/SendReferralInvite', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ friendEmail })
+                    });
+                    const data = await resp.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Invitation Sent! 🎉',
+                            text: `A personalised invite email has been sent to ${friendEmail}.`,
+                            confirmButtonColor: '#0f4c3a'
+                        });
+                        if (input) input.value = '';
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Could Not Send', text: data.message || 'Something went wrong.', confirmButtonColor: '#0f4c3a' });
+                    }
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server. Please try again.', confirmButtonColor: '#0f4c3a' });
+                } finally {
+                    if (btn) { btn.innerHTML = originalHtml; btn.disabled = false; }
+                }
             };
 
             // Update stats cards
@@ -992,7 +1117,9 @@ const Email = '@Email';
                         { title: 'Full Body Circuit', image: '/excersize/weight-loss.svg', text: 'Perform squats, push-ups, and step-ups in quick rounds with steady rest.', tags: ['Strength', '3x/week', 'Moderate'] }
                     ],
                     videos: [
-                        { title: 'NHS Aerobic Workouts', url: 'https://www.nhs.uk/live-well/exercise/aerobic-exercise-videos/' }
+                        { title: '20 Minute Fat Burning HIIT', channel: 'MommaStrong', duration: '20 min', id: 'ml6cT4AZdqI', url: 'https://www.youtube.com/watch?v=ml6cT4AZdqI' },
+                        { title: 'Full Body Weight Loss Workout', channel: 'SELF', duration: '30 min', id: 'vWcMQdlQe7I', url: 'https://www.youtube.com/watch?v=vWcMQdlQe7I' },
+                        { title: 'Beginner Cardio for Fat Loss', channel: 'Caroline Girvan', duration: '25 min', id: 'UItWltVZZmE', url: 'https://www.youtube.com/watch?v=UItWltVZZmE' }
                     ]
                 },
                 maintain: {
@@ -1004,7 +1131,9 @@ const Email = '@Email';
                         { title: 'Strength Basics', image: '/excersize/maintain-weight.svg', text: 'Perform squat, push, pull, hinge, and brace patterns with weights.', tags: ['Strength', '2x/week', 'Moderate'] }
                     ],
                     videos: [
-                        { title: 'NHS Pilates & Yoga', url: 'https://www.nhs.uk/live-well/exercise/pilates-and-yoga-exercise-videos/' }
+                        { title: '30-Min Total Body Strength', channel: 'Heather Robertson', duration: '30 min', id: 'cbKkB3POqaY', url: 'https://www.youtube.com/watch?v=cbKkB3POqaY' },
+                        { title: 'Yoga for Balance & Core', channel: 'Yoga with Adriene', duration: '32 min', id: 'VaoV1PrYft4', url: 'https://www.youtube.com/watch?v=VaoV1PrYft4' },
+                        { title: 'Low Impact Cardio Workout', channel: 'Sydney Cummings', duration: '28 min', id: 'u-9OcaZqY7A', url: 'https://www.youtube.com/watch?v=u-9OcaZqY7A' }
                     ]
                 },
                 gain: {
@@ -1016,7 +1145,9 @@ const Email = '@Email';
                         { title: 'Hypertrophy Sets', image: '/excersize/gain-weight.svg', text: 'Split routines targeting specific muscle groups with 3-5 sets of 8-12 reps.', tags: ['Muscle', '3x/week', 'Hypertrophy'] }
                     ],
                     videos: [
-                        { title: 'ACE Exercise Library', url: 'https://www.acefitness.org/resources/everyone/exercise-library/' }
+                        { title: 'Full Body Muscle Building (Beginner)', channel: 'Jeff Nippard', duration: '35 min', id: 'U9KBBnRBYRY', url: 'https://www.youtube.com/watch?v=U9KBBnRBYRY' },
+                        { title: 'Hypertrophy Push Day Workout', channel: 'AthleanX', duration: '30 min', id: 'rT7DgGymasA', url: 'https://www.youtube.com/watch?v=rT7DgGymasA' },
+                        { title: 'Mass Building Upper Body', channel: 'Jeremy Ethier', duration: '22 min', id: 'nHpbmKhDfgg', url: 'https://www.youtube.com/watch?v=nHpbmKhDfgg' }
                     ]
                 }
             };
@@ -1056,15 +1187,28 @@ const Email = '@Email';
                 const videos = document.getElementById('exerciseVideos');
                 if (videos) {
                     videos.innerHTML = plan.videos.map(v => `
-                        <div class="grid-card" style="min-height: auto; padding: 18px; flex-direction: row; align-items: center; gap: 16px;">
-                            <div style="width: 44px; height: 44px; border-radius: 50%; background-color: var(--primary-light); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px;">
-                                <i class="fas fa-play"></i>
+                        <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="yt-video-card" style="text-decoration:none; display:block;">
+                            <div class="yt-thumb-wrap">
+                                <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg"
+                                     alt="${v.title}"
+                                     class="yt-thumb-img"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="yt-thumb-fallback" style="display:none;">
+                                    <i class="fab fa-youtube" style="font-size:36px; color:#ff0000;"></i>
+                                </div>
+                                <div class="yt-play-overlay">
+                                    <div class="yt-play-btn"><i class="fas fa-play"></i></div>
+                                </div>
+                                <span class="yt-duration-badge">${v.duration}</span>
                             </div>
-                            <div>
-                                <h4 style="font-size: 14px; font-weight: 700; margin: 0 0 4px 0;">${v.title}</h4>
-                                <a href="${v.url}" target="_blank" style="font-size: 12px; color: var(--primary); font-weight: 700; text-decoration: none;">Watch Collection &rarr;</a>
+                            <div class="yt-card-body">
+                                <h4 class="yt-card-title">${v.title}</h4>
+                                <div class="yt-card-meta">
+                                    <i class="fab fa-youtube" style="color:#ff0000; font-size:13px;"></i>
+                                    <span>${v.channel}</span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     `).join('');
                 }
             }
