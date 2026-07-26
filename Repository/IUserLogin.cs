@@ -12,7 +12,9 @@ namespace FNS.Repository
         public DataTable LoginUser(string email = "", string password = "");
         public DataTable RegisterUser(string email = "", string password = "", string firstName = "", string lastName = "", string username = "", string gender = "", DateTime dob = default(DateTime));
         public DataTable GetUserStreakByEmail(string email = "");
-        DataTable UpdateUserProfile(string email, string firstName, string lastName, string goal, string? profileImagePath = null);
+        DataTable UpdateUserProfile(string email, string firstName, string lastName, string goal, string? profileImagePath = null,
+            double? weight = null, double? height = null, int? age = null, string? diet = null,
+            string? lifestyle = null, string? bloodType = null, double? sleepPatterns = null, string? gender = null);
         DataTable UpdateProfileImagePath(string email, string? profileImagePath);
         string GetProfileImagePath(string email);
         bool UserExistsByEmail(string email);

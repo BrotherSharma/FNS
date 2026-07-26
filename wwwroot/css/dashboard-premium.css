@@ -1333,10 +1333,329 @@ body.dashboard-shell > .container > main {
 }
 
 /* =============================================
-   YOUTUBE VIDEO CARDS
+   EXERCISE VIDEO CARDS
    ============================================= */
 #exerciseVideos {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.exercise-video-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 2000;
+}
+
+.exercise-video-modal-extra {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.exercise-video-modal-section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    padding: 14px 16px;
+}
+
+.exercise-resource-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.exercise-resource-card {
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 16px;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.exercise-resource-card h4 {
+    margin: 0;
+}
+
+.product-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #065f46;
+    background: #d1fae5;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+}
+
+.exercise-resource-card a.btn-profile-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exercise-video-modal-dialog {
+    width: min(760px, 100%);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    padding: 20px;
+}
+
+.exercise-video-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.exercise-popup-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 2100;
+}
+
+.exercise-popup-dialog {
+    width: min(960px, 100%);
+    max-height: calc(100vh - 40px);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+.more-resources-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    position: sticky;
+    top: 0;
+    background: var(--bg-card);
+    z-index: 2;
+    padding-bottom: 10px;
+}
+
+.more-resources-search-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    position: sticky;
+    top: 70px;
+    background: var(--bg-card);
+    z-index: 2;
+    padding-bottom: 12px;
+}
+
+.more-resources-search {
+    flex: 1;
+    min-width: 220px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg);
+    color: var(--text);
+}
+
+.more-resources-search-note {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.more-resources-list {
+    display: grid;
+    gap: 12px;
+    overflow-y: auto;
+    padding-right: 4px;
+    max-height: calc(100vh - 170px);
+}
+
+.exercise-popup-section {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 18px;
+}
+
+.exercise-popup-card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 14px;
+    align-items: center;
+}
+
+.exercise-popup-card img {
+    width: 100%;
+    height: 100%;
+    min-height: 110px;
+    border-radius: 16px;
+    object-fit: cover;
+}
+
+.exercise-popup-card h5 {
+    margin: 0 0 6px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.exercise-popup-card p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.exercise-popup-card .btn-profile-outline {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.exercise-video-player {
+    border-radius: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.97), rgba(15, 118, 110, 0.95));
+    color: #fff;
+}
+
+.exercise-video-screen {
+    border-radius: 16px;
+    padding: 20px;
+    min-height: 280px;
+    background: radial-gradient(circle at top, rgba(255,255,255,0.16), transparent 60%), linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.exercise-video-coach {
+    position: relative;
+    width: 180px;
+    height: 220px;
+    margin: 0 auto;
+    animation: exerciseCoachPulse 1.3s ease-in-out infinite;
+}
+
+.exercise-video-head {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #f8d8c2;
+    position: absolute;
+    top: 8px;
+    left: 64px;
+    box-shadow: inset 0 -6px 0 rgba(0,0,0,0.08);
+}
+
+.exercise-video-body {
+    width: 84px;
+    height: 92px;
+    border-radius: 24px;
+    background: var(--video-accent, #10b981);
+    position: absolute;
+    top: 60px;
+    left: 48px;
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,0.16);
+}
+
+.exercise-video-arm {
+    width: 20px;
+    height: 70px;
+    background: #f8d8c2;
+    position: absolute;
+    top: 70px;
+    border-radius: 999px;
+    animation: exerciseArmSwing 0.9s ease-in-out infinite alternate;
+}
+
+.exercise-video-arm.arm-left { left: 30px; transform-origin: top center; }
+.exercise-video-arm.arm-right { left: 130px; transform-origin: top center; animation-direction: alternate-reverse; }
+
+.exercise-video-leg {
+    width: 20px;
+    height: 78px;
+    background: #1f2937;
+    position: absolute;
+    top: 146px;
+    border-radius: 999px;
+    animation: exerciseLegStep 0.9s ease-in-out infinite alternate;
+}
+
+.exercise-video-leg.leg-left { left: 70px; }
+.exercise-video-leg.leg-right { left: 96px; animation-direction: alternate-reverse; }
+
+.exercise-video-timeline {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+    overflow: hidden;
+}
+
+.exercise-video-timeline::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 55%;
+    background: var(--video-accent, #10b981);
+    border-radius: inherit;
+    animation: exerciseTimeline 1.2s ease-in-out infinite;
+}
+
+.exercise-video-controls {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.86);
+}
+
+@keyframes exerciseCoachPulse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@keyframes exerciseArmSwing {
+    from { transform: rotate(16deg); }
+    to { transform: rotate(-18deg); }
+}
+
+@keyframes exerciseLegStep {
+    from { transform: translateY(0) rotate(8deg); }
+    to { transform: translateY(4px) rotate(-6deg); }
+}
+
+@keyframes exerciseTimeline {
+    0% { width: 20%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
 }
 
 .yt-video-card {

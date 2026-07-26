@@ -330,7 +330,15 @@ namespace FNS.Controllers
             {
                 streak = streakCount,
                 dob = dob,
-                goal = goal
+                goal = goal,
+                weight = row.Table.Columns.Contains("weight") ? Convert.ToDouble(row["weight"]) : 0.0,
+                height = row.Table.Columns.Contains("height") ? Convert.ToDouble(row["height"]) : 0.0,
+                age = row.Table.Columns.Contains("age") ? Convert.ToInt32(row["age"]) : 0,
+                diet = row.Table.Columns.Contains("diet") ? row["diet"]?.ToString() : "",
+                lifestyle = row.Table.Columns.Contains("lifestyle") ? row["lifestyle"]?.ToString() : "",
+                bloodType = row.Table.Columns.Contains("bloodType") ? row["bloodType"]?.ToString() : "",
+                sleepPatterns = row.Table.Columns.Contains("sleepPatterns") ? Convert.ToDouble(row["sleepPatterns"]) : 0.0,
+                gender = row.Table.Columns.Contains("gender") ? row["gender"]?.ToString() : ""
             });
         }
 
@@ -338,7 +346,12 @@ namespace FNS.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile([FromForm] string email, [FromForm] string firstName, [FromForm] string lastName, [FromForm] string goal, [FromForm] IFormFile profileImage = null)
+        public async Task<IActionResult> UpdateProfile(
+            [FromForm] string email, [FromForm] string firstName, [FromForm] string lastName, [FromForm] string goal,
+            [FromForm] IFormFile profileImage = null,
+            [FromForm] double? weight = null, [FromForm] double? height = null, [FromForm] int? age = null,
+            [FromForm] string diet = null, [FromForm] string lifestyle = null, [FromForm] string bloodType = null,
+            [FromForm] double? sleepPatterns = null, [FromForm] string gender = null)
         {
             try
             {
@@ -389,7 +402,8 @@ namespace FNS.Controllers
                     profileImagePath = $"/images/{fileName}";
                 }
 
-                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal, profileImagePath);
+                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal, profileImagePath,
+                    weight, height, age, diet, lifestyle, bloodType, sleepPatterns, gender);
                 
                 if (result.Rows.Count > 0 && result.Rows[0]["Status"].ToString() == "Success")
                 {

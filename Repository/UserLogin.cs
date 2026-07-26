@@ -169,10 +169,37 @@ namespace FNS.Repository
             resultDays.Columns.Add("daysCount", typeof(int));
             resultDays.Columns.Add("dob", typeof(DateTime));
             resultDays.Columns.Add("goal", typeof(string));
+            resultDays.Columns.Add("weight", typeof(double));
+            resultDays.Columns.Add("height", typeof(double));
+            resultDays.Columns.Add("age", typeof(int));
+            resultDays.Columns.Add("diet", typeof(string));
+            resultDays.Columns.Add("lifestyle", typeof(string));
+            resultDays.Columns.Add("bloodType", typeof(string));
+            resultDays.Columns.Add("sleepPatterns", typeof(double));
+            resultDays.Columns.Add("gender", typeof(string));
             DataRow row = resultDays.NewRow();
             row["daysCount"] = daysDifference;
             row["dob"] = resultTable.Rows[0]["c_dob"];
             row["goal"] = resultTable.Rows[0]["c_goal"];
+
+            // Health info fields
+            var srcRow = resultTable.Rows[0];
+            row["weight"] = resultTable.Columns.Contains("c_weight") && srcRow["c_weight"] != DBNull.Value
+                ? Convert.ToDouble(srcRow["c_weight"]) : 0.0;
+            row["height"] = resultTable.Columns.Contains("c_height") && srcRow["c_height"] != DBNull.Value
+                ? Convert.ToDouble(srcRow["c_height"]) : 0.0;
+            row["age"] = resultTable.Columns.Contains("c_age") && srcRow["c_age"] != DBNull.Value
+                ? Convert.ToInt32(srcRow["c_age"]) : 0;
+            row["diet"] = resultTable.Columns.Contains("c_diet") && srcRow["c_diet"] != DBNull.Value
+                ? srcRow["c_diet"].ToString() : "";
+            row["lifestyle"] = resultTable.Columns.Contains("c_lifestyle") && srcRow["c_lifestyle"] != DBNull.Value
+                ? srcRow["c_lifestyle"].ToString() : "";
+            row["bloodType"] = resultTable.Columns.Contains("c_bloodtype") && srcRow["c_bloodtype"] != DBNull.Value
+                ? srcRow["c_bloodtype"].ToString() : "";
+            row["sleepPatterns"] = resultTable.Columns.Contains("c_sleeppatterns") && srcRow["c_sleeppatterns"] != DBNull.Value
+                ? Convert.ToDouble(srcRow["c_sleeppatterns"]) : 0.0;
+            row["gender"] = resultTable.Columns.Contains("c_gender") && srcRow["c_gender"] != DBNull.Value
+                ? srcRow["c_gender"].ToString() : "";
             resultDays.Rows.Add(row);
             return resultDays;
         }
@@ -180,7 +207,9 @@ namespace FNS.Repository
 
 
 
-        public DataTable UpdateUserProfile(string email, string firstName, string lastName, string goal, string? profileImagePath = null)
+        public DataTable UpdateUserProfile(string email, string firstName, string lastName, string goal, string? profileImagePath = null,
+            double? weight = null, double? height = null, int? age = null, string? diet = null,
+            string? lifestyle = null, string? bloodType = null, double? sleepPatterns = null, string? gender = null)
         {
             DataTable resultTable = new DataTable();
             try
@@ -188,39 +217,64 @@ namespace FNS.Repository
                 _con.Open();
                 EnsureProfileImageColumn();
 
-                string query = @"
+                string userQuery = @"
                     UPDATE public.t_user
                     SET c_firstname = @FirstName,
                         c_lastname = @LastName,
+                        c_gender = COALESCE(@Gender, c_gender),
                         c_profile_image_path = COALESCE(@ProfileImagePath, c_profile_image_path)
-                    WHERE c_email = @Email;
-
-                    UPDATE public.t_healthinfo
-                    SET c_goal = @Goal
                     WHERE c_email = @Email;
                 ";
 
-                using (NpgsqlCommand cmd = new NpgsqlCommand(query, _con))
+                string healthQuery = @"
+                    UPDATE public.t_healthinfo
+                    SET c_goal = @Goal,
+                        c_weight = COALESCE(@Weight, c_weight),
+                        c_height = COALESCE(@Height, c_height),
+                        c_age = COALESCE(@Age, c_age),
+                        c_diet = COALESCE(@Diet, c_diet),
+                        c_lifestyle = COALESCE(@Lifestyle, c_lifestyle),
+                        c_bloodtype = COALESCE(@BloodType, c_bloodtype),
+                        c_sleeppatterns = COALESCE(@SleepPatterns, c_sleeppatterns)
+                    WHERE c_email = @Email;
+                ";
+
+                int totalRows = 0;
+
+                using (NpgsqlCommand cmd = new NpgsqlCommand(userQuery, _con))
                 {
                     cmd.Parameters.AddWithValue("@Email", email);
                     cmd.Parameters.AddWithValue("@FirstName", firstName);
                     cmd.Parameters.AddWithValue("@LastName", lastName);
-                    cmd.Parameters.AddWithValue("@Goal", goal);
+                    cmd.Parameters.AddWithValue("@Gender", (object?)gender ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@ProfileImagePath", (object?)profileImagePath ?? DBNull.Value);
+                    totalRows += cmd.ExecuteNonQuery();
+                }
 
-                    int rowsAffected = cmd.ExecuteNonQuery();
+                using (NpgsqlCommand cmd = new NpgsqlCommand(healthQuery, _con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@Goal", goal);
+                    cmd.Parameters.AddWithValue("@Weight", weight.HasValue ? (object)weight.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Height", height.HasValue ? (object)height.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Age", age.HasValue ? (object)age.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Diet", (object?)diet ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Lifestyle", (object?)lifestyle ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@BloodType", (object?)bloodType ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@SleepPatterns", sleepPatterns.HasValue ? (object)sleepPatterns.Value : DBNull.Value);
+                    totalRows += cmd.ExecuteNonQuery();
+                }
 
-                    resultTable.Columns.Add("Status", typeof(string));
-                    resultTable.Columns.Add("Message", typeof(string));
-                    
-                    if (rowsAffected > 0)
-                    {
-                        resultTable.Rows.Add("Success", "Profile updated successfully.");
-                    }
-                    else
-                    {
-                        resultTable.Rows.Add("Error", "User not found.");
-                    }
+                resultTable.Columns.Add("Status", typeof(string));
+                resultTable.Columns.Add("Message", typeof(string));
+                
+                if (totalRows > 0)
+                {
+                    resultTable.Rows.Add("Success", "Profile updated successfully.");
+                }
+                else
+                {
+                    resultTable.Rows.Add("Error", "User not found.");
                 }
             }
             catch (Exception ex)
