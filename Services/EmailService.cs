@@ -11,6 +11,7 @@ namespace FNS.Services
 
         Task<bool> SendRegistrationWelcomeEmailAsync(string userEmail, string userName, string loginUrl);
         Task<bool> SendPasswordResetEmailAsync(string userEmail, string resetUrl);
+        Task<bool> SendReferralInviteEmailAsync(string friendEmail, string senderName, string signupUrl);
     }
 
     public class EmailService : IEmailService
@@ -342,6 +343,98 @@ namespace FNS.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending password reset email to {UserEmail}", userEmail);
+                return false;
+            }
+        }
+        public async Task<bool> SendReferralInviteEmailAsync(string friendEmail, string senderName, string signupUrl)
+        {
+            try
+            {
+                string smtpServer = _configuration["Email:SmtpServer"];
+                int smtpPort = int.Parse(_configuration["Email:SmtpPort"]);
+                string senderEmail = _configuration["Email:SenderEmail"];
+                string senderPassword = _configuration["Email:SenderPassword"];
+
+                if (string.IsNullOrWhiteSpace(senderEmail) ||
+                    string.IsNullOrWhiteSpace(senderPassword) ||
+                    senderPassword == "your_app_password_here")
+                {
+                    _logger.LogWarning("Referral email skipped: Email credentials not configured.");
+                    return false;
+                }
+
+                using (SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort))
+                {
+                    smtpClient.EnableSsl = true;
+                    smtpClient.Credentials = new NetworkCredential(senderEmail, senderPassword);
+
+                    MailMessage mailMessage = new MailMessage(senderEmail, friendEmail)
+                    {
+                        Subject = $"{WebUtility.HtmlEncode(senderName)} invited you to join NutrInfo 🌿",
+                        IsBodyHtml = true
+                    };
+
+                    mailMessage.Body = $@"
+                    <html>
+                    <head>
+                        <style>
+                            body {{ margin: 0; padding: 0; background-color: #f4f8f6; font-family: Arial, sans-serif; color: #263b4a; }}
+                            .container {{ max-width: 620px; margin: 28px auto; background: #ffffff; border-radius: 14px; overflow: hidden; border: 1px solid #dfeae4; }}
+                            .header {{ background: linear-gradient(135deg, #0f4c3a 0%, #1a7a5e 100%); color: #ffffff; padding: 36px 28px; text-align: center; }}
+                            .header h1 {{ margin: 0 0 8px; font-size: 28px; letter-spacing: -0.5px; }}
+                            .header p {{ margin: 0; opacity: 0.85; font-size: 15px; }}
+                            .badge {{ display: inline-block; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); color: #fff; font-size: 12px; font-weight: bold; padding: 5px 14px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.06em; text-transform: uppercase; }}
+                            .content {{ padding: 32px 28px; line-height: 1.7; }}
+                            .panel {{ background: #eef8f3; border-left: 4px solid #0f4c3a; padding: 16px 20px; margin: 22px 0; border-radius: 8px; font-size: 14px; }}
+                            .feature-row {{ display: flex; gap: 12px; margin: 18px 0; }}
+                            .feature {{ flex: 1; background: #f7fbf9; border: 1px solid #dfeae4; border-radius: 10px; padding: 14px; text-align: center; font-size: 13px; }}
+                            .feature strong {{ display: block; color: #0f4c3a; margin-bottom: 4px; font-size: 20px; }}
+                            .cta-wrap {{ text-align: center; margin: 28px 0 16px; }}
+                            .btn {{ display: inline-block; background: linear-gradient(135deg, #0f4c3a, #1a7a5e); color: #ffffff !important; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 15px; }}
+                            .footer {{ color: #6c8291; font-size: 12px; padding: 0 28px 24px; text-align: center; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                <div class='badge'>🌿 Personal Invitation</div>
+                                <h1>You've Been Invited!</h1>
+                                <p>{WebUtility.HtmlEncode(senderName)} wants you to join NutrInfo</p>
+                            </div>
+                            <div class='content'>
+                                <p>Hi there,</p>
+                                <p><strong>{WebUtility.HtmlEncode(senderName)}</strong> thinks you'd love <strong>NutrInfo</strong> — a smart nutrition tracker that helps you reach your health goals with ease.</p>
+                                <div class='panel'>
+                                    🎁 <strong>Special Referral Bonus:</strong> When you sign up using this invitation, both you and {WebUtility.HtmlEncode(senderName)} earn <strong>100 reward points</strong> to unlock premium features!
+                                </div>
+                                <p>Here's what NutrInfo helps you do:</p>
+                                <ul style='padding-left:18px; margin:10px 0 20px;'>
+                                    <li>Track daily meals, calories, macros &amp; hydration</li>
+                                    <li>Get personalised workout videos by your goal</li>
+                                    <li>Monitor mood, streaks &amp; daily checklists</li>
+                                    <li>View progress charts and AI-powered suggestions</li>
+                                </ul>
+                                <div class='cta-wrap'>
+                                    <a class='btn' href='{signupUrl}'>Join NutrInfo Free →</a>
+                                </div>
+                                <p style='text-align:center; font-size:13px; color:#6c8291;'>No credit card required. Get started in 60 seconds.</p>
+                            </div>
+                            <div class='footer'>
+                                You received this email because {WebUtility.HtmlEncode(senderName)} sent you a personal invitation via NutrInfo.<br>
+                                If you did not expect this, you can safely ignore it.
+                            </div>
+                        </div>
+                    </body>
+                    </html>";
+
+                    await smtpClient.SendMailAsync(mailMessage);
+                    _logger.LogInformation("Referral invite sent to {FriendEmail} by {Sender}", friendEmail, senderName);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending referral invite to {FriendEmail}", friendEmail);
                 return false;
             }
         }

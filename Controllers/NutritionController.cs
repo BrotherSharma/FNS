@@ -15,6 +15,21 @@ public class FoodAnalysisRequest
     public string Description { get; set; } = string.Empty;
 }
 
+public class WorkoutCoachRequest
+{
+    public string Prompt { get; set; } = string.Empty;
+    public string Goal { get; set; } = string.Empty;
+    public string FitnessLevel { get; set; } = string.Empty;
+    public int Age { get; set; }
+    public double Weight { get; set; }
+    public double Height { get; set; }
+}
+
+public class WorkoutCoachResponse
+{
+    public string Recommendation { get; set; } = string.Empty;
+}
+
 public class NutritionResult
 {
     public int Calories { get; set; }
@@ -645,6 +660,76 @@ Keep it short and conversational. No bullet points.";
             _logger.LogError(ex, "Failed to analyze food description: {Description}", input.Description);
             return StatusCode(500, new { message = "An internal service error occurred while processing the request." });
         }
+    }
+
+    [HttpPost("workout-coach")]
+    [ProducesResponseType(typeof(WorkoutCoachResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> WorkoutCoach([FromBody] WorkoutCoachRequest input)
+    {
+        if (input == null || string.IsNullOrWhiteSpace(input.Prompt))
+        {
+            return BadRequest(new { message = "Workout prompt is required." });
+        }
+
+        try
+        {
+            var recommendation = await GetWorkoutCoachRecommendation(input);
+            return Ok(new WorkoutCoachResponse { Recommendation = recommendation });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate workout recommendation for prompt: {Prompt}", input.Prompt);
+            return StatusCode(500, new { message = "An internal service error occurred while processing the workout request." });
+        }
+    }
+
+    private async Task<string> GetWorkoutCoachRecommendation(WorkoutCoachRequest input)
+    {
+        var googleAI = new GoogleAI(apiKey: _geminiApiKey);
+        var model = googleAI.GenerativeModel(model: Model.Gemini25Flash);
+
+        var prompt = $@"You are a practical workout coach for a Food Nutrition + Body Maintenance web app.
+Create a safe, personalized exercise recommendation for the user request.
+
+User request: {input.Prompt}
+Goal: {input.Goal}
+Fitness level: {input.FitnessLevel}
+Age: {input.Age}
+Weight kg: {input.Weight}
+Height cm: {input.Height}
+
+Rules:
+- Keep the answer concise and directly usable inside a dashboard card.
+- Include avoid/recommended guidance if the user mentions pain, injury, fatigue, or limited time.
+- Connect exercise with nutrition when useful, such as calories burned or pre/post workout food.
+- Do not diagnose medical issues. Tell the user to consult a clinician for severe, sharp, persistent, chest, or dizziness symptoms.
+- Return plain text only, no markdown table, no JSON, no code fences, no asterisks.
+- Format the answer exactly as short sections with these labels on their own lines:
+Avoid:
+Recommended:
+Mini Plan:
+Nutrition Tip:
+- Keep each section to 1-3 short bullet lines using hyphens.";
+
+        var content = new Content
+        {
+            Parts = new List<IPart>
+            {
+                new TextData { Text = prompt }
+            }
+        };
+
+        var request = new GenerateContentRequest
+        {
+            Contents = new List<Content> { content }
+        };
+
+        var response = await model.GenerateContent(request);
+        return string.IsNullOrWhiteSpace(response.Text)
+            ? "Try a light full-body session today: warm up for 5 minutes, train at a comfortable pace, stretch, and stop if pain appears."
+            : response.Text.Trim();
     }
 
     private async Task<NutritionResult> GetNutritionFromAI(string description)

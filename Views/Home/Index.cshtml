@@ -9,6 +9,7 @@
     string ProfileImageSrc = string.IsNullOrWhiteSpace(ProfileImagePath)
         ? DefaultAvatarSrc
         : ProfileImagePath;
+    bool isPremium = Context.Session.GetString("IsPremium") == "True";
 }
 
 <!DOCTYPE html>
@@ -39,9 +40,6 @@
             <a href="#" class="nav-link active" data-section="dashboard" onclick="event.preventDefault(); switchSection('dashboard')">
                 <i class="fas fa-th-large"></i> Dashboard
             </a>
-            <a href="#" class="nav-link" data-section="dailySummary" onclick="event.preventDefault(); switchSection('dailySummary')">
-                <i class="fas fa-chart-line"></i> Daily Summary
-            </a>
             <a href="#" class="nav-link" data-section="todayGoal" onclick="event.preventDefault(); switchSection('todayGoal')">
                 <i class="fas fa-bullseye"></i> Today's Goal
             </a>
@@ -56,9 +54,6 @@
             </a>
             <a href="#" class="nav-link" data-section="notes" onclick="event.preventDefault(); switchSection('notes')">
                 <i class="fas fa-sticky-note"></i> Notes
-            </a>
-            <a href="#" class="nav-link" data-section="quickStats" onclick="event.preventDefault(); switchSection('quickStats')">
-                <i class="fas fa-bolt"></i> Quick Stats
             </a>
             <a href="#" class="nav-link" data-section="moodTracker" onclick="event.preventDefault(); switchSection('moodTracker')">
                 <i class="fas fa-smile"></i> Mood Tracker
@@ -90,6 +85,12 @@
         
         <!-- Floating Header Widget -->
         <div class="top-header-widget">
+            @if (!isPremium)
+            {
+                <a href="#" class="btn-go-premium header-premium-cta" onclick="event.preventDefault(); upgradeToPremium()">
+                    <i class="fas fa-crown"></i> Go Premium
+                </a>
+            }
             <div class="notification-bell" onclick="alert('You are all caught up!')">
                 <i class="far fa-bell"></i>
                 <span class="notification-badge">2</span>
@@ -104,36 +105,7 @@
         <div id="dashboard" class="page-section active">
             <div class="page-header-block">
                 <h2>Dashboard Overview</h2>
-                <p>Welcome back, @FirstName! Here's how your nutrition is shaping up.</p>
-            </div>
-            
-            <div class="grid-card" style="min-height: auto; margin-bottom: 24px; padding: 28px;">
-                <h3 style="font-size: 18px; font-weight: 700; color: var(--primary); margin: 0 0 12px 0;">Welcome to Your Nutrition Tracker</h3>
-                <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
-                    Track your daily nutrition, log meals, count macros, and establish healthy habits. Select options from the left sidebar to access your profile:
-                </p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
-                    <div style="background-color: var(--bg-canvas); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
-                        <strong style="color: var(--primary); display: block; margin-bottom: 4px;"><i class="fas fa-chart-line" style="margin-right: 6px;"></i> Daily Summary</strong>
-                        <span style="font-size: 12px; color: var(--text-muted);">View calories, hydration, and daily macro progression.</span>
-                    </div>
-                    <div style="background-color: var(--bg-canvas); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
-                        <strong style="color: var(--primary); display: block; margin-bottom: 4px;"><i class="fas fa-plus-circle" style="margin-right: 6px;"></i> Add Food</strong>
-                        <span style="font-size: 12px; color: var(--text-muted);">Log your breakfast, lunch, dinner, or snacks.</span>
-                    </div>
-                    <div style="background-color: var(--bg-canvas); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
-                        <strong style="color: var(--primary); display: block; margin-bottom: 4px;"><i class="fas fa-chart-bar" style="margin-right: 6px;"></i> Progress Charts</strong>
-                        <span style="font-size: 12px; color: var(--text-muted);">Visualize caloric trends and macro breakdowns.</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Daily Summary Section -->
-        <div id="dailySummary" class="page-section">
-            <div class="page-header-block">
-                <h2>Daily Summary</h2>
-                <p>Here's how you're doing today. <i class="fas fa-heart footer-heart-icon"></i></p>
+                <p>Welcome back, @FirstName! Here's how your nutrition is shaping up. <i class="fas fa-heart footer-heart-icon"></i></p>
             </div>
 
             <!-- 4 Column Premium Cards Grid -->
@@ -320,30 +292,240 @@
                 <h2>Exercise</h2>
                 <p>Workouts matched to your goal.</p>
             </div>
-            
-            <div class="grid-card" style="min-height: auto; margin-bottom: 24px;">
-                <div class="exercise-hero" style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: center;">
-                    <div>
-                        <p id="exerciseGoalSummary" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">
-                            Workouts are matched to your current nutrition goal.
-                        </p>
-                        <div class="exercise-tabs" style="display: flex; gap: 8px;">
-                            <button type="button" class="btn-profile-outline active" data-exercise-goal="loss">Weight Loss</button>
-                            <button type="button" class="btn-profile-outline" data-exercise-goal="maintain">Maintain</button>
-                            <button type="button" class="btn-profile-outline" data-exercise-goal="gain">Gain Weight</button>
+
+            <!-- Exercise Timer Widget -->
+            <div class="grid-card" style="min-height: auto; margin-bottom: 24px; padding: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 42px; height: 42px; border-radius: 12px; background: var(--primary-light); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-stopwatch" style="color: var(--primary); font-size: 18px;"></i>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 15px; font-weight: 700; margin: 0;">Exercise Timer</h4>
+                            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Set a countdown for your workout</p>
                         </div>
                     </div>
-                    <img id="exerciseHeroImage" src="/excersize/maintain-weight.svg" style="max-height: 140px; object-fit: contain;" alt="Exercise plan">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <select id="exerciseTimerMinutes" style="padding: 8px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; font-weight: 600;">
+                            <option value="5">5 min</option>
+                            <option value="10">10 min</option>
+                            <option value="15">15 min</option>
+                            <option value="20" selected>20 min</option>
+                            <option value="25">25 min</option>
+                            <option value="30">30 min</option>
+                            <option value="45">45 min</option>
+                            <option value="60">60 min</option>
+                        </select>
+                        <span id="exerciseTimerDisplay" style="font-size: 28px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; min-width: 90px; text-align: center;">20:00</span>
+                        <button type="button" id="exerciseTimerStartBtn" class="btn-profile-outline" onclick="toggleExerciseTimer()" style="padding: 8px 18px;">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button type="button" class="btn-profile-outline" onclick="resetExerciseTimer()" style="padding: 8px 14px;">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="premium-card-grid" id="exerciseCards"></div>
+            <div class="grid-card @(isPremium ? "" : "premium-locked-section")" style="min-height: auto; margin-bottom: 24px;">
+                @if (!isPremium)
+                {
+                    <div class="premium-locked-overlay">
+                        <i class="fas fa-crown"></i>
+                        <h3>Premium Feature</h3>
+                        <p>Unlock curated workout videos tailored to your fitness goals.</p>
+                        <button class="btn-go-premium" onclick="upgradeToPremium()">Upgrade Now</button>
+                    </div>
+                }
+                <div class="@(isPremium ? "" : "blur-content")">
+                    <div class="exercise-hero" style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: center;">
+                        <div>
+                            <p id="exerciseGoalSummary" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">
+                                Workouts are matched to your current nutrition goal.
+                            </p>
+                            <div class="exercise-tabs" style="display: flex; gap: 8px;">
+                                <button type="button" class="btn-profile-outline active" data-exercise-goal="loss">Weight Loss</button>
+                                <button type="button" class="btn-profile-outline" data-exercise-goal="maintain">Maintain</button>
+                                <button type="button" class="btn-profile-outline" data-exercise-goal="gain">Gain Weight</button>
+                            </div>
+                        </div>
+                        <img id="exerciseHeroImage" src="/excersize/maintain-weight.svg" style="max-height: 140px; object-fit: contain;" alt="Exercise plan">
+                    </div>
 
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin: 24px 0 16px 0;">Videos</h3>
-            <div class="premium-card-grid" id="exerciseVideos"></div>
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px;">
-                Start light, warm up first, and stop if you feel pain, dizziness, or unusual shortness of breath.
-            </p>
+                    <!-- Warm-Up Section -->
+                    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin: 24px 0 12px 0;"><i class="fas fa-sun" style="color: #f59e0b; margin-right: 6px;"></i>Warm-Up</h3>
+                    <div class="premium-card-grid" id="exerciseWarmUp"></div>
+
+                    <!-- Main Workouts -->
+                    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin: 24px 0 12px 0;"><i class="fas fa-dumbbell" style="color: var(--primary); margin-right: 6px;"></i>Main Workouts</h3>
+                    <div class="premium-card-grid" id="exerciseCards"></div>
+
+                    <!-- Cooldown Section -->
+                    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin: 24px 0 12px 0;"><i class="fas fa-snowflake" style="color: #3b82f6; margin-right: 6px;"></i>Cool Down</h3>
+                    <div class="premium-card-grid" id="exerciseCoolDown"></div>
+
+                    <!-- Weekly Schedule -->
+                    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin: 24px 0 12px 0;"><i class="fas fa-calendar-week" style="color: var(--primary); margin-right: 6px;"></i>Weekly Schedule</h3>
+                    <div id="exerciseWeeklySchedule" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 24px;"></div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 24px 0;">
+                        <div class="grid-card" style="min-height: auto; padding: 18px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;"><i class="fas fa-user-check" style="color: var(--primary); margin-right: 6px;"></i>Plan Builder</h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+                                <input id="exerciseAge" type="number" min="12" max="90" placeholder="Age" style="padding: 10px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                <input id="exerciseWeight" type="number" min="30" max="250" placeholder="Weight kg" style="padding: 10px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                <input id="exerciseHeight" type="number" min="120" max="230" placeholder="Height cm" style="padding: 10px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                <select id="exerciseLevel" style="padding: 10px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                    <option>Beginner</option>
+                                    <option>Intermediate</option>
+                                    <option>Advanced</option>
+                                </select>
+                            </div>
+                            <select id="exerciseGoalSelect" style="width: 100%; margin-top: 10px; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                <option value="loss">Lose Weight</option>
+                                <option value="gain">Build Muscle / Gain Weight</option>
+                                <option value="maintain">Stay Fit / Improve Endurance</option>
+                            </select>
+                            <button type="button" class="btn-profile-outline" onclick="buildPersonalWorkoutPlan()" style="width: 100%; margin-top: 12px;"><i class="fas fa-wand-magic-sparkles"></i> Generate Plan</button>
+                        </div>
+
+                        <div class="grid-card" style="min-height: auto; padding: 18px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;"><i class="fas fa-fire" style="color: #ef4444; margin-right: 6px;"></i>Calories Burned</h3>
+                            <select id="burnExerciseType" style="width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                <option value="8.3">Running</option>
+                                <option value="6.8">Cycling</option>
+                                <option value="5.5">Strength Training</option>
+                                <option value="7">Swimming</option>
+                                <option value="3.8">Walking</option>
+                                <option value="8">HIIT</option>
+                            </select>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px;">
+                                <input id="burnMinutes" type="number" min="5" value="30" placeholder="Minutes" aria-label="Workout duration in minutes" style="width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                <input id="burnWeight" type="number" min="30" value="70" placeholder="Weight kg" aria-label="Body weight in kilograms" style="width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px;">
+                            </div>
+                            <button type="button" class="btn-profile-outline" onclick="calculateExerciseBurn()" style="width: 100%; margin-top: 12px;"><i class="fas fa-calculator"></i> Calculate</button>
+                            <div id="burnResult" style="margin-top: 12px; font-weight: 800; color: var(--primary); font-size: 24px;">0 kcal</div>
+                        </div>
+
+                        <div class="grid-card" style="min-height: auto; padding: 18px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;"><i class="fas fa-chart-line" style="color: var(--primary); margin-right: 6px;"></i>Workout Dashboard</h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
+                                <div><strong id="exerciseConsumed">0</strong><small style="display:block;color:var(--text-muted);">Consumed</small></div>
+                                <div><strong id="exerciseBurned">0</strong><small style="display:block;color:var(--text-muted);">Burned</small></div>
+                                <div><strong id="exerciseNet">0</strong><small style="display:block;color:var(--text-muted);">Net</small></div>
+                            </div>
+                            <div id="exerciseAchievements" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;"></div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div class="grid-card" style="min-height: auto; padding: 18px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;"><i class="fas fa-calendar-days" style="color: var(--primary); margin-right: 6px;"></i>Workout Calendar</h3>
+                            <div id="workoutCalendar" style="display:grid; grid-template-columns: repeat(7, 1fr); gap: 6px;"></div>
+                            <p id="workoutCalendarSummary" style="font-size: 13px; color: var(--text-muted); margin: 12px 0 0;"></p>
+                        </div>
+
+                        <div class="grid-card" style="min-height: auto; padding: 18px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;"><i class="fas fa-list-check" style="color: var(--primary); margin-right: 6px;"></i>Today & History</h3>
+                            <div id="todayWorkoutList"></div>
+                            <button type="button" class="btn-profile-outline" onclick="completeTodayWorkout()" style="width: 100%; margin-top: 12px;"><i class="fas fa-check"></i> Complete Today's Workout</button>
+                            <div id="workoutHistory" style="margin-top: 14px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid-card" style="min-height: auto; padding: 18px; margin-bottom: 24px;">
+                        <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:14px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin:0;"><i class="fas fa-magnifying-glass" style="color: var(--primary); margin-right: 6px;"></i>Exercise Library</h3>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <input id="exerciseSearch" type="search" placeholder="Search exercise" style="padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                <select id="exerciseFilter" style="padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 10px;">
+                                    <option value="all">All</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Home">Home</option>
+                                    <option value="Gym">Gym</option>
+                                    <option value="Chest">Chest</option>
+                                    <option value="Legs">Legs</option>
+                                    <option value="Cardio">Cardio</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="exerciseLibrary" class="premium-card-grid"></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div class="grid-card" style="min-height: auto; padding: 18px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;"><i class="fas fa-robot" style="color: var(--primary); margin-right: 6px;"></i>Workout Coach</h3>
+                            <textarea id="coachPrompt" rows="3" placeholder="Example: I have knee pain, only 20 minutes today." style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px;"></textarea>
+                            <button type="button" id="workoutCoachButton" class="btn-profile-outline" onclick="getWorkoutCoachAdvice()" style="width:100%; margin-top:10px;"><i class="fas fa-message"></i> Get Suggestion</button>
+                            <span id="workoutCoachLoader" style="display:none; font-size: 13px; color: var(--text-muted); margin-top: 10px;"><i class="fas fa-spinner fa-spin"></i> Getting workout suggestion...</span>
+                            <div id="coachAdvice" style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-top: 12px;"></div>
+                        </div>
+                        <div class="grid-card" style="min-height: auto; padding: 18px;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;"><i class="fas fa-apple-whole" style="color: var(--primary); margin-right: 6px;"></i>Workout Nutrition</h3>
+                            <div id="workoutMeals" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;"></div>
+                            <h4 style="font-size: 14px; font-weight: 700; margin: 14px 0 8px;">Daily Goals</h4>
+                            <div id="exerciseDailyGoals"></div>
+                        </div>
+                    </div>
+    
+                    <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin: 24px 0 8px 0;">Videos</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 16px 0;">Tap any card to open a guided in-page workout demo directly inside the website.</p>
+                    <div class="premium-card-grid" id="exerciseVideos"></div>
+                    <div class="premium-card-grid" id="exerciseGymResources"></div>
+                    <div id="exerciseVideoModal" class="exercise-video-modal" role="dialog" aria-modal="true" aria-label="Workout demo player" style="display:none;">
+                        <div class="exercise-video-modal-dialog">
+                            <div class="exercise-video-modal-head">
+                                <div>
+                                    <h4 id="exerciseVideoModalTitle" style="margin:0; font-size:18px;">Workout Demo</h4>
+                                    <p id="exerciseVideoModalNote" style="margin:4px 0 0; font-size:13px; color:var(--text-muted);">Follow the guided demo from inside the website.</p>
+                                </div>
+                                <button type="button" class="btn-profile-outline" onclick="closeExerciseVideoModal()"><i class="fas fa-xmark"></i></button>
+                            </div>
+                            <div id="exerciseVideoPlayer" class="exercise-video-player">
+                                <div class="exercise-video-screen">
+                                    <div class="exercise-video-coach">
+                                        <div class="exercise-video-head"></div>
+                                        <div class="exercise-video-body"></div>
+                                        <div class="exercise-video-arm arm-left"></div>
+                                        <div class="exercise-video-arm arm-right"></div>
+                                        <div class="exercise-video-leg leg-left"></div>
+                                        <div class="exercise-video-leg leg-right"></div>
+                                    </div>
+                                    <div class="exercise-video-timeline"></div>
+                                </div>
+                                <div class="exercise-video-controls">
+                                    <span><i class="fas fa-play"></i> In-page demo</span>
+                                    <span><i class="fas fa-dumbbell"></i> Guided form cues</span>
+                                </div>
+                                <div class="exercise-video-modal-extra">
+                                    <div id="exerciseVideoModalRelated" class="exercise-video-modal-section"></div>
+                                    <div id="exerciseVideoModalSupplements" class="exercise-video-modal-section"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="moreResourcesModal" class="exercise-popup-modal" role="dialog" aria-modal="true" aria-label="More gym and diet resources" style="display:none;">
+                        <div class="exercise-popup-dialog">
+                            <div class="more-resources-header">
+                                <div>
+                                    <h4 style="margin:0; font-size:18px;">Gym & Diet Resources</h4>
+                                    <p style="margin:4px 0 0; font-size:13px; color:var(--text-muted);">Search and browse a mixed list of workout essentials and nutrition helpers.</p>
+                                </div>
+                                <button type="button" class="btn-profile-outline" onclick="closeMoreResourcesModal()"><i class="fas fa-xmark"></i></button>
+                            </div>
+                            <div class="more-resources-search-row">
+                                <input id="moreResourcesSearch" type="search" placeholder="Search gym and diet items..." class="more-resources-search" oninput="filterMoreResources()" />
+                                <span class="more-resources-search-note">Type any keyword to filter.</span>
+                            </div>
+                            <div id="moreResourcesList" class="more-resources-list"></div>
+                        </div>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px;">
+                        Start light, warm up first, and stop if you feel pain, dizziness, or unusual shortness of breath.
+                    </p>
+                </div>
+            </div>
         </div>
 
         <!-- Checklist Section -->
@@ -401,26 +583,6 @@
                 <div style="display: flex; align-items: center; gap: 12px; margin-top: 16px;">
                     <button class="btn btn-success" id="analyzeFoodButton" onclick="analyzeFood()" style="background-color: var(--primary) !important; border-radius: 12px; font-weight: 700; padding: 12px 24px;">Analyze Food</button>
                     <span id="analyzeFoodLoader" style="display:none; font-size: 14px; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Analyzing...</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Stats Section -->
-        <div id="quickStats" class="page-section">
-            <div class="page-header-block">
-                <h2>Quick Stats</h2>
-                <p>Overview of current accomplishments.</p>
-            </div>
-            <div class="premium-card-grid">
-                <div class="grid-card" style="min-height: 160px; justify-content: center; text-align: center;">
-                    <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Calories Today</span>
-                    <strong style="font-size: 36px; color: var(--primary); display: block; margin: 8px 0;" id="dashboardCalories">0</strong>
-                    <span style="font-size: 12px; color: var(--text-muted);">kcal</span>
-                </div>
-                <div class="grid-card" style="min-height: 160px; justify-content: center; text-align: center;">
-                    <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Current Streak</span>
-                    <strong style="font-size: 36px; color: #ea580c; display: block; margin: 8px 0;" id="dashboardStreak">0</strong>
-                    <span style="font-size: 12px; color: var(--text-muted);">days 🔥</span>
                 </div>
             </div>
         </div>
@@ -550,6 +712,15 @@
             </div>
         </div>
 
+        <div id="profileImageZoomOverlay" class="profile-image-zoom-overlay" onclick="closeProfileImageZoom()">
+            <div class="profile-image-zoom-dialog" onclick="event.stopPropagation();">
+                <button type="button" class="profile-image-zoom-close" onclick="closeProfileImageZoom()" aria-label="Close preview">
+                    <i class="fas fa-times"></i>
+                </button>
+                <img id="profileImageZoomContent" src="@ProfileImageSrc" alt="Profile preview" onerror="this.onerror=null;this.src='@DefaultAvatarSrc';">
+            </div>
+        </div>
+
         <!-- Profile Section -->
         <div id="profile" class="page-section">
             <div class="page-header-block">
@@ -558,50 +729,83 @@
             </div>
 
             <!-- Profile Info Card -->
-            <div class="profile-main-card">
-                <div class="profile-card-header">
-                    <div class="profile-identity-block">
-                         <div class="profile-avatar-wrapper">
-                           <img id="profileAvatarImage" src="@ProfileImageSrc" class="profile-avatar-large" alt="User Avatar" title="Click to change photo" style="cursor:pointer;" onclick="document.getElementById('profileImageInput').click();" onerror="this.onerror=null;this.src='@DefaultAvatarSrc';">
-                           <input type="file" id="profileImageInput" accept="image/*" style="display:none;" onchange="uploadProfileImage(this.files && this.files[0] ? this.files[0] : null)">
-                           <div class="profile-avatar-actions" style="margin-top:8px; display:flex; gap:8px; justify-content:center;">
-                             <button type="button" class="btn-profile-outline" onclick="document.getElementById('profileImageInput').click();">Edit Photo</button>
-                             <button type="button" class="btn-profile-outline red" onclick="removeProfileImage();">Remove Photo</button>
-                           </div>
-                         </div>
-                        <div class="profile-identity-details">
-                            <h2>@Name</h2>
-                            <p>@Email</p>
-                            <div class="profile-badges-row">
-                                <span class="profile-badge green">
-                                    <i class="fas fa-bullseye"></i> Goal: <span id="goal" style="font-weight: 700; margin-left: 2px;">Weight Loss</span>
-                                </span>
-                                <span class="profile-badge grey">
-                                    <i class="fas fa-user"></i> Age <span id="Age" style="font-weight: 700; margin-left: 2px;">23</span>
-                                </span>
-                            </div>
+            <div class="profile-main-card" style="display: flex; gap: 32px; padding: 32px; align-items: flex-start; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom: 32px;">
+                <!-- Left: Avatar -->
+                <div class="profile-avatar-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <div style="background-color: #e9f0e6; border-radius: 50%; padding: 4px;">
+                        <img id="profileAvatarImage" src="@ProfileImageSrc" class="profile-avatar-large" alt="User Avatar" title="Click to zoom photo" style="cursor:pointer; width: 160px; height: 160px; border-radius: 50%; object-fit: cover; display: block;" onclick="openProfileImageZoom();" onerror="this.onerror=null;this.src='@DefaultAvatarSrc';">
+                    </div>
+                    <input type="file" id="profileImageInput" accept="image/*" style="display:none;" onchange="uploadProfileImage(this.files && this.files[0] ? this.files[0] : null)">
+                    <div class="profile-avatar-actions" style="display:flex; gap:12px; justify-content:center; width: 100%;">
+                        <button type="button" onclick="document.getElementById('profileImageInput').click();" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--primary); color: var(--primary); background: white; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s;">
+                            <i class="fas fa-camera"></i> Edit Photo
+                        </button>
+                        <button type="button" onclick="removeProfileImage();" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #f87171; color: #dc2626; background: white; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s;">
+                            <i class="far fa-trash-alt"></i> Remove Photo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Details -->
+                <div class="profile-identity-details" style="flex: 1; display: flex; flex-direction: column; border-left: 1px solid #f3f4f6; padding-left: 32px; align-self: stretch;">
+                    <!-- Top Row -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                        <h2 style="font-size: 26px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; letter-spacing: -0.5px;">@Name</h2>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <button type="button" onclick="toggleEditProfile()" style="padding: 8px 16px; border-radius: 6px; background: var(--primary); color: white; border: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 2px 6px rgba(15, 76, 58, 0.2);">
+                                <i class="fas fa-pencil-alt"></i> Edit Profile
+                            </button>
+                            <div style="width: 1px; height: 16px; background-color: #d1d5db;"></div>
+                            <form id="logoutForm" method="get" action="/User/Logout" style="margin: 0;">
+                                <button type="submit" style="background: none; border: none; color: var(--primary); font-weight: 600; font-size: 14px; cursor: pointer; padding: 0;">Logout</button>
+                            </form>
                         </div>
                     </div>
+                    
+                    <!-- Email Row -->
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #eef8f3; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                            <i class="far fa-envelope"></i>
+                        </div>
+                        <p style="margin: 0; color: #374151; font-size: 15px; font-weight: 500;">@Email</p>
+                    </div>
 
-                    <div class="profile-actions-block">
-                        <button type="button" onclick="toggleEditProfile()" class="btn-profile-outline">Edit Profile</button>
-                        <form id="logoutForm" method="get" action="/User/Logout" style="margin: 0;">
-                            <button type="submit" class="btn-profile-outline red">
-                                <i class="fas fa-sign-out-alt"></i> Logout
-                            </button>
-                        </form>
+                    <!-- Divider -->
+                    <hr style="border: none; border-top: 1px solid #f3f4f6; margin: 0 0 24px 0; width: 100%;">
+
+                    <!-- Cards Row -->
+                    <div style="display: flex; gap: 16px;">
+                        <div style="flex: 1; background-color: #f2f7f2; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 13px; color: var(--primary); font-weight: 600;">Goal</span>
+                                <span id="goal" style="font-size: 16px; color: #111827; font-weight: 600;">Weight Loss</span>
+                            </div>
+                        </div>
+
+                        <div style="flex: 1; background-color: #f2f7f2; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 13px; color: var(--primary); font-weight: 600;">Age</span>
+                                <span style="font-size: 16px; color: #111827; font-weight: 600;"><span id="Age">23</span> Years</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Stats Rows (Days Completed, Remaining, Streak) -->
-            <div class="profile-stats-grid">
+            <div class="profile-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                 <div class="profile-stat-card">
                     <div class="profile-stat-icon-box green">
                         <i class="far fa-calendar-check"></i>
                     </div>
                     <div class="profile-stat-text-box">
-                        <h4 id="profileDaysCompleted">12</h4>
+                        <h4 id="profileDaysCompleted">0</h4>
                         <p>Days Completed</p>
                     </div>
                 </div>
@@ -612,23 +816,33 @@
                             <i class="fas fa-hourglass-half"></i>
                         </div>
                         <div class="profile-stat-text-box">
-                            <h4 id="profileDaysRemaining">18</h4>
+                            <h4 id="profileDaysRemaining">30</h4>
                             <p>Days Remaining</p>
                         </div>
                     </div>
                     <!-- Small SVG Circular indicator -->
                     <svg width="36" height="36" viewBox="0 0 36 36" style="transform: rotate(-90deg);">
                         <circle cx="18" cy="18" r="16" fill="none" stroke="#eef8f3" stroke-width="3"></circle>
-                        <circle cx="18" cy="18" r="16" fill="none" stroke="#0f4c3a" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="60" id="profileRemainingCircleDash"></circle>
+                        <circle cx="18" cy="18" r="16" fill="none" stroke="#0f4c3a" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100" id="profileRemainingCircleDash"></circle>
                     </svg>
                 </div>
-
+                
+                <div class="profile-stat-card">
+                    <div class="profile-stat-icon-box" id="bmiIconBox" style="background-color: var(--primary-light); color: var(--primary);">
+                        <i class="fas fa-weight"></i>
+                    </div>
+                    <div class="profile-stat-text-box">
+                        <h4 id="profileBmiValue">0.0</h4>
+                        <p id="profileBmiCategory">BMI</p>
+                    </div>
+                </div>
+                
                 <div class="profile-stat-card">
                     <div class="profile-stat-icon-box orange">
                         <i class="fas fa-fire"></i>
                     </div>
                     <div class="profile-stat-text-box">
-                        <h4 id="streakTextprofile">263</h4>
+                        <h4 id="streakTextprofile">0</h4>
                         <p>Current Streak</p>
                     </div>
                 </div>
@@ -646,34 +860,82 @@
                 <p class="profile-goal-subtext">You're making great progress towards your goal!</p>
             </div>
 
-            <!-- Referral Friend Section -->
-            <div class="refer-grid">
-                <div class="refer-card">
-                    <div class="refer-left-icon">
-                        <i class="fas fa-gift"></i>
+            <!-- Referral Friend Section — Professional Redesign -->
+            <div class="referral-hero-section @(isPremium ? "" : "premium-locked-section")">
+                @if (!isPremium)
+                {
+                    <div class="premium-locked-overlay">
+                        <i class="fas fa-crown"></i>
+                        <h3>Premium Feature</h3>
+                        <p>Unlock the Rewards Program to invite friends and earn points for premium perks.</p>
+                        <button class="btn-go-premium" onclick="upgradeToPremium()">Upgrade Now</button>
                     </div>
-                    <div class="refer-content">
-                        <h3>Refer a Friend</h3>
-                        <p>Invite your friends to Nutrition Tracker and earn rewards when they sign up!</p>
-                        <div class="refer-points-pill">
-                            <i class="fas fa-gem"></i> Earn 100 points
+                }
+                <div class="@(isPremium ? "" : "blur-content")">
+                    <!-- Gradient Hero Banner -->
+                <div class="referral-hero-banner">
+                    <div class="referral-hero-left">
+                        <div class="referral-badge-pill">
+                            <i class="fas fa-gem"></i> Rewards Program
+                        </div>
+                        <h2 class="referral-hero-title">Share NutrInfo, Earn Together</h2>
+                        <p class="referral-hero-desc">Invite friends and earn <strong>100 points</strong> for every friend who joins. Points unlock premium features, meal plans, and more.</p>
+                        <div class="referral-steps-row">
+                            <div class="referral-step">
+                                <div class="referral-step-num">1</div>
+                                <span>Share your invite link</span>
+                            </div>
+                            <div class="referral-step-arrow"><i class="fas fa-chevron-right"></i></div>
+                            <div class="referral-step">
+                                <div class="referral-step-num">2</div>
+                                <span>Friend signs up</span>
+                            </div>
+                            <div class="referral-step-arrow"><i class="fas fa-chevron-right"></i></div>
+                            <div class="referral-step">
+                                <div class="referral-step-num">3</div>
+                                <span>You earn 100 points</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="referral-hero-right">
+                        <div class="referral-trophy-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="referral-points-display">
+                            <span class="referral-pts-number">100</span>
+                            <span class="referral-pts-label">Points per referral</span>
                         </div>
                     </div>
                 </div>
-                
-                <div class="invite-card">
-                    <h4>Enter your friend's email</h4>
-                    <div class="invite-input-group">
-                        <input type="email" id="referralEmailInput" placeholder="friend@example.com">
-                        <button type="button" class="btn-send-invite" onclick="sendReferralInvite()">Send Invite</button>
+
+                <!-- Invite Form Card -->
+                <div class="referral-invite-card">
+                    <div class="referral-invite-header">
+                        <div class="referral-invite-icon">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <div>
+                            <h4 class="referral-invite-title">Send an Invitation</h4>
+                            <p class="referral-invite-sub">Your friend will receive a personalised invite email from you.</p>
+                        </div>
                     </div>
+                    <div class="referral-form-row">
+                        <div class="referral-input-wrap">
+                            <i class="fas fa-envelope referral-input-icon"></i>
+                            <input type="email" id="referralEmailInput" class="referral-email-input" placeholder="Enter friend's email address">
+                        </div>
+                        <button type="button" class="btn-referral-send" onclick="sendReferralInvite()">
+                            <i class="fas fa-paper-plane"></i> Send Invite
+                        </button>
+                    </div>
+                    <p class="referral-privacy-note"><i class="fas fa-lock"></i> We'll never share your friend's email with third parties.</p>
                 </div>
             </div>
 
             <!-- Edit Profile Form (Initially Hidden) -->
             <div id="editProfileForm" class="edit-profile-box" style="display: none;">
                 <h3>Edit Your Profile</h3>
-                <form onsubmit="event.preventDefault(); saveProfileChanges();" class="edit-profile-form">
+                <form onsubmit="event.preventDefault(); saveProfileChanges();" class="edit-profile-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <div class="form-field">
                         <label for="editFirstName">First Name</label>
                         <input type="text" id="editFirstName" value="@FirstName" required>
@@ -684,9 +946,44 @@
                     </div>
                     <div class="form-field full-width">
                         <label for="editGoal">Goal</label>
-                        <input type="text" id="editGoal" value="Weight Loss" required>
+                        <select id="editGoal" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); font-size: 15px; color: var(--text-main); font-weight: 500;">
+                            <option value="Weight Loss">Weight Loss</option>
+                            <option value="Maintain">Maintain</option>
+                            <option value="Gain">Weight Gain</option>
+                        </select>
                     </div>
-                    <button type="submit" class="btn-save-changes">Save Changes</button>
+                    <div class="form-field">
+                        <label for="editWeight">Weight (kg)</label>
+                        <input type="number" step="0.1" id="editWeight">
+                    </div>
+                    <div class="form-field">
+                        <label for="editHeight">Height (cm)</label>
+                        <input type="number" step="0.1" id="editHeight">
+                    </div>
+                    <div class="form-field">
+                        <label for="editDiet">Diet Preference</label>
+                        <select id="editDiet" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); font-size: 15px; color: var(--text-main); font-weight: 500;">
+                            <option value="">Select Diet</option>
+                            <option value="Veg">Vegetarian</option>
+                            <option value="Non-Veg">Non-Vegetarian</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="editLifestyle">Lifestyle</label>
+                        <select id="editLifestyle" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); font-size: 15px; color: var(--text-main); font-weight: 500;">
+                            <option value="">Select Lifestyle</option>
+                            <option value="Sedentary">Sedentary</option>
+                            <option value="Active">Active</option>
+                            <option value="Hyperactive">Hyperactive</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="editSleep">Sleep (hours)</label>
+                        <input type="number" step="0.5" id="editSleep">
+                    </div>
+                    <div class="form-field full-width">
+                        <button type="submit" class="btn-save-changes">Save Changes</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -695,7 +992,49 @@
 
     <!-- SweetAlert and JS scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
+        const Email = '@Email';
+        const Name = '@Name';
+        window.Email = Email;
+        window.Name = Name;
+        window.FNSUserName = Name || 'Member';
+        window.FNSUserEmail = Email || 'guest@example.com';
+        window.FNSUserDiet = 'Non-Veg';
+        window.FNSUserGender = 'all';
+        window.FNSUserLogoUrl = '@Url.Content("~/Logo/logo1.png")';
+
+        // Go Premium function
+        window.upgradeToPremium = async function () {
+            try {
+                // Show loading state
+                Swal.fire({
+                    title: 'Upgrading to Premium...',
+                    text: 'Please wait while we unlock your features.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                const resp = await fetch('/User/UpgradeUser', { method: 'POST' });
+                const data = await resp.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Welcome to Premium! 👑',
+                        text: 'Your new features have been unlocked.',
+                        confirmButtonColor: '#0f4c3a'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Upgrade Failed', text: data.message });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server.' });
+            }
+        };
+
         // Global function - defined outside DOMContentLoaded so inline onclick handlers can access it immediately
         function switchSection(sectionId) {
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -712,9 +1051,8 @@
         }
 
         document.addEventListener("DOMContentLoaded", async () => {
-            const Name = '@Name';
-const Email = '@Email';
-            
+                window.FNSUserName = '@Name';
+                window.FNSUserEmail = '@Email';
             // Set today's date in Daily Summary section
             const todayDateElement = document.getElementById('todayDate');
             const todayDayNameElement = document.getElementById('todayDayName');
@@ -749,15 +1087,44 @@ const Email = '@Email';
                 loadDailyNutrition();
             };
 
-            // Referral trigger
-            window.sendReferralInvite = function () {
+            // Referral trigger — sends a real email via backend
+            window.sendReferralInvite = async function () {
                 const input = document.getElementById('referralEmailInput');
-                if (!input || !input.value.trim()) {
-                    Swal.fire('Input Error', 'Please enter a valid email address.', 'info');
+                const friendEmail = input ? input.value.trim() : '';
+                if (!friendEmail) {
+                    Swal.fire({ icon: 'info', title: 'Email Required', text: 'Please enter your friend\'s email address.' });
                     return;
                 }
-                Swal.fire('Invitation Sent!', `We sent a referral email to ${input.value}.`, 'success');
-                input.value = '';
+
+                // Show loading state
+                const btn = document.querySelector('.btn-referral-send');
+                const originalHtml = btn ? btn.innerHTML : '';
+                if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...'; btn.disabled = true; }
+
+                try {
+                    const resp = await fetch('/User/SendReferralInvite', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ friendEmail })
+                    });
+                    const data = await resp.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Invitation Sent! 🎉',
+                            text: `A personalised invite email has been sent to ${friendEmail}.`,
+                            confirmButtonColor: '#0f4c3a'
+                        });
+                        if (input) input.value = '';
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Could Not Send', text: data.message || 'Something went wrong.', confirmButtonColor: '#0f4c3a' });
+                    }
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server. Please try again.', confirmButtonColor: '#0f4c3a' });
+                } finally {
+                    if (btn) { btn.innerHTML = originalHtml; btn.disabled = false; }
+                }
             };
 
             // Update stats cards
@@ -789,6 +1156,30 @@ const Email = '@Email';
                 }
                 // existing rendering logic continues...
             }
+
+            window.openProfileImageZoom = function () {
+                const overlay = document.getElementById('profileImageZoomOverlay');
+                const zoomImage = document.getElementById('profileImageZoomContent');
+                const avatar = document.getElementById('profileAvatarImage');
+                if (!overlay || !zoomImage || !avatar) return;
+
+                zoomImage.src = avatar.src;
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.closeProfileImageZoom = function () {
+                const overlay = document.getElementById('profileImageZoomOverlay');
+                if (!overlay) return;
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeProfileImageZoom();
+                }
+            });
 
             // --- New Functions for Profile Image Options ---
             window.showProfileImageOptions = function() {
@@ -986,13 +1377,30 @@ const Email = '@Email';
                 loss: {
                     title: 'Weight Loss',
                     image: '/excersize/weight-loss.svg',
-                    summary: 'Preserve lean mass & maximize deficit with dynamic cardio intervals and lifting.',
+                    summary: 'Preserve lean mass and maximize the calorie deficit with dynamic cardio intervals paired with progressive resistance training.',
+                    planDuration: '4 Weeks',
+                    sessionsPerWeek: '6 Training + 1 Mobility',
+                    focus: 'Strength & Recovery',
+                    dailyTarget: '1,670 kcal',
                     items: [
                         { title: 'Brisk Walk Intervals', image: '/excersize/weight-loss.svg', text: 'Alternate 3 minutes brisk walking with 1 minute easy walking for 30 minutes.', tags: ['Cardio', '4x/week', 'Beginner'] },
                         { title: 'Full Body Circuit', image: '/excersize/weight-loss.svg', text: 'Perform squats, push-ups, and step-ups in quick rounds with steady rest.', tags: ['Strength', '3x/week', 'Moderate'] }
                     ],
                     videos: [
-                        { title: 'NHS Aerobic Workouts', url: 'https://www.nhs.uk/live-well/exercise/aerobic-exercise-videos/' }
+                        { title: '20 Minute Fat Burning HIIT', channel: 'AI Motion Coach', duration: '20 min', accent: '#f97316', note: 'High-energy cardio with guided intervals.', related: ['Jump Squats', 'Mountain Climbers', 'Burpees'], supplements: ['Whey Protein', 'BCAA', 'Electrolyte Mix'] },
+                        { title: 'Full Body Weight Loss Workout', channel: 'AI Motion Coach', duration: '30 min', accent: '#10b981', note: 'Balanced strength and mobility flow.', related: ['Kettlebell Swings', 'Push-Up Variations', 'Walking Lunges'], supplements: ['Lean Protein Isolate', 'Omega-3s', 'Green Superfood'], products: ['Adjustable Dumbbells', 'Resistance Bands', 'Gym Towel'] },
+                        { title: 'Beginner Cardio for Fat Loss', channel: 'AI Motion Coach', duration: '25 min', accent: '#3b82f6', note: 'Gentle pacing with steady tempo cues.', related: ['Walking Intervals', 'Stationary Bike', 'Jump Rope'], supplements: ['Pre-Workout Energy', 'Protein Bars', 'Recovery Gummies'] },
+                        { title: 'AI Demo: 10-Min Core Burn', channel: 'NutrInfo Demo', duration: '10 min', accent: '#8b5cf6', note: 'Short core-focused circuit for home use.', related: ['Plank Variations', 'Russian Twists', 'Dead Bugs'], supplements: ['Micellar Casein', 'Magnesium', 'Zinc'] }
+                    ],
+                    products: [
+                        { name: 'Adjustable Dumbbell Set', desc: 'Perfect for full-body resistance training at the gym or home.', price: '₹7,199', image: 'https://images.unsplash.com/photo-1597776461687-15cab6a8e12e?auto=format&fit=crop&w=800&q=80', dietType: ['all'], gender: ['all'], amazonLink: 'https://www.amazon.in/dp/B08S7WH9KT', flipkartLink: 'https://www.flipkart.com/adjustable-dumbbell-set/p/itm1234567890' },
+                        { name: 'High-Grip Resistance Bands', desc: 'Use for warm-ups, mobility, and strength-assisted movements.', price: '₹1,299', image: 'https://images.unsplash.com/photo-1598966735124-95af0a3a9b38?auto=format&fit=crop&w=800&q=80', dietType: ['all'], gender: ['all'], amazonLink: 'https://www.amazon.in/dp/B089K5NDW3', flipkartLink: 'https://www.flipkart.com/resistance-bands/p/itm0987654321' }
+                    ],
+                    dietChart: [
+                        { meal: 'Breakfast', items: 'Oats with berries, paneer or tofu, Greek yogurt', calories: '420', protein: 28, carbs: 52, fat: 11 },
+                        { meal: 'Lunch', items: 'Grilled tofu, brown rice, steamed vegetables', calories: '520', protein: 34, carbs: 62, fat: 14 },
+                        { meal: 'Snack', items: 'Protein shake and a handful of almonds', calories: '260', protein: 26, carbs: 18, fat: 10 },
+                        { meal: 'Dinner', items: 'Tofu, quinoa, mixed greens', calories: '470', protein: 31, carbs: 48, fat: 13 }
                     ]
                 },
                 maintain: {
@@ -1004,7 +1412,20 @@ const Email = '@Email';
                         { title: 'Strength Basics', image: '/excersize/maintain-weight.svg', text: 'Perform squat, push, pull, hinge, and brace patterns with weights.', tags: ['Strength', '2x/week', 'Moderate'] }
                     ],
                     videos: [
-                        { title: 'NHS Pilates & Yoga', url: 'https://www.nhs.uk/live-well/exercise/pilates-and-yoga-exercise-videos/' }
+                        { title: '30-Min Total Body Strength', channel: 'AI Motion Coach', duration: '30 min', accent: '#06b6d4', note: 'Full-body strength with recovery focus.', related: ['Goblet Squats', 'Bent Over Rows', 'Plank Holds'], supplements: ['Creatine', 'Casein Protein', 'Joint Support'] },
+                        { title: 'Yoga for Balance & Core', channel: 'AI Motion Coach', duration: '32 min', accent: '#14b8a6', note: 'Flow-based balance and posture routine.', related: ['Pilates Roll-Ups', 'Dead Bug', 'Side Plank'], supplements: ['Collagen', 'Omega-3s', 'Magnesium'] },
+                        { title: 'Low Impact Cardio Workout', channel: 'AI Motion Coach', duration: '28 min', accent: '#84cc16', note: 'Easy rhythm for active recovery.', related: ['Brisk Walk', 'Stationary Bike', 'Low-Impact Step'], supplements: ['Hydration Electrolytes', 'Protein Smoothie', 'Recovery Tea'] },
+                        { title: 'AI Demo: Mobility Flow', channel: 'NutrInfo Demo', duration: '12 min', accent: '#ec4899', note: 'Gentle mobility and stretching routine.', related: ['Hip Openers', 'Thoracic Rotations', 'Leg Swings'], supplements: ['Fish Oil', 'Turmeric', 'Vitamin D'] }
+                    ],
+                    products: [
+                        { name: 'Yoga Mat', desc: 'High-density mat for stretching, mobility, and recovery sessions.', price: '₹1,050', image: 'https://images.unsplash.com/photo-1518611012118-f69da0ee4a03?auto=format&fit=crop&w=800&q=80', dietType: ['all'], gender: ['all'], amazonLink: 'https://www.amazon.in/dp/B08DW7V7TR', flipkartLink: 'https://www.flipkart.com/yoga-mat/p/itmabcdefghij' },
+                        { name: 'Foam Roller', desc: 'Use for pre- and post-workout muscle release and flexibility.', price: '₹1,399', image: 'https://images.unsplash.com/photo-1549576490-b0b4831ef60a?auto=format&fit=crop&w=800&q=80', dietType: ['all'], gender: ['all'], amazonLink: 'https://www.amazon.in/dp/B07Q5D1ZR1', flipkartLink: 'https://www.flipkart.com/foam-roller/p/itmklmnopqrst' }
+                    ],
+                    dietChart: [
+                        { meal: 'Breakfast', items: 'Smoothie bowl with spinach, banana, protein powder', calories: '380' },
+                        { meal: 'Lunch', items: 'Turkey wrap, mixed salad, hummus', calories: '450' },
+                        { meal: 'Snack', items: 'Greek yogurt and walnuts', calories: '240' },
+                        { meal: 'Dinner', items: 'Grilled shrimp, sweet potato, asparagus', calories: '430' }
                     ]
                 },
                 gain: {
@@ -1016,10 +1437,921 @@ const Email = '@Email';
                         { title: 'Hypertrophy Sets', image: '/excersize/gain-weight.svg', text: 'Split routines targeting specific muscle groups with 3-5 sets of 8-12 reps.', tags: ['Muscle', '3x/week', 'Hypertrophy'] }
                     ],
                     videos: [
-                        { title: 'ACE Exercise Library', url: 'https://www.acefitness.org/resources/everyone/exercise-library/' }
+                        { title: 'Full Body Muscle Building (Beginner)', channel: 'AI Motion Coach', duration: '35 min', accent: '#f59e0b', note: 'Accessible strength plan for beginners.', related: ['Leg Press', 'Chest Press', 'Lat Pulldown'], supplements: ['Mass Gainer', 'Whey Protein', 'BCAAs'] },
+                        { title: 'Hypertrophy Push Day Workout', channel: 'AI Motion Coach', duration: '30 min', accent: '#ef4444', note: 'Upper-body hypertrophy circuit.', related: ['Incline Bench', 'Dumbbell Flyes', 'Tricep Dips'], supplements: ['Creatine', 'Protein Blend', 'Pre-Workout'] },
+                        { title: 'Mass Building Upper Body', channel: 'AI Motion Coach', duration: '22 min', accent: '#a855f7', note: 'Focused upper-body growth routine.', related: ['Seated Rows', 'Overhead Press', 'Hammer Curls'], supplements: ['Lean Mass Powder', 'Fish Oil', 'Vitamin B12'] },
+                        { title: 'AI Demo: Strength Starter', channel: 'NutrInfo Demo', duration: '15 min', accent: '#0f766e', note: 'Simple starter session with form cues.', related: ['Bodyweight Squats', 'Push-Ups', 'Bird Dogs'], supplements: ['Protein Shake', 'Electrolytes', 'Recovery Bar'] }
+                    ],
+                    products: [
+                        { name: 'Gym Gloves', desc: 'Protect your hands during weight training and improve grip.', price: '₹499', image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80', dietType: ['all'], gender: ['male','all'], amazonLink: 'https://www.amazon.in/dp/B08XYF5JLP', flipkartLink: 'https://www.flipkart.com/gym-gloves/p/itm9876543210' },
+                        { name: 'Shaker Bottle', desc: 'Convenient bottle for protein shakes and intra-workout hydration.', price: '₹299', image: 'https://images.unsplash.com/photo-1599058917212-8d72a7669d3e?auto=format&fit=crop&w=800&q=80', dietType: ['all'], gender: ['all'], amazonLink: 'https://www.amazon.in/dp/B07YJEY5YN', flipkartLink: 'https://www.flipkart.com/shaker-bottle/p/itmabcdefgh12' }
+                    ],
+                    dietChart: [
+                        { meal: 'Breakfast', items: 'Egg omelet, avocado toast, berries', calories: '490' },
+                        { meal: 'Lunch', items: 'Steak, quinoa, roasted vegetables', calories: '620' },
+                        { meal: 'Snack', items: 'Peanut butter toast and banana', calories: '330' },
+                        { meal: 'Dinner', items: 'Chicken stir-fry with brown rice', calories: '560' }
                     ]
                 }
             };
+
+            const moreResources = [
+                { name: 'Premium Gym Towel', desc: 'Quick-dry microfiber towel for sweat management during training.', price: '₹349', image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07G1H9L4K', flipkartLink: 'https://www.flipkart.com/gym-towel/p/itm7e92a3eb59a09' },
+                { name: 'Adjustable Kettlebell Set', desc: 'Space-saving kettlebell kit for swings, presses, and strength circuits.', price: '₹2,999', image: 'https://images.unsplash.com/photo-1599058917212-8d72a7669d3e?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B0874K48YW', flipkartLink: 'https://www.flipkart.com/kettlebell-set/p/itm1f74379bdb092' },
+                { name: 'Smart Water Bottle', desc: 'Hydration tracker bottle with time markers for workout recovery.', price: '₹799', image: 'https://images.unsplash.com/photo-1526401485004-0ecadaeaf2ef?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B08V3T9D4Z', flipkartLink: 'https://www.flipkart.com/smart-water-bottle/p/itm3f2642221a2d6' },
+                { name: 'Plant Protein Powder', desc: 'Vegetarian protein blend with pea, rice and soya isolates.', price: '₹1,899', image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B08L5VBPZG', flipkartLink: 'https://www.flipkart.com/plant-protein/p/itm4f1a7a2b0988c' },
+                { name: 'Meal Prep Containers', desc: 'Bento-style meal prep boxes for balanced daily portions.', price: '₹999', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07GFQ1G9R', flipkartLink: 'https://www.flipkart.com/meal-prep-containers/p/itm7365c5beeab78' },
+                { name: 'Nutrition Guide Book', desc: 'Indian vegetarian meal planning and macro-friendly recipes.', price: '₹549', image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B08P7XCD5D', flipkartLink: 'https://www.flipkart.com/nutrition-guide-book/p/itm5f2ebb98d5baf' },
+                { name: 'Resistance Band Set', desc: 'Versatile resistance bands for mobility, strength and warm-ups.', price: '₹1,299', image: 'https://images.unsplash.com/photo-1598966735124-95af0a3a9b38?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B089K5NDW3', flipkartLink: 'https://www.flipkart.com/resistance-bands/p/itm0987654321' },
+                { name: 'Yoga Block & Strap', desc: 'Essential yoga props for better alignment and recovery stretches.', price: '₹849', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07D9FR7J1', flipkartLink: 'https://www.flipkart.com/yoga-block/p/itm467894651' },
+                { name: 'Digital Meal Scale', desc: 'Accurate portion control scale for nutrition tracking and meal prep.', price: '₹1,499', image: 'https://images.unsplash.com/photo-1512756290464-0a71f7917bc1?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07ND5ZMVH', flipkartLink: 'https://www.flipkart.com/digital-kitchen-scale/p/itm47a73a7c' },
+                { name: 'Recovery Massage Ball', desc: 'Targeted massage ball for knots, calves, and plantar fascia relief.', price: '₹459', image: 'https://images.unsplash.com/photo-1555898569-6ecb0efb04a1?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07L9M1S2W', flipkartLink: 'https://www.flipkart.com/massage-ball/p/itm852b7a8a' },
+                { name: 'Lean Mass Protein Blend', desc: 'High-protein supplement for muscle recovery and energy.', price: '₹2,050', image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B08F1FJ7L5', flipkartLink: 'https://www.flipkart.com/lean-protein/p/itm834d9223' },
+                { name: 'Healthy Snack Box', desc: 'Curated mix of nuts, seeds and dried fruit for smart snacking.', price: '₹649', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B08M8Q7ZSQ', flipkartLink: 'https://www.flipkart.com/healthy-snack-box/p/itm7765f1d482' },
+                { name: 'Smart Jump Rope', desc: 'Digital jump rope tracker for cardio, steps, and calorie counting.', price: '₹999', image: 'https://images.unsplash.com/photo-1518611012118-f69da0ee4a03?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07Z51FJ2T', flipkartLink: 'https://www.flipkart.com/smart-jump-rope/p/itm9ac5f7e1' },
+                { name: 'Fitness Tracker Band', desc: 'Wearable tracker for steps, heart rate, and sleep recovery.', price: '₹2,199', image: 'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07Y5L2BD3', flipkartLink: 'https://www.flipkart.com/fitness-band/p/itm129d797f' },
+                { name: 'Insulated Water Flask', desc: 'Keeps cold drinks chilled for gym sessions and outdoor workouts.', price: '₹749', image: 'https://images.unsplash.com/photo-1554284126-5bee45f6e5db?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B087D8YVJ1', flipkartLink: 'https://www.flipkart.com/insulated-flask/p/itm9c7b7f3' },
+                { name: 'Vegan Energy Bars', desc: 'Plant-based bars with oats, nuts, and protein for quick fuel.', price: '₹499', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07P8GL1X5', flipkartLink: 'https://www.flipkart.com/vegan-energy-bars/p/itm7d5e6a1' },
+                { name: 'Air Fryer Meal Maker', desc: 'Compact air fryer ideal for healthy roasted meals and snacks.', price: '₹4,299', image: 'https://images.unsplash.com/photo-1524594154903-6175c2e3ea03?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B08Q7P1G8X', flipkartLink: 'https://www.flipkart.com/air-fryer/p/itm12a3c4df' },
+                { name: 'Sprouted Multigrain Flour', desc: 'Nutrient-dense flour for healthy Indian rotis and baked dishes.', price: '₹599', image: 'https://images.unsplash.com/photo-1597742559517-72eebfa39ec2?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B07X5Y2D3N', flipkartLink: 'https://www.flipkart.com/sprouted-flour/p/itm9d8f2b4' },
+                { name: 'Protein Smoothie Blender', desc: 'High-speed blender for shakes, smoothies and superfood blends.', price: '₹3,199', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B08LG2XYBL', flipkartLink: 'https://www.flipkart.com/smoothie-blender/p/itm3a7c5d1' },
+                { name: 'Healthy Meal Prep Book', desc: 'Indian meal prep cookbook for balanced gym nutrition and weekly planning.', price: '₹549', image: 'https://images.unsplash.com/photo-1514516870929-83ed7b09f9ae?auto=format&fit=crop&w=800&q=80', amazonLink: 'https://www.amazon.in/dp/B08T6N8BD9', flipkartLink: 'https://www.flipkart.com/meal-prep-cookbook/p/itm2f9c6b5c' }
+            ];
+
+            let currentExercisePlan = null;
+            const exerciseStoreKey = `fnsExercise:${Email || 'guest'}`;
+            const exerciseState = JSON.parse(localStorage.getItem(exerciseStoreKey) || '{"completed":{},"history":[],"burned":0,"planGoal":"maintain"}');
+            const exerciseLibraryItems = [
+                { name: 'Push-up', level: 'Beginner', place: 'Home', muscle: 'Chest', kcal: 7, duration: '10 min', media: '/excersize/maintain-weight.svg', steps: ['Keep back straight', 'Lower chest with control', 'Push upward'], mistakes: 'Do not let hips sag.' },
+                { name: 'Bodyweight Squat', level: 'Beginner', place: 'Home', muscle: 'Legs', kcal: 6, duration: '12 min', media: '/excersize/gain-weight.svg', steps: ['Feet shoulder-width', 'Sit hips back', 'Stand tall'], mistakes: 'Keep knees aligned with toes.' },
+                { name: 'Running', level: 'Intermediate', place: 'Home', muscle: 'Cardio', kcal: 11, duration: '30 min', media: '/excersize/weight-loss.svg', steps: ['Start easy', 'Hold steady pace', 'Cool down'], mistakes: 'Avoid sudden speed jumps.' },
+                { name: 'Dumbbell Row', level: 'Intermediate', place: 'Gym', muscle: 'Back', kcal: 5, duration: '15 min', media: '/excersize/gain-weight.svg', steps: ['Brace core', 'Pull elbow back', 'Lower slowly'], mistakes: 'Do not twist the torso.' },
+                { name: 'Cycling', level: 'Beginner', place: 'Home', muscle: 'Cardio', kcal: 8, duration: '25 min', media: '/excersize/maintain-weight.svg', steps: ['Adjust seat', 'Pedal smoothly', 'Keep cadence steady'], mistakes: 'Avoid locked knees.' },
+                { name: 'Plank', level: 'Beginner', place: 'Home', muscle: 'Abs', kcal: 4, duration: '8 min', media: '/excersize/maintain-weight.svg', steps: ['Elbows below shoulders', 'Brace abs', 'Breathe steadily'], mistakes: 'Do not arch lower back.' }
+            ];
+
+            const weeklyTemplates = {
+                loss: ['Running + HIIT', 'Upper Body Strength', 'Cardio Walk', 'Lower Body Circuit', 'Cycling', 'Full Body Burn', 'Mobility Rest'],
+                maintain: ['Steady Cardio', 'Strength Basics', 'Yoga + Core', 'Walk 8000 Steps', 'Full Body Strength', 'Cycling', 'Stretch Rest'],
+                gain: ['Push Hypertrophy', 'Leg Strength', 'Pull Hypertrophy', 'Active Recovery', 'Full Body Heavy', 'Arms + Core', 'Rest + Protein']
+            };
+
+            function saveExerciseState() {
+                localStorage.setItem(exerciseStoreKey, JSON.stringify(exerciseState));
+            }
+
+            function renderSmallTask(containerId, items) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                container.innerHTML = items.map(item => `
+                    <div class="grid-card" style="min-height:auto; padding:14px;">
+                        <h4 style="font-size:14px; font-weight:700; margin:0 0 6px;">${item.title}</h4>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">${item.text}</p>
+                    </div>
+                `).join('');
+            }
+
+            function renderWeeklySchedule(goalKey) {
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const schedule = weeklyTemplates[goalKey] || weeklyTemplates.maintain;
+                const box = document.getElementById('exerciseWeeklySchedule');
+                if (!box) return;
+                box.innerHTML = days.map((day, i) => `
+                    <div style="border:1px solid var(--border-color); border-radius:10px; padding:10px; background:#fff;">
+                        <strong style="display:block; font-size:13px;">${day}</strong>
+                        <span style="font-size:12px; color:var(--text-muted);">${schedule[i]}</span>
+                    </div>
+                `).join('');
+                renderTodayWorkout(goalKey);
+            }
+
+            function renderWorkoutCalendar() {
+                const cal = document.getElementById('workoutCalendar');
+                if (!cal) return;
+                const now = new Date();
+                const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                let completed = 0;
+                cal.innerHTML = '';
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const key = `${now.getFullYear()}-${now.getMonth() + 1}-${day}`;
+                    const done = !!exerciseState.completed[key];
+                    if (done) completed++;
+                    cal.insertAdjacentHTML('beforeend', `<button type="button" onclick="toggleWorkoutDay('${key}')" style="border:1px solid var(--border-color); border-radius:8px; min-height:34px; background:${done ? 'var(--primary-light)' : '#fff'}; color:${done ? 'var(--primary)' : 'var(--text-main)'}; font-weight:700;">${done ? '✓' : day}</button>`);
+                }
+                const summary = document.getElementById('workoutCalendarSummary');
+                if (summary) summary.textContent = `Completed: ${completed}/${daysInMonth} workouts this month`;
+                renderAchievements(completed);
+            }
+
+            window.toggleWorkoutDay = function (key) {
+                exerciseState.completed[key] = !exerciseState.completed[key];
+                saveExerciseState();
+                renderWorkoutCalendar();
+            };
+
+            function renderTodayWorkout(goalKey) {
+                const box = document.getElementById('todayWorkoutList');
+                if (!box) return;
+                const todayIndex = (new Date().getDay() + 6) % 7;
+                const title = (weeklyTemplates[goalKey] || weeklyTemplates.maintain)[todayIndex];
+                box.innerHTML = `<strong style="display:block; margin-bottom:6px;">${title}</strong><span style="font-size:13px; color:var(--text-muted);">Timer ready: 45 sec work, 20 sec rest. Add warm-up and cool down.</span>`;
+            }
+
+            window.completeTodayWorkout = function () {
+                const now = new Date();
+                const key = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+                exerciseState.completed[key] = true;
+                exerciseState.history.unshift({ date: now.toLocaleDateString(), workout: 'Workout completed', calories: exerciseState.lastBurn || 250 });
+                exerciseState.history = exerciseState.history.slice(0, 5);
+                exerciseState.burned = (exerciseState.burned || 0) + (exerciseState.lastBurn || 250);
+                saveExerciseState();
+                renderExerciseTracking();
+            };
+
+            function renderExerciseTracking() {
+                renderWorkoutCalendar();
+                const history = document.getElementById('workoutHistory');
+                if (history) {
+                    history.innerHTML = (exerciseState.history || []).map(h => `<div style="border-top:1px solid var(--border-color); padding:8px 0; font-size:13px;"><strong>${h.date}</strong> ${h.workout}<span style="float:right; color:var(--primary); font-weight:700;">${h.calories} kcal</span></div>`).join('') || '<span style="font-size:13px;color:var(--text-muted);">No workouts logged yet.</span>';
+                }
+                const consumed = Number(document.getElementById('dashboardCalories')?.textContent || 0);
+                document.getElementById('exerciseConsumed').textContent = consumed;
+                document.getElementById('exerciseBurned').textContent = Math.round(exerciseState.burned || 0);
+                document.getElementById('exerciseNet').textContent = Math.max(0, consumed - Math.round(exerciseState.burned || 0));
+            }
+
+            function renderAchievements(monthCompleted) {
+                const box = document.getElementById('exerciseAchievements');
+                if (!box) return;
+                const count = exerciseState.history?.length || 0;
+                const badges = [];
+                if (count >= 1) badges.push('First Workout');
+                if (monthCompleted >= 7) badges.push('7 Day Streak');
+                if ((exerciseState.burned || 0) >= 1000) badges.push('1000 kcal Burned');
+                box.innerHTML = badges.map(b => `<span style="font-size:11px; font-weight:700; background:#fff7ed; color:#c2410c; border-radius:20px; padding:6px 10px;">${b}</span>`).join('') || '<span style="font-size:13px;color:var(--text-muted);">Badges unlock as you train.</span>';
+            }
+
+            window.calculateExerciseBurn = function () {
+                const met = Number(document.getElementById('burnExerciseType')?.value || 5);
+                const minutes = Number(document.getElementById('burnMinutes')?.value || 30);
+                const weight = Number(document.getElementById('burnWeight')?.value || 70);
+                const kcal = Math.round((met * 3.5 * weight / 200) * minutes);
+                exerciseState.lastBurn = kcal;
+                saveExerciseState();
+                const result = document.getElementById('burnResult');
+                if (result) result.textContent = `${kcal} kcal`;
+            };
+
+            window.buildPersonalWorkoutPlan = function () {
+                const goal = document.getElementById('exerciseGoalSelect')?.value || 'maintain';
+                exerciseState.planGoal = goal;
+                saveExerciseState();
+                renderExercisePlan(goal);
+            };
+
+            function escapeHtml(value) {
+                return (value || '').replace(/[&<>"']/g, char => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[char]));
+            }
+
+            function formatCoachRecommendation(text) {
+                const sectionLabels = ['Avoid', 'Recommended', 'Mini Plan', 'Nutrition Tip'];
+                const cleaned = (text || '')
+                    .replace(/\*\*/g, '')
+                    .replace(/\r/g, '')
+                    .replace(/\s+(Avoid|Recommended|Mini Plan|Nutrition Tip):/g, '\n$1:')
+                    .trim();
+
+                if (!cleaned) return '<p style="margin:0;">No recommendation returned. Try adding more details.</p>';
+
+                const sections = [];
+                const pattern = /(Avoid|Recommended|Mini Plan|Nutrition Tip):([\s\S]*?)(?=\n(?:Avoid|Recommended|Mini Plan|Nutrition Tip):|$)/g;
+                let match;
+                while ((match = pattern.exec(cleaned)) !== null) {
+                    const title = match[1];
+                    const body = match[2].trim();
+                    if (!body) continue;
+                    const bullets = body
+                        .split(/\n+|(?<=\.)\s+(?=[A-Z0-9-])/)
+                        .map(line => line.replace(/^[-\d.]+\s*/, '').trim())
+                        .filter(Boolean)
+                        .slice(0, 5);
+
+                    sections.push(`
+                        <div style="padding: 12px 0; border-top: 1px solid var(--border-color);">
+                            <h4 style="font-size: 14px; color: var(--text-main); font-weight: 800; margin: 0 0 8px;">${escapeHtml(title)}</h4>
+                            <ul style="padding-left: 18px; margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.55;">
+                                ${bullets.map(item => `<li style="margin-bottom: 5px;">${escapeHtml(item)}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `);
+                }
+
+                if (sections.length > 0) return sections.join('');
+
+                return `<p style="white-space: pre-line; margin: 0; color: var(--text-muted);">${escapeHtml(cleaned)}</p>`;
+            }
+
+            function renderExerciseLibrary() {
+                const search = (document.getElementById('exerciseSearch')?.value || '').toLowerCase();
+                const filter = document.getElementById('exerciseFilter')?.value || 'all';
+                const box = document.getElementById('exerciseLibrary');
+                if (!box) return;
+                const filtered = exerciseLibraryItems.filter(item => {
+                    const matchesSearch = item.name.toLowerCase().includes(search) || item.muscle.toLowerCase().includes(search);
+                    const matchesFilter = filter === 'all' || [item.level, item.place, item.muscle].includes(filter);
+                    return matchesSearch && matchesFilter;
+                });
+                box.innerHTML = filtered.map(item => `
+                    <div class="grid-card" style="min-height:auto; padding:16px;">
+                        <img src="${item.media}" alt="${item.name}" style="height:82px; width:100%; object-fit:contain; margin-bottom:8px;">
+                        <h4 style="font-size:15px; font-weight:700; margin:0 0 4px;">${item.name}</h4>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0 0 8px;">${item.level} · ${item.place} · ${item.muscle} · ${item.kcal} kcal/min</p>
+                        <ol style="font-size:12px; color:var(--text-muted); padding-left:18px; margin-bottom:8px;">${item.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+                        <strong style="font-size:12px;">Common mistake:</strong> <span style="font-size:12px; color:var(--text-muted);">${item.mistakes}</span>
+                    </div>
+                `).join('');
+            }
+
+            window.getWorkoutCoachAdvice = async function () {
+                const prompt = document.getElementById('coachPrompt')?.value?.trim() || '';
+                const adviceBox = document.getElementById('coachAdvice');
+                const btn = document.getElementById('workoutCoachButton');
+                const loader = document.getElementById('workoutCoachLoader');
+
+                if (!prompt) {
+                    Swal.fire('Input Error', 'Please describe what you need help with today.', 'info');
+                    return;
+                }
+
+                if (adviceBox) adviceBox.textContent = 'Getting workout suggestion...';
+                if (btn) btn.disabled = true;
+                if (loader) loader.style.display = 'inline-block';
+
+                try {
+                    const response = await fetch('/api/nutrition/workout-coach', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt,
+                            goal: document.getElementById('exerciseGoalSelect')?.selectedOptions?.[0]?.textContent || document.getElementById('goal')?.textContent || '',
+                            fitnessLevel: document.getElementById('exerciseLevel')?.value || '',
+                            age: Number(document.getElementById('exerciseAge')?.value || 0),
+                            weight: Number(document.getElementById('exerciseWeight')?.value || document.getElementById('burnWeight')?.value || 0),
+                            height: Number(document.getElementById('exerciseHeight')?.value || 0)
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Workout coach request failed.');
+                    const data = await response.json();
+                    if (adviceBox) adviceBox.innerHTML = formatCoachRecommendation(data.recommendation);
+                } catch (err) {
+                    console.error(err);
+                    if (adviceBox) adviceBox.textContent = 'Could not get a workout suggestion right now. Please try again.';
+                    Swal.fire('Error', 'Failed to get workout suggestion. Try again.', 'error');
+                } finally {
+                    if (loader) loader.style.display = 'none';
+                    if (btn) btn.disabled = false;
+                }
+            };
+
+            function renderWorkoutMeals(goalKey) {
+                const box = document.getElementById('workoutMeals');
+                if (!box) return;
+                const protein = goalKey === 'gain' ? 'Paneer, eggs, chicken, dal, or protein shake after training.' : 'Curd, eggs, dal, tofu, or lean protein after training.';
+                box.innerHTML = `<strong>Before:</strong> Banana, oats, or peanut butter toast.<br><strong>After:</strong> ${protein}`;
+                const goals = document.getElementById('exerciseDailyGoals');
+                if (goals) goals.innerHTML = ['Walk 8000 steps', 'Burn 450 kcal', 'Drink 3L water', 'Stretch 10 min'].map(g => `<label style="display:block; font-size:13px; margin:6px 0;"><input type="checkbox"> ${g}</label>`).join('');
+            }
+
+            async function loadImageDataUrl(src) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) return reject(new Error('Canvas not supported'));
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL('image/png'));
+                    };
+                    img.onerror = () => reject(new Error('Failed to load image: ' + src));
+                    img.src = src;
+                });
+            }
+
+            window.downloadDietPlanPdf = async function () {
+                try {
+                    const jsPDF = window.jspdf?.jsPDF;
+                    if (!jsPDF) {
+                        Swal.fire({ icon: 'error', title: 'PDF Error', text: 'PDF library not loaded.' });
+                        return;
+                    }
+
+                    const userName = window.FNSUserName || 'Member';
+                    const userEmail = window.FNSUserEmail || 'Not available';
+                    const planGoalKey = exerciseState.planGoal || 'maintain';
+                    const plan = currentExercisePlan || exercisePlans[planGoalKey];
+                    const planTitle = plan?.title || 'Fitness Plan';
+                    const planSummary = plan?.summary || '';
+                    const dietRows = plan?.dietChart || [];
+                    const dietPreference = window.FNSUserDiet || 'Non-Veg';
+                    const genderPreference = window.FNSUserGender || 'all';
+                    const nutritionNote = getGenderFriendlyNote(genderPreference);
+                    const weeklySchedule = weeklyTemplates[planGoalKey] || weeklyTemplates.maintain;
+                    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    const monthlyPlanLines = [
+                        'Complete at least 4 training sessions every week to maintain momentum.',
+                        'Include 2 strength-focused days and 2 recovery or mobility days each week.',
+                        'Aim for 12 to 16 workout sessions per month based on your fitness goal.',
+                        'Track progress weekly and adjust intensity according to your energy levels.'
+                    ];
+                    const currentYear = new Date().getFullYear();
+                    const currentMonth = new Date().getMonth() + 1;
+                    const todayDay = new Date().getDate();
+                    const weekCounts = [0, 0, 0, 0];
+                    Object.entries(exerciseState.completed || {}).forEach(([key, value]) => {
+                        if (!value) return;
+                        const parts = key.split('-').map(Number);
+                        if (parts.length !== 3) return;
+                        const [year, month, day] = parts;
+                        if (year === currentYear && month === currentMonth) {
+                            const weekIndex = Math.min(3, Math.floor((day - 1) / 7));
+                            weekCounts[weekIndex] += 1;
+                        }
+                    });
+                    const currentWeekIndex = Math.min(3, Math.floor((todayDay - 1) / 7));
+                    const currentWeekSessions = weekCounts[currentWeekIndex] || 0;
+                    const totalMonthSessions = weekCounts.reduce((sum, count) => sum + count, 0);
+                    const todayRowIndex = (new Date().getDay() + 6) % 7;
+                    const sessionBreakdown = [
+                        { day: 'Monday', focus: 'Running + HIIT intervals', intensity: 'High', duration: '45 min' },
+                        { day: 'Tuesday', focus: 'Upper body strength — push / pull', intensity: 'Moderate-High', duration: '50 min' },
+                        { day: 'Wednesday', focus: 'Steady cardio walk', intensity: 'Low', duration: '40 min' },
+                        { day: 'Thursday', focus: 'Lower body circuit — legs & glutes', intensity: 'High', duration: '50 min' },
+                        { day: 'Friday', focus: 'Cycling endurance', intensity: 'Moderate', duration: '45 min' },
+                        { day: 'Saturday', focus: 'Full body burn — compound sets', intensity: 'High', duration: '55 min' },
+                        { day: 'Sunday', focus: 'Mobility, stretching, active recovery', intensity: 'Recovery', duration: '30 min' }
+                    ];
+                    const monthlyProgress = [
+                        { week: 'Week 1', target: 'Build routine & baseline conditioning', sessions: '4 - 5', status: `${weekCounts[0]} sessions` },
+                        { week: 'Week 2', target: 'Increase strength volume by 10%', sessions: '4 - 5', status: `${weekCounts[1]} sessions` },
+                        { week: 'Week 3', target: 'Add cardio intervals, hold calories', sessions: '4 - 5', status: `${weekCounts[2]} sessions` },
+                        { week: 'Week 4', target: 'Deload, reassess weight & measurements', sessions: '3 - 4', status: `${weekCounts[3]} sessions` }
+                    ];
+                    const heroImageUrl = 'https://images.unsplash.com/photo-1490645935967-10de6ba17061.avif?auto=format&fit=crop&w=1400&q=80';
+
+                    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+                    const margin = 40;
+                    let y = margin;
+
+                    // Page 1 header
+                    doc.setFontSize(20);
+                    doc.setTextColor('#111827');
+                    if (window.FNSUserLogoUrl) {
+                        try {
+                            const logoData = await loadImageDataUrl(window.FNSUserLogoUrl);
+                            doc.addImage(logoData, 'PNG', margin, y, 48, 48);
+                        } catch (innerError) {
+                            console.warn('PDF logo load failed:', innerError);
+                        }
+                    }
+                    doc.setFontSize(20);
+                    doc.setFont('helvetica', 'bold');
+                    const titleX = margin + 60;
+                    doc.text('NutrInfo', titleX, y + 14);
+                    const titleWidth = doc.getTextWidth('NutrInfo');
+                    doc.setTextColor('#dc2626');
+                    doc.text('by FNS', titleX + titleWidth + 16, y + 14);
+                    doc.setFontSize(9);
+                    doc.setTextColor('#6b7280');
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('PERSONALIZED FITNESS & NUTRITION REPORT', titleX, y + 32);
+
+                    const rightX = 420;
+                    doc.setFontSize(12);
+                    doc.setTextColor('#111827');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Diet Plan Summary', rightX, y + 4, { align: 'left' });
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor('#6b7280');
+                    doc.text(`Report Date: ${new Date().toLocaleDateString('en-IN')}`, rightX, y + 22, { align: 'left' });
+                    doc.text(`Ref: FNS-${new Date().getFullYear()}-${String(new Date().getDate()).padStart(2,'0')}${String(new Date().getMonth()+1).padStart(2,'0')}-BS`, rightX, y + 36, { align: 'left' });
+
+                    y += 60;
+                    doc.setDrawColor('#dc2626');
+                    doc.setLineWidth(2);
+                    doc.line(margin, y, 560, y);
+                    y += 24;
+
+                    // Hero banner
+                    let heroHeight = 120;
+                    try {
+                        const heroData = await loadImageDataUrl(heroImageUrl);
+                        doc.roundedRect(margin, y - 10, 520, heroHeight, 14, 14, 'F');
+                        doc.addImage(heroData, 'PNG', margin, y - 10, 520, heroHeight);
+                        doc.setFillColor('#000000');
+                        doc.setGState(new doc.GState({ opacity: 0.4 }));
+                        doc.rect(margin, y - 10, 520, heroHeight, 'F');
+                        doc.setGState(new doc.GState({ opacity: 1 }));
+                    } catch (innerError) {
+                        doc.setFillColor('#111827');
+                        doc.roundedRect(margin, y - 10, 520, heroHeight, 14, 14, 'F');
+                    }
+                    doc.setFontSize(18);
+                    doc.setTextColor('#ffffff');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Hello, ${userName}`, margin + 20, y + 45);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Your ${dietPreference.toLowerCase()} ${planTitle.toLowerCase()} programme — built around strength, lean muscle and recovery support.`, margin + 20, y + 65, { maxWidth: 440 });
+                    y += heroHeight + 24;
+
+                    // Profile cards
+                    const cardHeight = 56;
+                    const cardWidth = 116;
+                    const profileFields = [
+                        { label: 'Goal', value: planTitle },
+                        { label: 'Preference', value: dietPreference },
+                        { label: 'Gender', value: genderPreference },
+                        { label: 'Daily Target', value: plan.dailyTarget || '—' }
+                    ];
+                    profileFields.forEach((field, index) => {
+                        const x = margin + index * (cardWidth + 10);
+                        doc.setFillColor('#ffffff');
+                        doc.setDrawColor('#e5e7eb');
+                        doc.roundedRect(x, y, cardWidth, cardHeight, 10, 10, 'FD');
+                        doc.setFontSize(8);
+                        doc.setTextColor('#6b7280');
+                        doc.text(field.label.toUpperCase(), x + 10, y + 16);
+                        doc.setFontSize(12);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor('#111827');
+                        doc.text(field.value, x + 10, y + 34);
+                    });
+                    y += cardHeight + 24;
+
+                    // Plan Information table
+                    doc.setFontSize(12);
+                    doc.setTextColor('#0f172a');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Plan Information', margin, y);
+                    y += 18;
+                    doc.setFillColor('#ffffff');
+                    doc.setDrawColor('#e5e7eb');
+                    doc.roundedRect(margin, y, 520, 110, 12, 12, 'FD');
+                    const infoX1 = margin + 10;
+                    const infoX2 = margin + 260;
+                    const rowGap = 26;
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor('#374151');
+                    doc.text('Full Name', infoX1, y + 24);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(userName, infoX1, y + 40);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Plan Duration', infoX2, y + 24);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(plan.planDuration || '4 Weeks', infoX2, y + 40);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Email', infoX1, y + 24 + rowGap);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(userEmail, infoX1, y + 40 + rowGap);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Sessions / Week', infoX2, y + 24 + rowGap);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(plan.sessionsPerWeek || '6 Training + 1 Mobility', infoX2, y + 40 + rowGap);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Issued On', infoX1, y + 24 + rowGap * 2);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(new Date().toLocaleDateString('en-IN'), infoX1, y + 40 + rowGap * 2);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Focus', infoX2, y + 24 + rowGap * 2);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(plan.focus || 'Strength & Recovery', infoX2, y + 40 + rowGap * 2);
+                    y += 130;
+
+                    const summaryLine = `Summary — ${planSummary}`;
+                    doc.setFontSize(10);
+                    doc.setTextColor('#374151');
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(doc.splitTextToSize(summaryLine, 520), margin, y);
+                    y += 24;
+
+                    // Daily diet chart table
+                    doc.setFontSize(12);
+                    doc.setTextColor('#111827');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Daily Diet Chart', margin, y);
+                    y += 18;
+
+                    const chartWidths = [80, 260, 110, 70];
+                    const chartX = margin;
+                    const headerHeight = 26;
+                    doc.setFillColor('#111827');
+                    doc.rect(chartX, y - 8, chartWidths.reduce((a, b) => a + b, 0), headerHeight, 'F');
+                    doc.setFontSize(9);
+                    doc.setTextColor('#ffffff');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('MEAL', chartX + 8, y + 10);
+                    doc.text('FOODS', chartX + chartWidths[0] + 8, y + 10);
+                    doc.text('MACROS', chartX + chartWidths[0] + chartWidths[1] + 8, y + 10);
+                    doc.text('ENERGY', chartX + chartWidths[0] + chartWidths[1] + chartWidths[2] + 8, y + 10);
+                    y += headerHeight;
+
+                    let totals = { protein: 0, carbs: 0, fat: 0, calories: 0 };
+                    dietRows.forEach((row, index) => {
+                        const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
+                        doc.setFillColor(bgColor);
+                        doc.rect(chartX, y - 8, chartWidths.reduce((a, b) => a + b, 0), 34, 'F');
+                        doc.setFontSize(9);
+                        doc.setTextColor('#111827');
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(row.meal, chartX + 8, y + 12);
+                        doc.setFont('helvetica', 'normal');
+                        const foods = getPreferredDietText(row.items, dietPreference);
+                        const wrappedFoods = doc.splitTextToSize(foods, chartWidths[1] - 12);
+                        doc.text(wrappedFoods, chartX + chartWidths[0] + 8, y + 12);
+                        const macrosText = `P ${row.protein}g  C ${row.carbs}g  F ${row.fat}g`;
+                        doc.text(macrosText, chartX + chartWidths[0] + chartWidths[1] + 8, y + 12);
+                        doc.text(`${row.calories} kcal`, chartX + chartWidths[0] + chartWidths[1] + chartWidths[2] + 8, y + 12);
+                        totals.protein += row.protein || 0;
+                        totals.carbs += row.carbs || 0;
+                        totals.fat += row.fat || 0;
+                        totals.calories += Number(row.calories || 0);
+                        y += 34;
+                        if (y > 700) {
+                            doc.addPage();
+                            y = margin;
+                        }
+                    });
+
+                    // daily total row
+                    doc.setFillColor('#fee2e2');
+                    doc.rect(chartX, y - 8, chartWidths.reduce((a, b) => a + b, 0), 34, 'F');
+                    doc.setFontSize(10);
+                    doc.setTextColor('#b91c1c');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Daily Total', chartX + 8, y + 12);
+                    doc.text(`${dietRows.length} meals · ${dietPreference.toLowerCase()}`, chartX + chartWidths[0] + 8, y + 12);
+                    doc.text(`P ${totals.protein} · C ${totals.carbs} · F ${totals.fat}`, chartX + chartWidths[0] + chartWidths[1] + 8, y + 12);
+                    doc.text(`${totals.calories} kcal`, chartX + chartWidths[0] + chartWidths[1] + chartWidths[2] + 8, y + 12);
+                    y += 44;
+
+                    // Macro progress bars
+                    const macroBoxes = [
+                        { label: 'PROTEIN', value: totals.protein, percent: 28 },
+                        { label: 'CARBS', value: totals.carbs, percent: 46 },
+                        { label: 'FATS', value: totals.fat, percent: 26 }
+                    ];
+                    const macroBoxWidth = 160;
+                    macroBoxes.forEach((box, index) => {
+                        const x = margin + index * (macroBoxWidth + 10);
+                        doc.setFillColor('#ffffff');
+                        doc.setDrawColor('#e5e7eb');
+                        doc.roundedRect(x, y - 4, macroBoxWidth, 48, 10, 10, 'FD');
+                        doc.setFontSize(8);
+                        doc.setTextColor('#6b7280');
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(box.label, x + 10, y + 10);
+                        doc.setFontSize(14);
+                        doc.setTextColor('#111827');
+                        doc.text(`${box.value}g`, x + 10, y + 28);
+                        doc.setFillColor('#e5e7eb');
+                        doc.rect(x + 10, y + 34, macroBoxWidth - 20, 8, 'F');
+                        doc.setFillColor('#ef4444');
+                        doc.rect(x + 10, y + 34, (macroBoxWidth - 20) * (box.percent / 100), 8, 'F');
+                        doc.setFontSize(8);
+                        doc.setTextColor('#6b7280');
+                        doc.text(`${box.percent}%`, x + macroBoxWidth - 30, y + 42);
+                    });
+
+                    // Footer page 1
+                    doc.setFontSize(8);
+                    doc.setTextColor('#9ca3af');
+                    doc.text('NutrInfo by FNS · Personalized Fitness & Nutrition Report', margin, 820);
+                    doc.text('Page 1 of 2', 520, 820, { align: 'right' });
+
+                    doc.addPage();
+                    y = margin;
+
+                    // Page 2 title
+                    if (window.FNSUserLogoUrl) {
+                        try {
+                            const logoData = await loadImageDataUrl(window.FNSUserLogoUrl);
+                            doc.addImage(logoData, 'PNG', margin, y, 42, 42);
+                        } catch (innerError) {
+                            console.warn('PDF logo load failed:', innerError);
+                        }
+                    }
+                    doc.setFontSize(20);
+                    doc.setTextColor('#111827');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Training Schedule', margin + 50, y + 14);
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor('#6b7280');
+                    doc.text('WEEKLY & MONTHLY PROGRAMME', margin + 50, y + 32);
+
+                    const page2RightX = 560 - 10;
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor('#dc2626');
+                    doc.text(userName, page2RightX, y + 14, { align: 'right' });
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor('#6b7280');
+                    doc.text(`Goal: ${planTitle} · ${dietPreference}`, page2RightX, y + 28, { align: 'right' });
+
+                    y += 50;
+                    doc.setLineWidth(2);
+                    doc.setDrawColor('#dc2626');
+                    doc.line(margin, y, 560, y);
+                    y += 24;
+
+                    // Weekly Basic Plan cards
+                    const dayBoxWidth = 72;
+                    weeklySchedule.forEach((item, index) => {
+                        const x = margin + index * (dayBoxWidth + 6);
+                        const isSunday = index === 6;
+                        doc.setFillColor(isSunday ? '#dc2626' : '#111827');
+                        doc.roundedRect(x, y - 2, dayBoxWidth, 48, 10, 10, 'F');
+                        doc.setFontSize(8);
+                        doc.setTextColor('#ffffff');
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(weekDays[index].toUpperCase(), x + 8, y + 12);
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(doc.splitTextToSize(item, dayBoxWidth - 12), x + 8, y + 26);
+                    });
+                    y += 70;
+
+                    // Session Breakdown table
+                    doc.setFontSize(12);
+                    doc.setTextColor('#111827');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Session Breakdown', margin, y);
+                    y += 18;
+                    const tableX = margin;
+                    const tableWidths = [90, 240, 90, 90];
+                    const rowHeight2 = 24;
+                    doc.setFillColor('#111827');
+                    doc.rect(tableX, y - 8, tableWidths.reduce((a, b) => a + b, 0), rowHeight2, 'F');
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor('#ffffff');
+                    doc.text('DAY', tableX + 8, y + 10);
+                    doc.text('FOCUS', tableX + tableWidths[0] + 8, y + 10);
+                    doc.text('INTENSITY', tableX + tableWidths[0] + tableWidths[1] + 8, y + 10);
+                    doc.text('DURATION', tableX + tableWidths[0] + tableWidths[1] + tableWidths[2] + 8, y + 10);
+                    y += rowHeight2;
+
+                    sessionBreakdown.forEach((row, index) => {
+                        const isToday = index === todayRowIndex;
+                        if (isToday) {
+                            doc.setFillColor('#fef3c7');
+                            doc.rect(tableX, y - 8, tableWidths.reduce((a, b) => a + b, 0), rowHeight2, 'F');
+                            doc.setDrawColor('#fbbf24');
+                            doc.rect(tableX, y - 8, tableWidths.reduce((a, b) => a + b, 0), rowHeight2, 'S');
+                        } else {
+                            doc.setFillColor(index % 2 === 0 ? '#ffffff' : '#f8fafc');
+                            doc.rect(tableX, y - 8, tableWidths.reduce((a, b) => a + b, 0), rowHeight2, 'F');
+                        }
+                        doc.setFontSize(9);
+                        doc.setTextColor('#111827');
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(row.day, tableX + 8, y + 10);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(doc.splitTextToSize(row.focus, tableWidths[1] - 12), tableX + tableWidths[0] + 8, y + 10);
+                        doc.text(row.intensity, tableX + tableWidths[0] + tableWidths[1] + 8, y + 10);
+                        doc.text(row.duration, tableX + tableWidths[0] + tableWidths[1] + tableWidths[2] + 8, y + 10);
+                        y += rowHeight2;
+                        if (y > 700) {
+                            doc.addPage();
+                            y = margin;
+                        }
+                    });
+
+                    doc.setFillColor('#fee2e2');
+                    doc.rect(tableX, y - 8, tableWidths.reduce((a, b) => a + b, 0), rowHeight2, 'F');
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor('#b91c1c');
+                    doc.text('Weekly Total', tableX + 8, y + 10);
+                    doc.text(`${currentWeekSessions} completed`, tableX + tableWidths[0] + 8, y + 10);
+                    doc.text(`${totalMonthSessions} total`, tableX + tableWidths[0] + tableWidths[1] + 8, y + 10);
+                    doc.text('5 h 15 min', tableX + tableWidths[0] + tableWidths[1] + tableWidths[2] + 8, y + 10);
+                    y += rowHeight2 + 20;
+
+                    // Monthly Basic Plan
+                    doc.setFontSize(12);
+                    doc.setTextColor('#111827');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Monthly Basic Plan', margin, y);
+                    y += 18;
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor('#374151');
+                    monthlyPlanLines.forEach(line => {
+                        doc.text(` ${line}`, margin, y, { maxWidth: 520 });
+                        y += 16;
+                    });
+                    y += 10;
+
+                    // Monthly Progress Tracker
+                    doc.setFontSize(12);
+                    doc.setTextColor('#111827');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Monthly Progress Tracker', margin, y);
+                    y += 18;
+                    const trackerWidths = [80, 260, 100, 80];
+                    doc.setFillColor('#111827');
+                    doc.rect(tableX, y - 8, trackerWidths.reduce((a, b) => a + b, 0), rowHeight2, 'F');
+                    doc.setTextColor('#ffffff');
+                    doc.setFontSize(9);
+                    doc.text('WEEK', tableX + 8, y + 10);
+                    doc.text('TARGET', tableX + trackerWidths[0] + 8, y + 10);
+                    doc.text('SESSIONS', tableX + trackerWidths[0] + trackerWidths[1] + 8, y + 10);
+                    doc.text('STATUS', tableX + trackerWidths[0] + trackerWidths[1] + trackerWidths[2] + 8, y + 10);
+                    y += rowHeight2;
+                    monthlyProgress.forEach((row, index) => {
+                        doc.setFillColor(index % 2 === 0 ? '#ffffff' : '#f8fafc');
+                        doc.rect(tableX, y - 8, trackerWidths.reduce((a, b) => a + b, 0), rowHeight2, 'F');
+                        doc.setFontSize(9);
+                        doc.setTextColor('#111827');
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(row.week, tableX + 8, y + 10);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(doc.splitTextToSize(row.target, trackerWidths[1] - 12), tableX + trackerWidths[0] + 8, y + 10);
+                        doc.text(row.sessions, tableX + trackerWidths[0] + trackerWidths[1] + 8, y + 10);
+                        doc.text(row.status, tableX + trackerWidths[0] + trackerWidths[1] + trackerWidths[2] + 8, y + 10);
+                        y += rowHeight2;
+                        if (y > 720) {
+                            doc.addPage();
+                            y = margin;
+                        }
+                    });
+                    y += 16;
+
+                    doc.setFillColor('#fef2f2');
+                    doc.setDrawColor('#fecaca');
+                    doc.roundedRect(margin, y, 520, 90, 12, 12, 'FD');
+                    doc.setFontSize(12);
+                    doc.setTextColor('#b91c1c');
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Important', margin + 10, y + 20);
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor('#374151');
+                    const noteText = 'Warm up before every training session, stay hydrated throughout the day, and consult a specialist if any discomfort occurs. This personalized report is intended for guidance only and does not replace professional medical advice.';
+                    doc.text(doc.splitTextToSize(noteText, 500), margin + 10, y + 38);
+                    y += 110;
+
+                    doc.setFontSize(8);
+                    doc.setTextColor('#9ca3af');
+                    doc.text('NutrInfo by FNS · bhargavsharma1212@gmail.com', margin, 820);
+                    doc.text('Page 2 of 2', 520, 820, { align: 'right' });
+
+                    doc.save('NutrInfo_FNS_Diet_Plan.pdf');
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire({ icon: 'error', title: 'PDF Error', text: 'Unable to create the diet plan PDF. Please refresh and try again.' });
+                }
+            }
+
+            function normalizeDietPreference(value) {
+                if (!value) return 'non-veg';
+                const normalized = value.toString().trim().toLowerCase();
+                if (['veg', 'vegetarian', 'veg.'].includes(normalized)) return 'vegetarian';
+                return 'non-veg';
+            }
+
+            function getPreferredDietText(text, dietPreference) {
+                const preference = normalizeDietPreference(dietPreference);
+                if (preference !== 'vegetarian') return text;
+                return text
+                    .replace(/\b(grilled chicken|chicken stir-fry|grilled shrimp|chicken|salmon|shrimp|turkey|steak)\b/gi, matched => {
+                        const map = {
+                            'chicken': 'paneer',
+                            'grilled chicken': 'grilled tofu',
+                            'chicken stir-fry': 'paneer stir-fry',
+                            'salmon': 'tofu',
+                            'grilled shrimp': 'grilled tofu',
+                            'shrimp': 'paneer',
+                            'turkey': 'paneer',
+                            'steak': 'soya steak'
+                        };
+                        return map[matched.toLowerCase()] || matched;
+                    })
+                    .replace(/\b(egg whites|eggs?)\b/gi, 'paneer or tofu');
+            }
+
+            function getGenderFriendlyNote(gender) {
+                const key = (gender || 'all').toString().toLowerCase();
+                if (key === 'female') return 'Balanced energy, recovery, and hormone-friendly nutrition.';
+                if (key === 'male') return 'Strength, lean muscle, and recovery support.';
+                return 'Nutrition and training tuned to your profile.';
+            }
+
+            function filterProductsByPreference(products) {
+                const dietPreference = normalizeDietPreference(window.FNSUserDiet);
+                const genderPref = (window.FNSUserGender || 'all').toString().toLowerCase();
+                return (products || []).filter(product => {
+                    const dietTypes = Array.isArray(product.dietType) ? product.dietType.map(t => t.toString().toLowerCase()) : ['all'];
+                    const genderTypes = Array.isArray(product.gender) ? product.gender.map(g => g.toString().toLowerCase()) : ['all'];
+
+                    if (!dietTypes.includes('all')) {
+                        if (dietPreference === 'vegetarian' && !dietTypes.includes('vegetarian')) return false;
+                        if (dietPreference !== 'vegetarian' && !dietTypes.includes('all')) return false;
+                    }
+                    if (!genderTypes.includes('all')) {
+                        if (genderPref !== 'all' && !genderTypes.includes(genderPref)) return false;
+                    }
+                    return true;
+                });
+            }
+
+            function renderGymResources(goalKey) {
+                const box = document.getElementById('exerciseGymResources');
+                if (!box || !currentExercisePlan) return;
+                const dietRows = (currentExercisePlan.dietChart || []).map(row => {
+                    const items = getPreferredDietText(row.items, window.FNSUserDiet);
+                    return `
+                    <tr>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">${escapeHtml(row.meal)}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">${escapeHtml(items)}</td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align:right;">${escapeHtml(row.calories)}</td>
+                    </tr>
+                `;
+                }).join('');
+
+                const preferredProducts = filterProductsByPreference(currentExercisePlan.products || []);
+                const products = preferredProducts.length ? preferredProducts : (currentExercisePlan.products || []);
+                const genderKey = (window.FNSUserGender || 'all').toString().toLowerCase();
+                const profileNote = `Personalized for ${escapeHtml(window.FNSUserDiet || 'Balanced')} ${genderKey === 'female' ? 'female' : genderKey === 'male' ? 'male' : 'member'}.`;
+
+                const productCards = products.map(product => `
+                    <div class="exercise-resource-card">
+                        ${product.image ? `<div style="overflow:hidden; border-radius:16px; margin:-16px -16px 12px;"><img src="${product.image}" alt="${escapeHtml(product.name)}" style="width:100%; height:140px; object-fit:cover;"></div>` : ''}
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                                <h4 style="font-size:14px; font-weight:700; margin:0;">${escapeHtml(product.name)}</h4>
+                                ${Array.isArray(product.dietType) && product.dietType.map(dt => dt.toString().toLowerCase()).includes('vegetarian') ? `<span class="product-badge">Vegetarian-Friendly</span>` : ''}
+                            </div>
+                            <p style="font-size:12px; color:var(--text-muted); margin:0 0 8px;">${escapeHtml(product.desc)}</p>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <span style="font-weight:700; color:var(--primary);">${escapeHtml(product.price)}</span>
+                            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                                ${product.amazonLink ? `<a href="${product.amazonLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline" style="font-size:12px; padding:6px 10px;">Amazon</a>` : ''}
+                                ${product.flipkartLink ? `<a href="${product.flipkartLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline" style="font-size:12px; padding:6px 10px;">Flipkart</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                box.innerHTML = `
+                    <div class="exercise-resource-block">
+                        <div class="grid-card" style="padding:18px; min-height:auto;">
+                            <div style="display:flex; justify-content:space-between; align-items:start; gap:12px; margin-bottom:14px;">
+                                <div>
+                                    <h3 style="font-size:16px; font-weight:700; margin:0;"><i class="fas fa-chart-pie" style="color:var(--primary); margin-right:6px;"></i>Diet Chart</h3>
+                                    <p style="margin:8px 0 0; color:var(--text-muted); font-size:13px;">${escapeHtml(profileNote)}</p>
+                                </div>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                                    <button type="button" onclick="openMoreResourcesModal()" class="btn-profile-outline" style="font-size:13px; padding:8px 12px; white-space:nowrap;">Gym & Diet Resources</button>
+                                    <button type="button" onclick="downloadDietPlanPdf()" class="btn-profile-outline" style="font-size:13px; padding:8px 12px; white-space:nowrap;">Download PDF</button>
+                                </div>
+                            </div>
+                            <table style="width:100%; border-collapse:collapse; color:var(--text-main);">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left; padding:10px 10px 6px; font-size:12px; color:var(--text-muted);">Meal</th>
+                                        <th style="text-align:left; padding:10px 10px 6px; font-size:12px; color:var(--text-muted);">Items</th>
+                                        <th style="text-align:right; padding:10px 10px 6px; font-size:12px; color:var(--text-muted);">Cals</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${dietRows}</tbody>
+                            </table>
+                        </div>
+                        <div class="grid-card" style="padding:18px; min-height:auto;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+                                <h3 style="font-size:16px; font-weight:700; margin:0;"><i class="fas fa-box-open" style="color:var(--primary); margin-right:6px;"></i>Gym Products</h3>
+                                <button type="button" onclick="openMoreResourcesModal()" class="btn-profile-outline" style="font-size:13px; padding:8px 12px; white-space:nowrap;">Gym & Diet Resources</button>
+                            </div>
+                            ${productCards}
+                        </div>
+                    </div>
+                `;
+            }
 
             function goalKeyFromText(goalText) {
                 const value = (goalText || '').toLowerCase();
@@ -1055,23 +2387,184 @@ const Email = '@Email';
 
                 const videos = document.getElementById('exerciseVideos');
                 if (videos) {
+                    currentExercisePlan = plan;
                     videos.innerHTML = plan.videos.map(v => `
-                        <div class="grid-card" style="min-height: auto; padding: 18px; flex-direction: row; align-items: center; gap: 16px;">
-                            <div style="width: 44px; height: 44px; border-radius: 50%; background-color: var(--primary-light); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px;">
-                                <i class="fas fa-play"></i>
+                        <button type="button" class="yt-video-card" data-title="${escapeHtml(v.title)}" data-note="${escapeHtml(v.note)}" data-accent="${v.accent}" style="text-decoration:none; display:block; border:none; padding:0; text-align:left; background:transparent; cursor:pointer; width:100%;">
+                            <div class="yt-thumb-wrap" style="background: linear-gradient(135deg, ${v.accent}22 0%, #111827 100%);">
+                                <svg width="100%" height="100%" viewBox="0 0 320 180" role="img" aria-label="${v.title}">
+                                    <rect x="0" y="0" width="320" height="180" fill="url(#grad-${v.title.replace(/[^a-z0-9]/gi, '')})"></rect>
+                                    <defs>
+                                        <linearGradient id="grad-${v.title.replace(/[^a-z0-9]/gi, '')}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#0f172a"></stop>
+                                            <stop offset="100%" stop-color="${v.accent}"></stop>
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="56" cy="62" r="20" fill="#fff" opacity="0.9"></circle>
+                                    <rect x="74" y="44" width="86" height="36" rx="18" fill="#fff" opacity="0.95"></rect>
+                                    <rect x="110" y="54" width="60" height="16" rx="8" fill="${v.accent}"></rect>
+                                    <rect x="76" y="92" width="110" height="12" rx="6" fill="#fff" opacity="0.78"></rect>
+                                    <rect x="76" y="112" width="92" height="10" rx="5" fill="#fff" opacity="0.62"></rect>
+                                    <circle cx="240" cy="92" r="34" fill="#ffffff" opacity="0.18"></circle>
+                                    <rect x="224" y="76" width="30" height="32" rx="10" fill="#fff" opacity="0.85"></rect>
+                                    <path d="M236 82 L250 92 L236 102 Z" fill="${v.accent}"></path>
+                                    <rect x="52" y="132" width="210" height="8" rx="4" fill="#fff" opacity="0.22"></rect>
+                                    <rect x="52" y="148" width="160" height="6" rx="3" fill="#fff" opacity="0.16"></rect>
+                                </svg>
+                                <div class="yt-play-overlay">
+                                    <div class="yt-play-btn"><i class="fas fa-play"></i></div>
+                                </div>
+                                <span class="yt-duration-badge">${v.duration}</span>
                             </div>
-                            <div>
-                                <h4 style="font-size: 14px; font-weight: 700; margin: 0 0 4px 0;">${v.title}</h4>
-                                <a href="${v.url}" target="_blank" style="font-size: 12px; color: var(--primary); font-weight: 700; text-decoration: none;">Watch Collection &rarr;</a>
+                            <div class="yt-card-body">
+                                <h4 class="yt-card-title">${v.title}</h4>
+                                <div class="yt-card-meta">
+                                    <i class="fas fa-robot" style="color:${v.accent}; font-size:13px;"></i>
+                                    <span>${v.channel}</span>
+                                </div>
+                                <p style="font-size:12px; color:var(--text-muted); margin:8px 0 0; line-height:1.5;">${v.note}</p>
                             </div>
-                        </div>
+                        </button>
                     `).join('');
+                    videos.querySelectorAll('.yt-video-card').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            openExerciseVideoModal(btn.dataset.title, btn.dataset.note, btn.dataset.accent || '#10b981');
+                        });
+                    });
                 }
+                renderSmallTask('exerciseWarmUp', [
+                    { title: 'Joint Mobility', text: 'Neck, shoulders, hips, knees, and ankles for 5 minutes.' },
+                    { title: 'Pulse Raiser', text: goalKey === 'gain' ? 'Light rowing or incline walk before lifting.' : 'Easy march, walk, or cycling before intervals.' }
+                ]);
+                renderSmallTask('exerciseCoolDown', [
+                    { title: 'Breathing Reset', text: 'Slow nasal breathing until heart rate settles.' },
+                    { title: 'Stretch', text: 'Hold calves, hamstrings, chest, and back stretches for 20-30 seconds.' }
+                ]);
+                renderWeeklySchedule(goalKey);
+                renderWorkoutMeals(goalKey);
+                renderGymResources(goalKey);
+                renderExerciseTracking();
+                renderExerciseLibrary();
             }
 
+            function renderExerciseVideoModalDetails(video) {
+                const relatedBox = document.getElementById('exerciseVideoModalRelated');
+                const supplementBox = document.getElementById('exerciseVideoModalSupplements');
+                if (!relatedBox || !supplementBox) return;
+
+                relatedBox.innerHTML = `
+                    <h4 style="font-size:14px; font-weight:700; margin:0 0 8px;">Similar Moves</h4>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                        ${(video.related || []).map(name => `<span style="background: rgba(255,255,255,0.08); color:#fff; padding:6px 10px; border-radius:999px; font-size:12px;">${escapeHtml(name)}</span>`).join('')}
+                    </div>
+                `;
+
+                supplementBox.innerHTML = `
+                    <h4 style="font-size:14px; font-weight:700; margin:0 0 8px;">Suggested Gym Supplements</h4>
+                    <ul style="margin:0; padding-left:18px; color:#e5e7eb; font-size:13px; line-height:1.6;">
+                        ${(video.supplements || []).map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+                    </ul>
+                `;
+            }
+
+            window.openExerciseVideoModal = function (title, note, accent) {
+                const modal = document.getElementById('exerciseVideoModal');
+                const titleBox = document.getElementById('exerciseVideoModalTitle');
+                const noteBox = document.getElementById('exerciseVideoModalNote');
+                const player = document.getElementById('exerciseVideoPlayer');
+                if (!modal || !titleBox || !noteBox || !player) return;
+
+                titleBox.textContent = title || 'Workout Demo';
+                noteBox.textContent = note || 'Follow the guided demo from inside the website.';
+                player.style.setProperty('--video-accent', accent || '#10b981');
+
+                const video = currentExercisePlan?.videos?.find(v => v.title === title) || null;
+                renderExerciseVideoModalDetails(video || {});
+
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.closeExerciseVideoModal = function () {
+                const modal = document.getElementById('exerciseVideoModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            };
+
+            window.openMoreResourcesModal = function () {
+                const modal = document.getElementById('moreResourcesModal');
+                const list = document.getElementById('moreResourcesList');
+                if (!modal || !list) return;
+
+                const renderResources = (resources) => resources.map(item => `
+                    <div class="exercise-popup-card">
+                        <img src="${item.image}" alt="${escapeHtml(item.name)}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x260?text=Image+Unavailable';" />
+                        <div>
+                            <h5>${escapeHtml(item.name)}</h5>
+                            <p>${escapeHtml(item.desc)}</p>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                                ${item.amazonLink ? `<a href="${item.amazonLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline">Amazon</a>` : ''}
+                                ${item.flipkartLink ? `<a href="${item.flipkartLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline">Flipkart</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                list.innerHTML = renderResources(moreResources);
+
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.closeMoreResourcesModal = function () {
+                const modal = document.getElementById('moreResourcesModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            };
+
+            window.filterMoreResources = function () {
+                const query = document.getElementById('moreResourcesSearch')?.value.trim().toLowerCase() || '';
+                const list = document.getElementById('moreResourcesList');
+                if (!list) return;
+
+                const filtered = moreResources.filter(item => {
+                    const haystack = `${item.name} ${item.desc} ${item.price}`.toLowerCase();
+                    return haystack.includes(query);
+                });
+
+                if (!filtered.length) {
+                    list.innerHTML = `<div class="exercise-popup-card" style="grid-template-columns:1fr; text-align:center;"><p style="margin:0; padding:30px 0; color:var(--text-muted);">No items match your search. Try keywords like fitness, protein, or plan.</p></div>`;
+                    return;
+                }
+
+                list.innerHTML = filtered.map(item => `
+                    <div class="exercise-popup-card">
+                        <img src="${item.image}" alt="${escapeHtml(item.name)}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x260?text=Image+Unavailable';" />
+                        <div>
+                            <h5>${escapeHtml(item.name)}</h5>
+                            <p>${escapeHtml(item.desc)}</p>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                                ${item.amazonLink ? `<a href="${item.amazonLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline">Amazon</a>` : ''}
+                                ${item.flipkartLink ? `<a href="${item.flipkartLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline">Flipkart</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
             document.querySelectorAll('#exercise [data-exercise-goal]').forEach(btn => {
-                btn.addEventListener('click', () => renderExercisePlan(btn.dataset.exerciseGoal));
+                btn.addEventListener('click', () => {
+                    exerciseState.planGoal = btn.dataset.exerciseGoal;
+                    saveExerciseState();
+                    renderExercisePlan(btn.dataset.exerciseGoal);
+                });
             });
+            document.getElementById('exerciseSearch')?.addEventListener('input', renderExerciseLibrary);
+            document.getElementById('exerciseFilter')?.addEventListener('change', renderExerciseLibrary);
+            renderExercisePlan(exerciseState.planGoal || 'maintain');
 
             // Initial load of user attributes
             try {
@@ -1081,9 +2574,11 @@ const Email = '@Email';
                     const streakCount = data.streak ?? 0;
                     const dob = data.dob;
                     const goal = data.goal || 'Weight Loss';
+                    window.FNSUserDiet = (data.diet || window.FNSUserDiet || 'Non-Veg').toString();
+                    window.FNSUserGender = (data.gender || window.FNSUserGender || 'all').toString();
                     
-                    let Age = "23";
-                    if (dob) {
+                    let Age = data.age || "23";
+                    if (!data.age && dob) {
                         let [d, m, y] = dob.split(" ")[0].split("-");
                         let birthDate = new Date(y, m - 1, d);
                         let today = new Date();
@@ -1099,17 +2594,19 @@ const Email = '@Email';
                     document.getElementById("Age").textContent = Age;
                     document.getElementById("goal").textContent = goal;
                     
-                    // Profile stats
-                    const daysCompleted = 12; // Static or derived from logs
-                    const daysRemaining = 18;
+                    // Profile stats (Days Completed & Remaining - Current Month)
+                    const currentDate = new Date();
+                    const daysCompleted = currentDate.getDate(); 
+                    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+                    const daysRemaining = daysInMonth - daysCompleted;
+                    
                     document.getElementById("profileDaysCompleted").textContent = daysCompleted;
                     document.getElementById("profileDaysRemaining").textContent = daysRemaining;
                     
                     // Update remaining dash circle
                     const circleDash = document.getElementById('profileRemainingCircleDash');
                     if (circleDash) {
-                        const totalDays = daysCompleted + daysRemaining;
-                        const pctCompleted = (daysCompleted / totalDays) * 100;
+                        const pctCompleted = (daysCompleted / daysInMonth) * 100;
                         const offset = 100 - pctCompleted;
                         circleDash.setAttribute('stroke-dashoffset', offset);
                         
@@ -1117,8 +2614,53 @@ const Email = '@Email';
                         document.getElementById('goalProgressBarFill').style.width = `${pctCompleted}%`;
                     }
 
-                    document.getElementById("editGoal").value = goal;
-                    renderExercisePlan(goalKeyFromText(goal));
+                    // Calculate BMI
+                    const weightKg = data.weight || 0;
+                    const heightCm = data.height || 0;
+                    if (weightKg > 0 && heightCm > 0) {
+                        const heightM = heightCm / 100;
+                        const bmi = weightKg / (heightM * heightM);
+                        document.getElementById("profileBmiValue").textContent = bmi.toFixed(1);
+                        
+                        let colorHex = "#8aa6ba"; // default gray
+                        let bgHex = "#eef4f7";
+                        if (bmi < 18.5) {
+                            colorHex = "#3b82f6"; bgHex = "#eff6ff";
+                        } else if (bmi < 25) {
+                            colorHex = "#10b981"; bgHex = "#ecfdf5";
+                        } else if (bmi < 30) {
+                            colorHex = "#f59e0b"; bgHex = "#fffbeb";
+                        } else {
+                            colorHex = "#ef4444"; bgHex = "#fef2f2";
+                        }
+                        document.getElementById("profileBmiCategory").textContent = "BMI";
+                        document.getElementById("profileBmiCategory").style.color = colorHex;
+                        document.getElementById("bmiIconBox").style.color = colorHex;
+                        document.getElementById("bmiIconBox").style.backgroundColor = bgHex;
+                    } else {
+                        document.getElementById("profileBmiValue").textContent = "N/A";
+                        document.getElementById("profileBmiCategory").textContent = "BMI";
+                    }
+
+                    // Pre-populate Edit Profile form
+                    if (document.getElementById("editGoal")) document.getElementById("editGoal").value = goal;
+                    if (document.getElementById("editWeight") && weightKg > 0) document.getElementById("editWeight").value = weightKg;
+                    if (document.getElementById("editHeight") && heightCm > 0) document.getElementById("editHeight").value = heightCm;
+                    if (document.getElementById("editAge")) document.getElementById("editAge").value = Age;
+                    if (document.getElementById("editGender") && data.gender) document.getElementById("editGender").value = data.gender;
+                    if (document.getElementById("editDiet") && data.diet) document.getElementById("editDiet").value = data.diet;
+                    if (document.getElementById("editLifestyle") && data.lifestyle) document.getElementById("editLifestyle").value = data.lifestyle;
+                    if (document.getElementById("editBloodType") && data.bloodType) document.getElementById("editBloodType").value = data.bloodType;
+                    if (document.getElementById("editSleep") && data.sleepPatterns > 0) document.getElementById("editSleep").value = data.sleepPatterns;
+
+                    if (document.getElementById("exerciseAge")) document.getElementById("exerciseAge").value = Age;
+                    if (document.getElementById("exerciseWeight") && weightKg > 0) document.getElementById("exerciseWeight").value = weightKg;
+                    if (document.getElementById("exerciseHeight") && heightCm > 0) document.getElementById("exerciseHeight").value = heightCm;
+                    if (document.getElementById("burnWeight") && weightKg > 0) document.getElementById("burnWeight").value = weightKg;
+
+                    exerciseState.planGoal = goalKeyFromText(goal);
+                    saveExerciseState();
+                    renderExercisePlan(exerciseState.planGoal);
                 }
             } catch (err) { console.error("Error loading user profile details", err); }
 
@@ -1345,10 +2887,15 @@ const Email = '@Email';
             window.saveProfileChanges = async function() {
                 const firstName = document.getElementById('editFirstName').value.trim();
                 const lastName = document.getElementById('editLastName').value.trim();
-                const goal = document.getElementById('editGoal').value.trim();
+                const goal = document.getElementById('editGoal').value;
+                const weight = document.getElementById('editWeight').value;
+                const height = document.getElementById('editHeight').value;
+                const diet = document.getElementById('editDiet').value;
+                const lifestyle = document.getElementById('editLifestyle').value;
+                const sleep = document.getElementById('editSleep').value;
 
                 if (!firstName || !lastName || !goal) {
-                    Swal.fire('Profile Error', 'Please fill in all fields', 'warning');
+                    Swal.fire('Profile Error', 'Please fill in all required fields (Name, Goal)', 'warning');
                     return;
                 }
 
@@ -1358,6 +2905,11 @@ const Email = '@Email';
                     formData.append('firstName', firstName);
                     formData.append('lastName', lastName);
                     formData.append('goal', goal);
+                    if (weight) formData.append('weight', weight);
+                    if (height) formData.append('height', height);
+                    if (diet) formData.append('diet', diet);
+                    if (lifestyle) formData.append('lifestyle', lifestyle);
+                    if (sleep) formData.append('sleepPatterns', sleep);
 
                     const response = await fetch('/User/UpdateProfile', {
                         method: 'POST',

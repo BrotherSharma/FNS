@@ -68,7 +68,7 @@ body {
   padding: 100px 30px 30px 30px;
   flex-grow: 1;
   overflow-y: auto;
-  height: 100vh;
+  min-height: calc(100vh - 100px);
 }
 
 
@@ -249,6 +249,68 @@ canvas {
   margin: 5px 0 0;
   font-size: 0.9rem;
   color: #666;
+}
+
+.profile-image-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 4000;
+}
+
+.profile-image-zoom-overlay.active {
+  display: flex;
+}
+
+.profile-image-zoom-dialog {
+  position: relative;
+  max-width: min(92vw, 900px);
+  max-height: 92vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-image-zoom-dialog img {
+  max-width: 100%;
+  max-height: 92vh;
+  object-fit: contain;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  animation: profileImageZoomIn 0.2s ease-out forwards;
+}
+
+.profile-image-zoom-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111827;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+}
+
+@keyframes profileImageZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Edit Profile Form */

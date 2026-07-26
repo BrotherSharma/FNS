@@ -81,11 +81,13 @@ namespace FNS.Controllers
                     var firstName = dtlogin.Rows[0]["c_firstname"].ToString();
                     var lastName = dtlogin.Rows[0]["c_lastname"].ToString();
                     var Email = dtlogin.Rows[0]["c_email"].ToString();
+                    bool isPremium = dtlogin.Rows[0]["c_is_premium"] != DBNull.Value && Convert.ToBoolean(dtlogin.Rows[0]["c_is_premium"]);
                     string name = firstName + " " + lastName;
                     HttpContext.Session.SetString("Name", name);
                     HttpContext.Session.SetString("Email", Email);
                     HttpContext.Session.SetString("FirstName", firstName);
                     HttpContext.Session.SetString("LastName", lastName);
+                    HttpContext.Session.SetString("IsPremium", isPremium.ToString());
                     return Json(new { success = true });
                 }
                 else
@@ -328,7 +330,15 @@ namespace FNS.Controllers
             {
                 streak = streakCount,
                 dob = dob,
-                goal = goal
+                goal = goal,
+                weight = row.Table.Columns.Contains("weight") ? Convert.ToDouble(row["weight"]) : 0.0,
+                height = row.Table.Columns.Contains("height") ? Convert.ToDouble(row["height"]) : 0.0,
+                age = row.Table.Columns.Contains("age") ? Convert.ToInt32(row["age"]) : 0,
+                diet = row.Table.Columns.Contains("diet") ? row["diet"]?.ToString() : "",
+                lifestyle = row.Table.Columns.Contains("lifestyle") ? row["lifestyle"]?.ToString() : "",
+                bloodType = row.Table.Columns.Contains("bloodType") ? row["bloodType"]?.ToString() : "",
+                sleepPatterns = row.Table.Columns.Contains("sleepPatterns") ? Convert.ToDouble(row["sleepPatterns"]) : 0.0,
+                gender = row.Table.Columns.Contains("gender") ? row["gender"]?.ToString() : ""
             });
         }
 
@@ -336,7 +346,12 @@ namespace FNS.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile([FromForm] string email, [FromForm] string firstName, [FromForm] string lastName, [FromForm] string goal, [FromForm] IFormFile profileImage = null)
+        public async Task<IActionResult> UpdateProfile(
+            [FromForm] string email, [FromForm] string firstName, [FromForm] string lastName, [FromForm] string goal,
+            [FromForm] IFormFile profileImage = null,
+            [FromForm] double? weight = null, [FromForm] double? height = null, [FromForm] int? age = null,
+            [FromForm] string diet = null, [FromForm] string lifestyle = null, [FromForm] string bloodType = null,
+            [FromForm] double? sleepPatterns = null, [FromForm] string gender = null)
         {
             try
             {
@@ -387,7 +402,8 @@ namespace FNS.Controllers
                     profileImagePath = $"/images/{fileName}";
                 }
 
-                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal, profileImagePath);
+                DataTable result = _userLogin.UpdateUserProfile(email, firstName, lastName, goal, profileImagePath,
+                    weight, height, age, diet, lifestyle, bloodType, sleepPatterns, gender);
                 
                 if (result.Rows.Count > 0 && result.Rows[0]["Status"].ToString() == "Success")
                 {
@@ -495,6 +511,65 @@ namespace FNS.Controllers
 
 
 
+
+        [HttpPost]
+        public async Task<IActionResult> SendReferralInvite([FromBody] JsonElement body)
+        {
+            try
+            {
+                string friendEmail = null;
+                if (body.ValueKind == JsonValueKind.Object &&
+                    body.TryGetProperty("friendEmail", out var fe))
+                    friendEmail = fe.GetString();
+
+                if (string.IsNullOrWhiteSpace(friendEmail) ||
+                    !System.Text.RegularExpressions.Regex.IsMatch(friendEmail,
+                        @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                {
+                    return BadRequest(new { success = false, message = "Please enter a valid email address." });
+                }
+
+                string senderName = HttpContext.Session.GetString("Name") ?? "A NutrInfo user";
+                string signupUrl = $"{Request.Scheme}://{Request.Host}/User/Register";
+
+                bool sent = await _emailService.SendReferralInviteEmailAsync(friendEmail, senderName, signupUrl);
+
+                if (sent)
+                    return Ok(new { success = true, message = $"Invitation sent to {friendEmail}!" });
+                else
+                    return Ok(new { success = false, message = "Email configuration issue — invite could not be sent." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult UpgradeUser()
+        {
+            try
+            {
+                string email = HttpContext.Session.GetString("Email");
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Unauthorized(new { success = false, message = "User not logged in." });
+                }
+
+                bool success = _userLogin.UpgradeUserToPremium(email);
+                if (success)
+                {
+                    HttpContext.Session.SetString("IsPremium", "True");
+                    return Ok(new { success = true, message = "Successfully upgraded to Premium!" });
+                }
+                
+                return BadRequest(new { success = false, message = "Failed to upgrade user." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

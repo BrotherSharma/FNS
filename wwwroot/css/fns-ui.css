@@ -237,11 +237,12 @@ body.fns-layout-shell > .container {
   background-color: var(--bg-canvas, #f8faf9) !important;
   background-image: none !important;
   color: var(--fns-ink);
+  height: 100vh;
+  overflow: hidden;
 }
 
 .dashboard-shell .main-content {
-  height: auto;
-  min-height: 100vh;
+  height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
 }
