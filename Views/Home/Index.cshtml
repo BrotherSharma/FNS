@@ -28,12 +28,17 @@
 
     <!-- Sidebar Navigation -->
     <div class="sidebar">
-        <div class="logo-container">
-            <i class="fas fa-leaf logo-icon"></i>
-            <div class="logo-text">
-                <span class="logo-title">NutrInfo</span>
-                <span class="logo-subtitle">FUEL YOUR BEST</span>
+        <div class="sidebar-top-row">
+            <div class="logo-container">
+                <i class="fas fa-leaf logo-icon"></i>
+                <div class="logo-text">
+                    <span class="logo-title">NutrInfo</span>
+                    <span class="logo-subtitle">FUEL YOUR BEST</span>
+                </div>
             </div>
+            <button type="button" class="sidebar-close-btn" onclick="closeMobileSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         
         <div class="sidebar-nav">
@@ -80,11 +85,16 @@
         </div>
     </div>
 
+    <div class="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
+
     <!-- Main Content Area -->
     <div class="main-content">
         
         <!-- Floating Header Widget -->
         <div class="top-header-widget">
+            <button type="button" class="mobile-sidebar-toggle" onclick="toggleMobileSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
             @if (!isPremium)
             {
                 <a href="#" class="btn-go-premium header-premium-cta" onclick="event.preventDefault(); upgradeToPremium()">
@@ -291,40 +301,6 @@
             <div class="page-header-block">
                 <h2>Exercise</h2>
                 <p>Workouts matched to your goal.</p>
-            </div>
-
-            <!-- Exercise Timer Widget -->
-            <div class="grid-card" style="min-height: auto; margin-bottom: 24px; padding: 20px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 42px; height: 42px; border-radius: 12px; background: var(--primary-light); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-stopwatch" style="color: var(--primary); font-size: 18px;"></i>
-                        </div>
-                        <div>
-                            <h4 style="font-size: 15px; font-weight: 700; margin: 0;">Exercise Timer</h4>
-                            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Set a countdown for your workout</p>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <select id="exerciseTimerMinutes" style="padding: 8px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; font-weight: 600;">
-                            <option value="5">5 min</option>
-                            <option value="10">10 min</option>
-                            <option value="15">15 min</option>
-                            <option value="20" selected>20 min</option>
-                            <option value="25">25 min</option>
-                            <option value="30">30 min</option>
-                            <option value="45">45 min</option>
-                            <option value="60">60 min</option>
-                        </select>
-                        <span id="exerciseTimerDisplay" style="font-size: 28px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; min-width: 90px; text-align: center;">20:00</span>
-                        <button type="button" id="exerciseTimerStartBtn" class="btn-profile-outline" onclick="toggleExerciseTimer()" style="padding: 8px 18px;">
-                            <i class="fas fa-play"></i> Start
-                        </button>
-                        <button type="button" class="btn-profile-outline" onclick="resetExerciseTimer()" style="padding: 8px 14px;">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <div class="grid-card @(isPremium ? "" : "premium-locked-section")" style="min-height: auto; margin-bottom: 24px;">
@@ -1048,6 +1024,20 @@
             
             if (sectionId === 'todayChecklist' && typeof loadChecklist === 'function') loadChecklist();
             if (sectionId === 'moodTracker' && typeof loadMood === 'function') loadMood();
+
+            if (document.body.classList.contains('sidebar-open')) {
+                closeMobileSidebar();
+            }
+        }
+
+        function toggleMobileSidebar() {
+            document.body.classList.toggle('sidebar-open');
+            document.querySelector('.sidebar')?.classList.toggle('sidebar-visible');
+        }
+
+        function closeMobileSidebar() {
+            document.body.classList.remove('sidebar-open');
+            document.querySelector('.sidebar')?.classList.remove('sidebar-visible');
         }
 
         document.addEventListener("DOMContentLoaded", async () => {
