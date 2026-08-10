@@ -14,6 +14,10 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Security.Cryptography;
 using System.Text;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace FNS.Controllers
 {
@@ -114,7 +118,73 @@ namespace FNS.Controllers
             return RedirectToAction("Login", "User");
         }
 
+        [HttpGet]
+        public IActionResult GoogleLogin()
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = Url.Action("GoogleCallback", "User")
+            };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> GoogleCallback()
+        {
+            try
+            {
+                var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                if (!result.Succeeded || result.Principal == null)
+                {
+                    return RedirectToAction("Login", "User");
+                }
+
+                var claims = result.Principal.Claims;
+                string email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? "";
+                string firstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value ?? "";
+                string lastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value ?? "";
+                string profileImageUrl = claims.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value ?? "";
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    return RedirectToAction("Login", "User");
+                }
+
+                // Find existing user or create a new one
+                DataTable userTable = _userLogin.FindOrCreateGoogleUser(email, firstName, lastName, profileImageUrl);
+
+                if (userTable.Rows.Count > 0)
+                {
+                    var userFirstName = userTable.Rows[0]["c_firstname"].ToString();
+                    var userLastName = userTable.Rows[0]["c_lastname"].ToString();
+                    var userEmail = userTable.Rows[0]["c_email"].ToString();
+                    bool isPremium = userTable.Rows[0]["c_is_premium"] != DBNull.Value && Convert.ToBoolean(userTable.Rows[0]["c_is_premium"]);
+                    bool isNewUser = userTable.Columns.Contains("IsNewUser") && userTable.Rows[0]["IsNewUser"] != DBNull.Value && Convert.ToBoolean(userTable.Rows[0]["IsNewUser"]);
+
+                    string name = userFirstName + " " + userLastName;
+                    HttpContext.Session.SetString("Name", name);
+                    HttpContext.Session.SetString("Email", userEmail);
+                    HttpContext.Session.SetString("FirstName", userFirstName);
+                    HttpContext.Session.SetString("LastName", userLastName);
+                    HttpContext.Session.SetString("IsPremium", isPremium.ToString());
+
+                    if (isNewUser)
+                    {
+                        HttpContext.Session.SetString("NeedsDobAndGender", "true");
+                        return RedirectToAction("Improve", "User");
+                    }
+
+                    return RedirectToAction("Index", "Home");
+                }
+
+                return RedirectToAction("Login", "User");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Google callback error: {ex}");
+                return RedirectToAction("Login", "User");
+            }
+        }
 
 
         [HttpGet]

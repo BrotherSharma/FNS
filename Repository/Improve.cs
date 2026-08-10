@@ -62,7 +62,29 @@ namespace FNS.Repository
                 }
                 if (healthInfo.TryGetProperty("alcoholConsumption", out var ac)) alcoholConsumption = ac.GetString() ?? string.Empty;
 
+                string gender = string.Empty;
+                DateTime? dob = null;
+                if (healthInfo.TryGetProperty("gender", out var gen)) gender = gen.GetString() ?? string.Empty;
+                if (healthInfo.TryGetProperty("dob", out var dobEl))
+                {
+                    if (DateTime.TryParse(dobEl.GetString(), out DateTime parsedDob))
+                        dob = parsedDob;
+                }
+
                 _con.Open();
+
+                // If gender and dob are provided, update t_user
+                if (!string.IsNullOrEmpty(gender) && dob.HasValue)
+                {
+                    string updateUserQuery = "UPDATE public.t_user SET c_gender = @Gender, c_dob = @Dob WHERE c_email = @Email";
+                    using (NpgsqlCommand updateCmd = new NpgsqlCommand(updateUserQuery, _con))
+                    {
+                        updateCmd.Parameters.AddWithValue("@Gender", gender);
+                        updateCmd.Parameters.AddWithValue("@Dob", dob.Value);
+                        updateCmd.Parameters.AddWithValue("@Email", email);
+                        updateCmd.ExecuteNonQuery();
+                    }
+                }
 
                 string query = "INSERT INTO public.t_healthInfo (c_weight, c_height, c_age, c_goal, c_referral, c_diet, c_lifestyle, c_bloodType, c_sleepPatterns, c_alcoholConsumption, c_email) " +
                             "VALUES (@Weight, @Height, @Age, @Goal, @Referral, @Diet, @Lifestyle, @BloodType, @SleepPatterns, @AlcoholConsumption, @email)";

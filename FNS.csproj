@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Google_GenerativeAI" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
     <PackageReference Include="Mscc.GenerativeAI" Version="2.8.19" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Npgsql" Version="8.0.3" />
