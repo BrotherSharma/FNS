@@ -150,7 +150,7 @@ namespace FNS.Controllers
                     return RedirectToAction("Login", "User");
                 }
 
-                // Find existing user or create a new one
+                // Find existing uaser or create a new one
                 DataTable userTable = _userLogin.FindOrCreateGoogleUser(email, firstName, lastName, profileImageUrl);
 
                 if (userTable.Rows.Count > 0)

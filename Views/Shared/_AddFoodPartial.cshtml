@@ -4,44 +4,55 @@
     string Email = ViewBag.Email;
 }
 
-<div class="grid-card" style="min-height: auto; padding: 28px;">
-    <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 20px;">Foods Details</h3>
+<div class="grid-card shadow-sm border-0 rounded-4" style="min-height: auto; padding: 28px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px);">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; font-family: 'Outfit', sans-serif;" class="m-0">Daily Food Journal</h3>
+            <p class="text-secondary small m-0">Track your logged meals and nutrition breakdown</p>
+        </div>
+        <button class="btn btn-primary d-inline-flex align-items-center gap-2 px-3 py-2 fw-bold rounded-3 shadow-sm" id="addFoodBtn">
+            <i class="fas fa-plus"></i>
+            <span>Log Food Item</span>
+        </button>
+    </div>
 
     <!-- Control bar -->
-    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-        <input type="search" id="foodSearch" class="form-control" style="flex-grow: 1; min-height: 42px; border-radius: 12px !important; border: 1px solid var(--border-color) !important; padding: 0 16px !important; font-size: 13px;" placeholder="Search logged food..." />
-        <select id="foodPageSize" class="form-select" style="max-width: 100px; min-height: 42px; border-radius: 12px; border: 1px solid var(--border-color);">
+    <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+        <div class="position-relative flex-grow-1" style="min-width: 240px;">
+            <i class="fas fa-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%);"></i>
+            <input type="search" id="foodSearch" class="form-control ps-5" style="min-height: 44px; border-radius: 12px !important; border: 1.5px solid #cbd5e1 !important; font-size: 14px;" placeholder="Search logged meals or foods..." />
+        </div>
+        <select id="foodPageSize" class="form-select border" style="max-width: 120px; min-height: 44px; border-radius: 12px; border: 1.5px solid #cbd5e1; font-weight: 500; font-size: 14px;">
             <option value="10">10 / page</option>
             <option value="25">25 / page</option>
             <option value="50">50 / page</option>
             <option value="100">100 / page</option>
         </select>
-        <button class="btn btn-success" id="addFoodBtn" style="background-color: var(--primary) !important; border: none; border-radius: 12px; font-weight: 700; min-height: 42px; padding: 0 20px; cursor: pointer; color: #fff;">Add Food</button>
     </div>
 
     <!-- Log Table -->
-    <div class="checklist-table-wrap" style="margin-bottom: 20px;">
-        <table class="checklist-table table table-hover" style="margin: 0;">
-            <thead>
-                <tr>
-                    <th>Meal</th>
-                    <th>Food</th>
-                    <th>Notes</th>
-                    <th>Date</th>
+    <div class="checklist-table-wrap rounded-3 border overflow-hidden mb-3">
+        <table class="checklist-table table table-hover m-0 align-middle">
+            <thead class="table-light">
+                <tr class="text-uppercase small text-muted fw-bold" style="letter-spacing: 0.5px;">
+                    <th class="py-3 px-3">Meal</th>
+                    <th class="py-3">Food Item</th>
+                    <th class="py-3">Notes</th>
+                    <th class="py-3 text-end px-3">Logged Date</th>
                 </tr>
             </thead>
             <tbody id="foodLogBody">
-                <tr><td colspan="4" class="text-center text-muted">No entries yet.</td></tr>
+                <tr><td colspan="4" class="text-center text-muted py-4">No entries logged yet today.</td></tr>
             </tbody>
         </table>
     </div>
 
     <!-- Pagination -->
-    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-        <div id="foodPaginationInfo" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Showing 0-0 of 0</div>
+    <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap pt-2">
+        <div id="foodPaginationInfo" class="small text-muted fw-semibold">Showing 0-0 of 0</div>
         <div class="btn-group" role="group" aria-label="Food pagination">
-            <button type="button" class="btn-profile-outline" id="foodPrevPage" style="padding: 6px 14px; font-size: 12px; border-top-right-radius: 0; border-bottom-right-radius: 0;">Previous</button>
-            <button type="button" class="btn-profile-outline" id="foodNextPage" style="padding: 6px 14px; font-size: 12px; border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none !important;">Next</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm px-3 rounded-start-3" id="foodPrevPage">Previous</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm px-3 rounded-end-3" id="foodNextPage">Next</button>
         </div>
     </div>
 </div>
@@ -49,37 +60,46 @@
 <!-- Modal Dialog -->
 <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
-        <div class="modal-content" style="border-radius: var(--card-radius); border: 1px solid var(--border-color); box-shadow: var(--card-shadow); overflow: hidden;">
-            <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 20px 24px; background-color: var(--primary-light);">
-                <h5 class="modal-title" style="font-weight: 800; color: var(--primary); font-size: 16px;">Add Food Log</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size: 12px;"></button>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: rgba(255, 255, 255, 0.98);">
+            <div class="modal-header border-bottom py-3 px-4" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;">
+                <h5 class="modal-title fw-bold m-0" style="font-family: 'Outfit', sans-serif;"><i class="fas fa-utensils me-2"></i>Log Food Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="padding: 24px;">
+            <div class="modal-body p-4">
                 <form id="addModalForm">
-                    <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-                        <label for="modalFoodName" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Food Name</label>
-                        <input type="text" id="modalFoodName" class="form-control" style="height: 44px; border-radius: 12px !important; border: 1px solid var(--border-color) !important; padding: 0 16px !important; font-size: 14px;" placeholder="e.g. Avocado Toast" required>
+                    <div class="mb-3">
+                        <label for="modalFoodName" class="form-label text-secondary small fw-bold text-uppercase">Food Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted" style="border-top-left-radius:12px; border-bottom-left-radius:12px; border: 1.5px solid #cbd5e1;"><i class="fas fa-apple-alt"></i></span>
+                            <input type="text" id="modalFoodName" class="form-control border-start-0" style="min-height: 46px; border-top-left-radius:0 !important; border-bottom-left-radius:0 !important;" placeholder="e.g. Grilled Chicken Salad" required>
+                        </div>
                     </div>
                     
-                    <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-                        <label for="modalMeal" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Meal Category</label>
-                        <select id="modalMeal" class="form-select" style="height: 44px; border-radius: 12px; border: 1px solid var(--border-color); padding: 0 16px; font-size: 14px;">
-                            <option>Breakfast</option>
-                            <option>Lunch</option>
-                            <option>Dinner</option>
-                            <option>Snack</option>
-                            <option>Other</option>
-                        </select>
+                    <div class="mb-3">
+                        <label for="modalMeal" class="form-label text-secondary small fw-bold text-uppercase">Meal Category</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted" style="border-top-left-radius:12px; border-bottom-left-radius:12px; border: 1.5px solid #cbd5e1;"><i class="fas fa-clock"></i></span>
+                            <select id="modalMeal" class="form-control border-start-0" style="min-height: 46px; border-top-left-radius:0 !important; border-bottom-left-radius:0 !important;">
+                                <option>Breakfast</option>
+                                <option>Lunch</option>
+                                <option>Dinner</option>
+                                <option>Snack</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px;">
-                        <label for="modalNotes" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Notes (optional)</label>
-                        <textarea id="modalNotes" class="form-control" rows="3" style="border-radius: 12px !important; border: 1px solid var(--border-color) !important; padding: 12px 16px !important; font-size: 14px;" placeholder="Add details or quantity..."></textarea>
+                    <div class="mb-4">
+                        <label for="modalNotes" class="form-label text-secondary small fw-bold text-uppercase">Notes & Portion (optional)</label>
+                        <textarea id="modalNotes" class="form-control" rows="3" style="border-radius: 12px !important; border: 1.5px solid #cbd5e1 !important; padding: 12px 16px !important;" placeholder="Add portion size, calories, or recipe notes..."></textarea>
                     </div>
 
-                    <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                        <button type="button" class="btn-profile-outline" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" style="background-color: var(--primary) !important; border: none; border-radius: 12px; font-weight: 700; padding: 10px 24px; color: #fff; cursor: pointer;">Save Log</button>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light border px-4 py-2 fw-semibold rounded-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm rounded-3">
+                            <span>Save Log</span>
+                            <i class="fas fa-check ms-1"></i>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -101,16 +121,31 @@
         let foodTotalPages = 0;
         let foodTotalRecords = 0;
 
+        function getMealBadge(meal) {
+            const m = (meal || '').toLowerCase();
+            if (m.includes('breakfast')) return '<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3">Breakfast</span>';
+            if (m.includes('lunch')) return '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Lunch</span>';
+            if (m.includes('dinner')) return '<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">Dinner</span>';
+            if (m.includes('snack')) return '<span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">Snack</span>';
+            return `<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3">${$('<div/>').text(meal).html()}</span>`;
+        }
+
         function renderFoodLog(items) {
             const $body = $('#foodLogBody');
             $body.empty();
             if (!items || items.length === 0) {
-                $body.append('<tr><td colspan="4" class="text-center text-muted" style="padding: 24px;">No entries logged yet today.</td></tr>');
+                $body.append('<tr><td colspan="4" class="text-center text-muted py-4">No entries logged yet today.</td></tr>');
                 return;
             }
             for (let i = 0; i < items.length; i++) {
                 const it = items[i];
-                const row = `<tr style="border-bottom: 1px solid var(--border-color);"><td style="font-weight: 600; color: var(--primary);">${$('<div/>').text(it.meal).html()}</td><td style="font-weight: 500;">${$('<div/>').text(it.foodName).html()}</td><td style="color: var(--text-muted);">${$('<div/>').text(it.notes).html()}</td><td style="font-size: 12px; font-weight: 600; color: var(--text-muted);">${$('<div/>').text(it.date || '').html()}</td></tr>`;
+                const badge = getMealBadge(it.meal);
+                const row = `<tr>
+                    <td class="px-3">${badge}</td>
+                    <td class="fw-bold text-dark">${$('<div/>').text(it.foodName).html()}</td>
+                    <td class="text-secondary small">${$('<div/>').text(it.notes || '-').html()}</td>
+                    <td class="text-end px-3 text-muted small fw-semibold">${$('<div/>').text(it.date || '').html()}</td>
+                </tr>`;
                 $body.append(row);
             }
         }
@@ -205,7 +240,6 @@
                         foodPage = 1;
                         loadFoodLog(userEmail);
                         
-                        // Show SweetAlert
                         Swal.fire({
                             icon: 'success',
                             title: 'Food Logged!',
@@ -216,13 +250,11 @@
                             timer: 2000
                         });
                         
-                        // Trigger daily summary update in host window if available
                         if (typeof window.loadDailyNutrition === 'function') {
                             window.loadDailyNutrition();
                         } else if (parent && typeof parent.loadDailyNutrition === 'function') {
                             parent.loadDailyNutrition();
                         } else {
-                            // default fallback to page reload or direct call
                             const todayStrVal = new Date().toDateString();
                             location.reload();
                         }
@@ -236,7 +268,6 @@
             });
         });
 
-        // initial load
         if (userEmail && userEmail.length > 0) {
             loadFoodLog(userEmail);
         }

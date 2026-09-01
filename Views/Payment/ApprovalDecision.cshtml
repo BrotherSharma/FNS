@@ -1,214 +1,76 @@
 @{
-    ViewData["Title"] = "Approval Decision - ReserveEase";
+    ViewData["Title"] = "Approval Decision - NutrInfo FNS";
+    Layout = null;
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="/Logo/cp.png" />
-    <title>Approval Decision - ReserveEase</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <title>Approval Decision - NutrInfo FNS</title>
 
-        html, body {
-            width: 100%;
-            height: 100%;
-        }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 500px;
-            padding: 40px 30px;
-            text-align: center;
-        }
-
-        .approved .icon {
-            font-size: 4rem;
-            color: #28a745;
-            margin-bottom: 20px;
-        }
-
-        .rejected .icon {
-            font-size: 4rem;
-            color: #dc3545;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            color: #333;
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-        }
-
-        .approved h1 {
-            color: #28a745;
-        }
-
-        .rejected h1 {
-            color: #dc3545;
-        }
-
-        p {
-            color: #666;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-
-        .details {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 25px 0;
-            text-align: left;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        .detail-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .detail-label {
-            color: #666;
-        }
-
-        .detail-value {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .info-message {
-            background: #e8f4f8;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 25px 0;
-            text-align: left;
-            color: #555;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .button-group {
-            margin-top: 30px;
-        }
-
-        button {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .approved button {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-
-        .approved button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-        }
-
-        .rejected button {
-            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
-            color: white;
-        }
-
-        .rejected button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/css/fns-ui.css" rel="stylesheet" />
 </head>
 <body class="fns-status-shell">
-    <div class="container @ViewBag.Status.ToLower()">
+    <div class="container text-center" style="max-width: 540px;">
         @if (ViewBag.Status == "Approved")
         {
-            <div class="icon">✓</div>
-            <h1>Payment Approved!</h1>
-            <p>Your request has been approved by the admin.</p>
+            <div class="mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle rounded-circle p-4 mb-3" style="width: 88px; height: 88px; background: rgba(16, 185, 129, 0.15); border: 2px solid rgba(16, 185, 129, 0.3);">
+                    <i class="fas fa-check-circle fs-1 text-success"></i>
+                </div>
+                <h2 class="fw-bold text-success mb-2" style="font-family: 'Outfit', sans-serif;">Account Approved!</h2>
+                <p class="text-secondary">Great news! Your payment has been verified and your NutrInfo subscription is now active.</p>
+            </div>
 
-            <div class="details">
-                <div class="detail-row">
-                    <span class="detail-label">Order ID:</span>
-                    <span class="detail-value">@ViewBag.OrderId</span>
+            <div class="info-box text-start mb-4">
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-muted small">Access Level:</span>
+                    <span class="fw-bold text-success small">Full Premium Access</span>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">User Email:</span>
-                    <span class="detail-value">@ViewBag.UserEmail</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value" style="color: #28a745;">Approved</span>
+                <div class="d-flex justify-content-between py-2">
+                    <span class="text-muted small">Verification Date:</span>
+                    <span class="fw-semibold text-dark small">@DateTime.Now.ToString("MMM dd, yyyy")</span>
                 </div>
             </div>
 
-            <div class="info-message">
-                <strong>✓ Access Granted</strong><br/>
-                The user has been notified via email and can now access the ReserveEase application.
-            </div>
-
-            <div class="button-group">
-                <button onclick="window.location.href = '/Home/Index'">Go to Dashboard</button>
+            <div class="d-grid">
+                <a href="/Home/Index" class="btn btn-primary py-3 fw-bold fs-6 shadow">
+                    <span>Enter Dashboard</span>
+                    <i class="fas fa-arrow-right ms-2"></i>
+                </a>
             </div>
         }
         else
         {
-            <div class="icon">✗</div>
-            <h1>Payment Rejected</h1>
-            <p>The payment request has been rejected.</p>
-
-            <div class="details">
-                <div class="detail-row">
-                    <span class="detail-label">Order ID:</span>
-                    <span class="detail-value">@ViewBag.OrderId</span>
+            <div class="mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-danger-subtle rounded-circle p-4 mb-3" style="width: 88px; height: 88px; background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.3);">
+                    <i class="fas fa-times-circle fs-1 text-danger"></i>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">User Email:</span>
-                    <span class="detail-value">@ViewBag.UserEmail</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value" style="color: #dc3545;">Rejected</span>
-                </div>
+                <h2 class="fw-bold text-danger mb-2" style="font-family: 'Outfit', sans-serif;">Approval Declined</h2>
+                <p class="text-secondary">Unfortunately, your payment verification could not be completed at this time.</p>
             </div>
 
-            <div class="info-message">
-                <strong>✗ Request Rejected</strong><br/>
-                The user has been notified about the rejection.
+            <div class="reason-box text-start mb-4 border-left-danger" style="border-left: 5px solid #ef4444;">
+                <h6 class="fw-bold text-danger mb-1"><i class="fas fa-exclamation-triangle me-2"></i>Reason</h6>
+                <p class="small text-secondary m-0">@(ViewBag.Reason ?? "Payment credentials could not be verified. Please retry or contact support.")</p>
             </div>
 
-            <div class="button-group">
-                <button onclick="window.location.href = '/'">Back to Home</button>
+            <div class="d-grid gap-2 d-sm-flex justify-content-center">
+                <a href="/Payment/Payment" class="btn btn-primary px-4 py-2 fw-semibold">
+                    <i class="fas fa-redo me-2"></i> Retry Payment
+                </a>
+                <a href="/User/Login" class="btn btn-secondary px-4 py-2 fw-semibold">
+                    <i class="fas fa-sign-out-alt me-2"></i> Sign Out
+                </a>
             </div>
         }
     </div>
