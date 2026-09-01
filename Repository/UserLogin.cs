@@ -226,7 +226,7 @@ namespace FNS.Repository
                     WHERE c_email = @Email;
                 ";
 
-                string healthQuery = @"
+                string healthUpdateQuery = @"
                     UPDATE public.t_healthinfo
                     SET c_goal = @Goal,
                         c_weight = COALESCE(@Weight, c_weight),
@@ -237,6 +237,21 @@ namespace FNS.Repository
                         c_bloodtype = COALESCE(@BloodType, c_bloodtype),
                         c_sleeppatterns = COALESCE(@SleepPatterns, c_sleeppatterns)
                     WHERE c_email = @Email;
+                ";
+
+                string healthInsertQuery = @"
+                    INSERT INTO public.t_healthinfo (c_email, c_goal, c_weight, c_height, c_age, c_diet, c_lifestyle, c_bloodtype, c_sleeppatterns)
+                    VALUES (
+                        @Email,
+                        COALESCE(@Goal, ''),
+                        COALESCE(@Weight, 0),
+                        COALESCE(@Height, 0),
+                        COALESCE(@Age, 0),
+                        COALESCE(@Diet, ''),
+                        COALESCE(@Lifestyle, ''),
+                        COALESCE(@BloodType, ''),
+                        COALESCE(@SleepPatterns, 0)
+                    );
                 ";
 
                 int totalRows = 0;
@@ -251,7 +266,8 @@ namespace FNS.Repository
                     totalRows += cmd.ExecuteNonQuery();
                 }
 
-                using (NpgsqlCommand cmd = new NpgsqlCommand(healthQuery, _con))
+                int healthRowsAffected;
+                using (NpgsqlCommand cmd = new NpgsqlCommand(healthUpdateQuery, _con))
                 {
                     cmd.Parameters.AddWithValue("@Email", email);
                     cmd.Parameters.AddWithValue("@Goal", goal);
@@ -262,7 +278,28 @@ namespace FNS.Repository
                     cmd.Parameters.AddWithValue("@Lifestyle", (object?)lifestyle ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@BloodType", (object?)bloodType ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@SleepPatterns", sleepPatterns.HasValue ? (object)sleepPatterns.Value : DBNull.Value);
-                    totalRows += cmd.ExecuteNonQuery();
+                    healthRowsAffected = cmd.ExecuteNonQuery();
+                }
+
+                if (healthRowsAffected == 0)
+                {
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(healthInsertQuery, _con))
+                    {
+                        cmd.Parameters.AddWithValue("@Email", email);
+                        cmd.Parameters.AddWithValue("@Goal", goal);
+                        cmd.Parameters.AddWithValue("@Weight", weight.HasValue ? (object)weight.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Height", height.HasValue ? (object)height.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Age", age.HasValue ? (object)age.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Diet", (object?)diet ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Lifestyle", (object?)lifestyle ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@BloodType", (object?)bloodType ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@SleepPatterns", sleepPatterns.HasValue ? (object)sleepPatterns.Value : DBNull.Value);
+                        totalRows += cmd.ExecuteNonQuery();
+                    }
+                }
+                else
+                {
+                    totalRows += healthRowsAffected;
                 }
 
                 resultTable.Columns.Add("Status", typeof(string));
@@ -551,6 +588,103 @@ namespace FNS.Repository
                 cmd.Parameters.AddRange(parameters); // Add parameters to command
                 return Convert.ToInt32(cmd.ExecuteScalar()); // Execute the query and return the result as an integer
             }
+        }
+
+        public DataTable FindOrCreateGoogleUser(string email, string firstName, string lastName, string profileImageUrl)
+        {
+            DataTable userTable = new DataTable();
+            try
+            {
+                _con.Open();
+                EnsureProfileImageColumn();
+                EnsurePremiumColumn();
+
+                // Check if user already exists
+                string selectQuery = "SELECT c_email, c_firstname, c_lastname, c_is_premium FROM public.t_user WHERE c_email = @Email";
+                using (NpgsqlCommand selectCmd = new NpgsqlCommand(selectQuery, _con))
+                {
+                    selectCmd.Parameters.AddWithValue("@Email", email);
+                    using (NpgsqlDataReader reader = selectCmd.ExecuteReader())
+                    {
+                        userTable.Load(reader);
+                    }
+                }
+
+                if (userTable.Rows.Count > 0)
+                {
+                    userTable.Columns.Add("IsNewUser", typeof(bool));
+                    userTable.Rows[0]["IsNewUser"] = false;
+
+                    // User exists – update profile image from Google if currently empty
+                    if (!string.IsNullOrEmpty(profileImageUrl))
+                    {
+                        string currentImage = GetProfileImagePathInternal(email);
+                        if (string.IsNullOrEmpty(currentImage))
+                        {
+                            using var updateCmd = new NpgsqlCommand(
+                                "UPDATE public.t_user SET c_profile_image_path = @Img WHERE c_email = @Email", _con);
+                            updateCmd.Parameters.AddWithValue("@Img", profileImageUrl);
+                            updateCmd.Parameters.AddWithValue("@Email", email);
+                            updateCmd.ExecuteNonQuery();
+                        }
+                    }
+                    return userTable;
+                }
+
+                // User doesn't exist – auto-register with Google info
+                string randomPassword = Guid.NewGuid().ToString("N").Substring(0, 16);
+                string insertQuery = @"
+                    INSERT INTO public.t_user (c_email, c_password, c_role, c_firstname, c_lastname, c_username, c_gender, c_dob, c_createddate, c_profile_image_path)
+                    VALUES (@Email, @Password, 'EndUser', @FirstName, @LastName, @Username, 'Other', @Dob, NOW(), @ProfileImage)
+                    RETURNING c_email, c_firstname, c_lastname, c_is_premium;";
+
+                DataTable newUserTable = new DataTable();
+                using (NpgsqlCommand insertCmd = new NpgsqlCommand(insertQuery, _con))
+                {
+                    insertCmd.Parameters.AddWithValue("@Email", email);
+                    insertCmd.Parameters.AddWithValue("@Password", randomPassword);
+                    insertCmd.Parameters.AddWithValue("@FirstName", firstName);
+                    insertCmd.Parameters.AddWithValue("@LastName", lastName);
+                    insertCmd.Parameters.AddWithValue("@Username", email.Split('@')[0]);
+                    insertCmd.Parameters.AddWithValue("@Dob", DateTime.Now.Date);
+                    insertCmd.Parameters.AddWithValue("@ProfileImage", (object)profileImageUrl ?? DBNull.Value);
+
+                    using (NpgsqlDataReader reader = insertCmd.ExecuteReader())
+                    {
+                        newUserTable.Load(reader);
+                    }
+                }
+
+                newUserTable.Columns.Add("IsNewUser", typeof(bool));
+                if (newUserTable.Rows.Count > 0)
+                {
+                    newUserTable.Rows[0]["IsNewUser"] = true;
+                }
+
+                return newUserTable;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_con.State == ConnectionState.Open)
+                    _con.Close();
+            }
+        }
+
+        /// <summary>
+        /// Internal helper – reads profile image path without opening/closing the connection
+        /// (assumes connection is already open).
+        /// </summary>
+        private string GetProfileImagePathInternal(string email)
+        {
+            using var cmd = new NpgsqlCommand(
+                "SELECT c_profile_image_path FROM public.t_user WHERE c_email = @Email LIMIT 1;", _con);
+            cmd.Parameters.AddWithValue("@Email", email);
+            var result = cmd.ExecuteScalar();
+            return result == null || result == DBNull.Value ? string.Empty : result.ToString() ?? string.Empty;
         }
 
         // Simple logging method (for demonstration purposes, you can replace with a proper logging framework like Serilog or NLog)

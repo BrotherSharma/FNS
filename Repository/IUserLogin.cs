@@ -22,5 +22,6 @@ namespace FNS.Repository
         string GetEmailByValidResetToken(string token);
         bool ResetPassword(string token, string newPassword);
         bool UpgradeUserToPremium(string email);
+        DataTable FindOrCreateGoogleUser(string email, string firstName, string lastName, string profileImageUrl);
     }
 }

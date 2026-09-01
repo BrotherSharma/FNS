@@ -1,6 +1,8 @@
 using FNS.Repository;
 using FNS.Services;
 using Npgsql;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,20 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
+
+// Configure Google OAuth authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Google:ClientId"] ?? "";
+    options.ClientSecret = builder.Configuration["Google:ClientSecret"] ?? "";
+    options.CallbackPath = "/signin-google";
+});
 
 // Register the UserLogin service with scoped lifetime
 builder.Services.AddScoped<IUserLogin, UserLogin>();
@@ -51,6 +67,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

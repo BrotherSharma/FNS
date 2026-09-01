@@ -1,444 +1,395 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+
 :root {
-  --fns-ink: #13231d;
-  --fns-muted: #596a62;
-  --fns-surface: rgba(255, 255, 255, 0.9);
-  --fns-surface-strong: #ffffff;
-  --fns-border: rgba(23, 34, 28, 0.12);
-  --fns-shadow: 0 18px 50px rgba(19, 35, 29, 0.18);
-  --fns-primary: #1f5f4a;
-  --fns-primary-dark: #103427;
-  --fns-accent: #d86b45;
-  --fns-teal: #0f766e;
-  --fns-gold: #dca43a;
+  --fns-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --fns-font-display: 'Outfit', sans-serif;
+
+  /* Primary Theme Palette */
+  --fns-emerald-dark: #064e3b;
+  --fns-emerald: #059669;
+  --fns-emerald-light: #10b981;
+  --fns-teal: #0d9488;
+  --fns-cyan: #06b6d4;
+  --fns-indigo: #6366f1;
+  --fns-coral: #f43f5e;
+  --fns-amber: #f59e0b;
+
+  /* Surfaces & Glassmorphism */
+  --fns-surface-bg: rgba(15, 23, 42, 0.72);
+  --fns-surface-card: rgba(255, 255, 255, 0.88);
+  --fns-surface-glass: rgba(255, 255, 255, 0.94);
+  --fns-border-light: rgba(255, 255, 255, 0.25);
+  --fns-border-subtle: rgba(15, 23, 42, 0.08);
+
+  /* Text & Ink */
+  --fns-ink-primary: #0f172a;
+  --fns-ink-secondary: #475569;
+  --fns-ink-muted: #64748b;
+
+  /* Shadows & Glows */
+  --fns-shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+  --fns-shadow-md: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --fns-shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.18);
+  --fns-shadow-glow: 0 0 25px rgba(16, 185, 129, 0.35);
+
   --fns-bg-image: url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1800&q=80");
   --fns-bg-fallback: url("/Logo/cp1.jpg");
-  --fns-font-family: 'Inter', sans-serif;
 }
 
+/* Global Font & Smooth Scrolling */
+html, body {
+  font-family: var(--fns-font-family);
+  color: var(--fns-ink-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Body Layout Shell */
 body.fns-layout-shell {
   min-height: 100vh;
-  height: auto;
-  overflow: auto;
-  display: block;
   margin: 0;
   padding: 0;
-  color: var(--fns-ink);
-  font-family: var(--fns-font-family);
-  font-size: 16px;
-  line-height: 1.5;
-  background:
-    linear-gradient(115deg, rgba(245, 250, 247, 0.74), rgba(222, 242, 234, 0.62)),
-    var(--fns-bg-image) center / cover,
-    var(--fns-bg-fallback) center / cover;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.15), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.15), transparent 40%),
+    linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background-attachment: fixed;
 }
 
 body.fns-layout-shell > .container {
   width: 100%;
-  max-width: none;
-  padding: 0 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
 }
 
+/* ----------------------------------------------------
+   Auth Shell & Responsive Modern Cards
+---------------------------------------------------- */
 .fns-auth-shell,
 .fns-payment-shell,
 .fns-status-shell {
   min-height: 100vh;
-  color: var(--fns-ink);
-  background:
-    linear-gradient(115deg, rgba(13, 38, 31, 0.76), rgba(31, 122, 114, 0.38)),
-    var(--fns-bg-image) center / cover,
-    var(--fns-bg-fallback) center / cover;
-}
-
-.fns-auth-shell {
   display: flex;
   align-items: center;
-  padding: 28px 14px;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background:
+    linear-gradient(135deg, rgba(6, 78, 59, 0.85), rgba(15, 23, 42, 0.92)),
+    var(--fns-bg-image) center / cover no-repeat,
+    var(--fns-bg-fallback) center / cover no-repeat;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.fns-auth-shell::before,
+.fns-payment-shell::before,
+.fns-status-shell::before {
+  content: "";
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+  top: -100px;
+  right: -100px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulseGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.9) translate(0, 0); opacity: 0.6; }
+  100% { transform: scale(1.15) translate(-30px, 30px); opacity: 0.9; }
 }
 
 .fns-auth-shell .container {
-  max-width: 1080px;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .fns-auth-shell .login-card,
 .fns-auth-shell .card-center,
 .fns-auth-shell .reset-card {
   position: relative;
-  width: min(100%, 520px);
-  max-width: 520px;
-  margin: 0 auto;
-  padding: 34px 36px;
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  border-radius: 16px;
-  background: var(--fns-surface);
-  box-shadow: var(--fns-shadow);
-  backdrop-filter: blur(14px);
+  width: 100%;
+  padding: 2.75rem 2.5rem;
+  border-radius: 24px;
+  background: var(--fns-surface-glass);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .fns-auth-shell .login-card::before,
 .fns-auth-shell .card-center::before,
-.fns-auth-shell .reset-card::before,
-.fns-payment-shell .payment-container::before,
-.fns-status-shell .container::before {
+.fns-auth-shell .reset-card::before {
   content: "";
   display: block;
-  width: 54px;
-  height: 4px;
-  margin: 0 auto 18px;
+  width: 60px;
+  height: 5px;
+  margin: 0 auto 1.5rem;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--fns-primary), var(--fns-accent), var(--fns-gold));
+  background: linear-gradient(90deg, #10b981, #06b6d4, #6366f1);
 }
 
 .fns-auth-shell .brand-logo,
 .fns-auth-shell .login-logo {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   object-fit: cover;
-  border-radius: 8px;
-  padding: 5px;
-  background: #fff;
-  box-shadow: 0 10px 24px rgba(23, 34, 28, 0.16);
+  border-radius: 16px;
+  padding: 6px;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  margin: 0 auto 1.25rem;
+  display: block;
 }
 
 .fns-auth-shell h3,
 .fns-auth-shell .reset-title {
-  color: var(--fns-primary-dark);
+  font-family: var(--fns-font-display);
   font-weight: 800;
+  font-size: 1.85rem;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  text-align: center;
 }
 
+.fns-auth-shell p.muted,
+.fns-auth-shell .muted {
+  color: var(--fns-ink-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Custom Form Controls */
 .fns-auth-shell .form-control,
 .fns-layout-shell .form-control,
-.dashboard-shell input,
-.dashboard-shell select,
-.dashboard-shell textarea {
-  min-height: 46px;
-  border: 1px solid var(--fns-border) !important;
-  border-radius: 8px !important;
-  background-color: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 1px 0 rgba(23, 34, 28, 0.04);
+.fns-payment-shell .form-control,
+.fns-status-shell .form-control {
+  min-height: 50px;
+  border-radius: 12px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background-color: #ffffff !important;
+  padding: 0.75rem 1.15rem;
+  font-size: 0.98rem;
+  color: #0f172a;
+  font-weight: 500;
+  transition: all 0.25s ease;
 }
 
 .fns-auth-shell .form-control:focus,
 .fns-layout-shell .form-control:focus,
-.dashboard-shell input:focus,
-.dashboard-shell select:focus,
-.dashboard-shell textarea:focus {
-  border-color: var(--fns-teal) !important;
-  box-shadow: 0 0 0 0.2rem rgba(31, 122, 114, 0.14) !important;
+.fns-payment-shell .form-control:focus,
+.fns-status-shell .form-control:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+  outline: none;
 }
 
-.fns-auth-shell .card-center form {
-  display: grid;
-  gap: 12px;
-}
-
-.fns-auth-shell .card-center .mt-2,
-.fns-auth-shell .reset-card .mb-3 {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-.fns-auth-shell .card-center .form-control,
-.fns-auth-shell .reset-card .form-control {
-  min-height: 52px;
-  padding: 0.85rem 1rem;
-  font-size: 0.98rem;
-}
-
-.fns-auth-shell .card-center .btn,
-.fns-auth-shell .reset-card .btn {
-  min-height: 52px;
-  border-radius: 10px;
-  font-weight: 700;
-}
-
-.fns-auth-shell .card-center .small,
-.fns-auth-shell .card-center .muted,
-.fns-auth-shell .reset-card .small,
-.fns-auth-shell .reset-card .muted,
-.fns-auth-shell .small-links {
-  font-size: 0.96rem !important;
-  line-height: 1.45;
-}
-
-.fns-auth-shell .small-links a,
-.fns-auth-shell .card-center a,
-.fns-auth-shell .reset-card a {
-  font-size: 0.96rem;
+.fns-auth-shell .error-message {
+  color: #ef4444;
+  font-size: 0.85rem;
   font-weight: 600;
+  margin-top: 6px;
+  display: block;
 }
 
-.fns-auth-shell .small-links {
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.fns-auth-shell .small-links > div {
-  line-height: 1.45;
-}
-
-.fns-auth-shell .card-center .text-center.muted.small {
-  margin-top: 4px !important;
-}
-
-.fns-auth-shell .card-center h3,
-.fns-auth-shell .reset-card h3 {
-  font-size: 2rem;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.5rem !important;
-}
-
-.fns-auth-shell .reset-card p.muted,
-.fns-auth-shell .card-center .muted {
-  font-size: 0.96rem;
-  line-height: 1.5;
-}
-
+/* Glass & Solid Buttons */
 .fns-auth-shell .btn-primary,
 .fns-layout-shell .btn-primary,
-.fns-layout-shell .improve-action-btn,
-.dashboard-shell .btn-primary,
-.dashboard-shell button.btn-primary {
-  border: 0 !important;
-  border-radius: 8px !important;
-  color: #fff !important;
-  background: linear-gradient(135deg, var(--fns-primary), var(--fns-teal)) !important;
-  box-shadow: 0 12px 24px rgba(46, 89, 66, 0.22);
+.fns-payment-shell .btn-primary,
+.fns-status-shell .btn-primary,
+.fns-layout-shell .improve-action-btn {
+  min-height: 50px;
+  border-radius: 12px !important;
+  border: none !important;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
 }
 
 .fns-auth-shell .btn-primary:hover,
 .fns-layout-shell .btn-primary:hover,
-.fns-layout-shell .improve-action-btn:hover,
-.dashboard-shell .btn-primary:hover,
-.dashboard-shell button.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 30px rgba(46, 89, 66, 0.3);
+.fns-payment-shell .btn-primary:hover,
+.fns-status-shell .btn-primary:hover,
+.fns-layout-shell .improve-action-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(16, 185, 129, 0.45);
 }
 
 .fns-auth-shell a,
 .fns-layout-shell a {
-  color: var(--fns-teal);
+  color: #059669;
+  text-decoration: none;
   font-weight: 600;
+  transition: color 0.2s ease;
 }
 
+.fns-auth-shell a:hover,
+.fns-layout-shell a:hover {
+  color: #047857;
+  text-decoration: underline;
+}
+
+/* ----------------------------------------------------
+   Fitness Onboarding / Improve View Styling
+---------------------------------------------------- */
 .fns-layout-shell .improve-card {
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 8px;
-  background: var(--fns-surface);
-  box-shadow: var(--fns-shadow);
-  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+  padding: 2.5rem;
 }
 
 .fns-layout-shell .improve-title {
-  color: var(--fns-primary-dark);
-}
-
-.dashboard-shell {
-  background-color: var(--bg-canvas, #f8faf9) !important;
-  background-image: none !important;
-  color: var(--fns-ink);
-  height: 100vh;
-  overflow: hidden;
-}
-
-.dashboard-shell .main-content {
-  height: 100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.dashboard-shell .app-header {
-  background: linear-gradient(135deg, rgba(16, 52, 39, 0.93), rgba(15, 118, 110, 0.86)) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 10px 26px rgba(23, 34, 28, 0.22);
-}
-
-.dashboard-shell .sidebar {
-  background-color: #ffffff !important;
-  background-image: none !important;
-  border-right: 1px solid var(--fns-border);
-}
-
-.dashboard-shell .sidebar a {
-  margin: 3px 10px;
-  border-radius: 8px;
-  border-left: 0;
-}
-
-.dashboard-shell .sidebar a:hover,
-.dashboard-shell .sidebar a.active {
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 8px 18px rgba(0, 0, 0, 0.12);
-}
-
-.dashboard-shell .page-section {
-  max-width: none;
-  width: 100%;
-  margin: 0;
-}
-
-.dashboard-shell .page-section h2 {
-  color: var(--fns-primary-dark);
+  font-family: var(--fns-font-display);
   font-weight: 800;
+  font-size: 2rem;
+  color: #0f172a;
 }
 
-.dashboard-shell .section,
-.dashboard-shell .chart-box,
-.dashboard-shell .profile-container,
-.dashboard-shell .stat-card,
-.dashboard-shell .goal-card,
-.dashboard-shell .suggestion-item,
-.dashboard-shell .food-card,
-.dashboard-shell .checklist-table-wrap {
-  border: 1px solid var(--fns-border);
-  border-radius: 8px !important;
-  background: var(--fns-surface);
-  box-shadow: 0 14px 34px rgba(19, 35, 29, 0.14);
-  backdrop-filter: blur(10px);
-}
-
-.dashboard-shell .chart-row {
-  align-items: stretch;
-}
-
-.dashboard-shell .chart-box {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: clamp(320px, 34vw, 420px);
-}
-
-.dashboard-shell .chart-box canvas {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: block;
-}
-
-.dashboard-shell .daily-summary-header,
-.dashboard-shell .goal-progress-card {
-  border-radius: 8px !important;
-  background:
-    linear-gradient(135deg, rgba(31, 95, 74, 0.9), rgba(15, 118, 110, 0.78)),
-    var(--fns-bg-image) center / cover,
-    var(--fns-bg-fallback) center / cover !important;
-  box-shadow: 0 16px 34px rgba(46, 89, 66, 0.22);
-}
-
-.dashboard-shell .stat-item {
-  border-left: 0;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 8px;
-}
-
-.dashboard-shell .stat-box,
-.dashboard-shell .goal-stat {
-  border: 1px solid rgba(46, 89, 66, 0.12);
-  border-radius: 8px !important;
-  background: rgba(247, 251, 249, 0.94) !important;
-}
-
-.dashboard-shell table {
-  overflow: hidden;
-  border-radius: 8px;
-}
-
-.dashboard-shell thead th {
-  background: rgba(46, 89, 66, 0.08);
-  color: var(--fns-primary-dark);
-}
-
-.dashboard-shell .mood-tracker i {
-  padding: 10px;
-  border-radius: 8px;
-  background: rgba(46, 89, 66, 0.07);
-}
-
-.dashboard-shell .profile-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid var(--fns-border);
-}
-
-.dashboard-shell .profile-header-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.dashboard-shell .profile-header-actions form {
-  margin: 0;
-}
-
-.dashboard-shell .profile-actions form {
-  margin: 0;
-}
-
-.dashboard-shell .profile-logout-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 10px 18px;
-  background: var(--primary-color) !important;
-  box-shadow: 0 12px 24px rgba(46, 89, 66, 0.24);
-}
-
-.fns-payment-shell,
-.fns-status-shell {
+/* Custom Interactive Option Cards */
+.goal-option-card, .activity-option-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.25s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 24px;
+  gap: 1rem;
 }
 
+.goal-option-card:hover, .activity-option-card:hover {
+  border-color: #10b981;
+  background: #f0fdf4;
+  transform: translateY(-2px);
+}
+
+.goal-option-card.selected, .activity-option-card.selected {
+  border-color: #10b981;
+  background: #ecfdf5;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+}
+
+/* ----------------------------------------------------
+   Payment & Admin Approval Touchpoints Styling
+---------------------------------------------------- */
 .fns-payment-shell .payment-container,
 .fns-status-shell .container {
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  border-radius: 8px;
-  background: var(--fns-surface);
-  box-shadow: var(--fns-shadow);
-  backdrop-filter: blur(14px);
+  max-width: 640px;
+  width: 100%;
+  border-radius: 24px;
+  background: var(--fns-surface-glass);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 2.5rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(20px);
 }
 
-.fns-payment-shell .amount-section,
-.fns-payment-shell .btn-pay,
-.fns-status-shell .btn-primary,
-.fns-status-shell .btn-retry,
-.fns-status-shell .step-number {
-  background: linear-gradient(135deg, var(--fns-primary), var(--fns-teal)) !important;
+.fns-payment-shell .amount-section {
+  background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
 }
 
 .fns-payment-shell .payment-details,
 .fns-payment-shell .info-section,
 .fns-status-shell .info-box,
 .fns-status-shell .activity-log,
-.fns-status-shell .step,
 .fns-status-shell .contact-info,
 .fns-status-shell .reason-box,
 .fns-status-shell .next-steps {
-  border: 1px solid rgba(46, 89, 66, 0.12);
-  border-left: 4px solid var(--fns-teal);
-  border-radius: 8px;
-  background: rgba(247, 251, 249, 0.94) !important;
+  border: 1px solid #e2e8f0;
+  border-left: 5px solid #10b981;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--fns-shadow-sm);
+}
+
+.fns-status-shell .step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
 }
 
 .fns-payment-shell .btn-cancel,
 .fns-status-shell .btn-secondary,
 .fns-status-shell .btn-logout {
-  border-radius: 8px;
-  background: #f4f7f5 !important;
-  border: 1px solid var(--fns-border) !important;
+  min-height: 48px;
+  border-radius: 12px !important;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
-@media (max-width: 768px) {
+.fns-payment-shell .btn-cancel:hover,
+.fns-status-shell .btn-secondary:hover,
+.fns-status-shell .btn-logout:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Modern Pill Badges */
+.fns-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fns-badge-success { background: #dcfce7; color: #15803d; }
+.fns-badge-warning { background: #fef3c7; color: #b45309; }
+.fns-badge-danger  { background: #ffe4e6; color: #be123c; }
+.fns-badge-info    { background: #e0f2fe; color: #0369a1; }
+
+@media (max-width: 640px) {
   .fns-auth-shell,
   .fns-payment-shell,
   .fns-status-shell {
-    padding: 16px;
-    align-items: flex-start;
+    padding: 1rem;
   }
 
   .fns-auth-shell .login-card,
@@ -446,11 +397,7 @@ body.fns-layout-shell > .container {
   .fns-auth-shell .reset-card,
   .fns-payment-shell .payment-container,
   .fns-status-shell .container {
-    padding: 22px;
-  }
-
-  .dashboard-shell {
-    background-color: var(--bg-canvas, #f8faf9) !important;
-    background-image: none !important;
+    padding: 1.75rem 1.25rem;
+    border-radius: 18px;
   }
 }
