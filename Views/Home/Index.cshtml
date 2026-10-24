@@ -30,7 +30,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <link href="/css/fns-ui.css" rel="stylesheet" />
-    <link href="/css/dashboard-premium.css" rel="stylesheet" />
+    <link href="/css/dashboard-premium.css?v=20261024-profile-instagram" rel="stylesheet" />
 </head>
 <body class="dashboard-shell">
 
@@ -807,7 +807,7 @@
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 2px;">
                                 <span style="font-size: 13px; color: var(--primary); font-weight: 600;">Age</span>
-                                <span style="font-size: 16px; color: #111827; font-weight: 600;"><span id="Age">23</span> Years</span>
+                                <span style="font-size: 16px; color: #111827; font-weight: 600;"><span id="Age">N/A</span> <span id="ageUnit"></span></span>
                             </div>
                         </div>
                     </div>
@@ -863,6 +863,20 @@
                     </div>
                 </div>
             </div>
+
+            <section class="profile-instagram-banner" aria-label="Follow us on Instagram">
+                <div class="profile-instagram-mark" aria-hidden="true">
+                    <i class="fab fa-instagram"></i>
+                </div>
+                <div class="profile-instagram-copy">
+                    <span class="profile-instagram-eyebrow">Stay connected</span>
+                    <h3>Follow us on Instagram</h3>
+                    <p>Find us at <span>@@your_web.site</span> for more.</p>
+                </div>
+                <a class="profile-instagram-link" href="https://www.instagram.com/your_web.site/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram, opens in a new tab">
+                    Follow on Instagram <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
+            </section>
 
             <!-- Goal Completion card -->
             <div class="profile-goal-card">
@@ -1116,7 +1130,7 @@
             const activeLink = document.querySelector(`.sidebar [data-section="${sectionId}"]`);
             if (activeLink) activeLink.classList.add('active');
             
-            if (sectionId === 'todayChecklist' && typeof loadChecklist === 'function') loadChecklist();
+            if (sectionId === 'todayChecklist' && typeof window.loadChecklist === 'function') window.loadChecklist();
             if (sectionId === 'moodTracker' && typeof loadMood === 'function') loadMood();
 
             if (document.body.classList.contains('sidebar-open')) {
@@ -1344,6 +1358,7 @@
                     renderChecklist([]);
                 }
             }
+            window.loadChecklist = loadChecklist;
 
             async function saveChecklist() {
                 const items = Array.from(document.querySelectorAll('.checklist-toggle')).map(input => ({
@@ -2857,26 +2872,15 @@
                 if (response.ok) {
                     const data = await response.json();
                     const streakCount = data.streak ?? 0;
-                    const dob = data.dob;
                     const goal = data.goal || 'Weight Loss';
                     window.FNSUserDiet = (data.diet || window.FNSUserDiet || 'Non-Veg').toString();
                     window.FNSUserGender = (data.gender || window.FNSUserGender || 'all').toString();
-                    
-                    let Age = data.age || "23";
-                    if (!data.age && dob) {
-                        let [d, m, y] = dob.split(" ")[0].split("-");
-                        let birthDate = new Date(y, m - 1, d);
-                        let today = new Date();
-                        let computedAge = today.getFullYear() - birthDate.getFullYear();
-                        if (today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
-                            computedAge--;
-                        }
-                        Age = computedAge;
-                    }
+                    const age = data.age ?? 'N/A';
 
                     document.getElementById("streakText").textContent = `${streakCount}-day`;
                     document.getElementById("streakTextprofile").textContent = streakCount;
-                    document.getElementById("Age").textContent = Age;
+                    document.getElementById("Age").textContent = age;
+                    document.getElementById("ageUnit").textContent = age === 'N/A' ? '' : 'Years';
                     document.getElementById("goal").textContent = goal;
                     
                     // Profile stats (Days Completed & Remaining - Current Month)
@@ -3165,8 +3169,7 @@
 
             // Profile togglers
             window.toggleEditProfile = function () {
-                const form = document.getElementById('editProfileForm');
-                if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                openEditProfileModal();
             };
 
             window.saveProfileChanges = async function() {
