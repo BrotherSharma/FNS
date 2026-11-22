@@ -30,7 +30,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <link href="/css/fns-ui.css" rel="stylesheet" />
-    <link href="/css/dashboard-premium.css" rel="stylesheet" />
+    <link href="/css/dashboard-premium.css?v=20261024-resource-modal" rel="stylesheet" />
 </head>
 <body class="dashboard-shell">
 
@@ -537,9 +537,6 @@
                     <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px;">
                         Start light, warm up first, and stop if you feel pain, dizziness, or unusual shortness of breath.
                     </p>
-                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px;">
-                        Start light, warm up first, and stop if you feel pain, dizziness, or unusual shortness of breath.
-                    </p>
                 </div>
             </div>
         </div>
@@ -807,7 +804,7 @@
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 2px;">
                                 <span style="font-size: 13px; color: var(--primary); font-weight: 600;">Age</span>
-                                <span style="font-size: 16px; color: #111827; font-weight: 600;"><span id="Age">23</span> Years</span>
+                                <span style="font-size: 16px; color: #111827; font-weight: 600;"><span id="Age">N/A</span> <span id="ageUnit"></span></span>
                             </div>
                         </div>
                     </div>
@@ -863,6 +860,20 @@
                     </div>
                 </div>
             </div>
+
+            <section class="profile-instagram-banner" aria-label="Follow us on Instagram">
+                <div class="profile-instagram-mark" aria-hidden="true">
+                    <i class="fab fa-instagram"></i>
+                </div>
+                <div class="profile-instagram-copy">
+                    <span class="profile-instagram-eyebrow">Stay connected</span>
+                    <h3>Follow us on Instagram</h3>
+                    <p>Find us at <span>@@your_web.site</span> for more.</p>
+                </div>
+                <a class="profile-instagram-link" href="https://www.instagram.com/your_web.site/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram, opens in a new tab">
+                    Follow on Instagram <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                </a>
+            </section>
 
             <!-- Goal Completion card -->
             <div class="profile-goal-card">
@@ -1116,7 +1127,7 @@
             const activeLink = document.querySelector(`.sidebar [data-section="${sectionId}"]`);
             if (activeLink) activeLink.classList.add('active');
             
-            if (sectionId === 'todayChecklist' && typeof loadChecklist === 'function') loadChecklist();
+            if (sectionId === 'todayChecklist' && typeof window.loadChecklist === 'function') window.loadChecklist();
             if (sectionId === 'moodTracker' && typeof loadMood === 'function') loadMood();
 
             if (document.body.classList.contains('sidebar-open')) {
@@ -1133,6 +1144,98 @@
             document.body.classList.remove('sidebar-open');
             document.querySelector('.sidebar')?.classList.remove('sidebar-visible');
         }
+
+        const gymDietResourcesData = [
+            { id: 1, title: 'Whey Protein Isolate', category: 'Supplements', icon: 'fa-jar', tag: '25g Protein / scoop', desc: 'Ultra-pure fast-absorbing protein ideal for post-workout muscle recovery and repair.', tip: 'Take 1 scoop with 250ml cold water within 30 min after workout.' },
+            { id: 2, title: 'Creatine Monohydrate', category: 'Supplements', icon: 'fa-bolt', tag: 'Strength & Power', desc: 'Clinically proven to increase muscular strength, explosive power, and muscle cell hydration.', tip: '3g-5g daily consistently every morning or post-workout.' },
+            { id: 3, title: 'Pre-Workout Energy Fuel', category: 'Supplements', icon: 'fa-fire-flame-curved', tag: 'Focus & Endurance', desc: 'Combines L-Citrulline, Beta-Alanine, and Caffeine for intense workout energy and muscle pumps.', tip: 'Take 20 minutes before training. Avoid taking late at night.' },
+            { id: 4, title: 'BCAA & Electrolytes', category: 'Supplements', icon: 'fa-droplet', tag: 'Hydration & Anti-Catabolic', desc: 'Essential amino acids to prevent muscle breakdown during long endurance or strength sessions.', tip: 'Sip throughout your workout in 500ml iced water.' },
+            { id: 5, title: 'Heavy-Duty Lifting Straps', category: 'Gym Gear', icon: 'fa-ring', tag: 'Grip Support', desc: 'Padded cotton straps that eliminate grip fatigue on heavy deadlifts, rows, and shrugs.', tip: 'Wrap snugly around the barbell before pulling.' },
+            { id: 6, title: 'Foam Roller & Massage Ball', category: 'Recovery', icon: 'fa-spa', tag: 'Myofascial Release', desc: 'Relieves tight knots in calves, quads, IT bands, and upper back for improved flexibility.', tip: 'Roll slowly over tight areas for 30-60 seconds per muscle.' },
+            { id: 7, title: 'High-Protein Meal Prep Guide', category: 'Diet & Nutrition', icon: 'fa-utensils', tag: 'Macro Balanced', desc: 'Weekly guide with balanced recipes (Chicken breast, Paneer tikka, Quinoa bowls, Eggs).', tip: 'Prep 3 days in advance in airtight glass containers.' },
+            { id: 8, title: 'Omega-3 & Multivitamins', category: 'Supplements', icon: 'fa-capsules', tag: 'Joints & Immunity', desc: 'Essential EPA/DHA fatty acids and micronutrients to support joint lubrication and heart health.', tip: 'Take 1 softgel daily with your largest meal.' },
+            { id: 9, title: 'Resistance Loop Bands Set', category: 'Gym Gear', icon: 'fa-dumbbell', tag: 'Home & Travel Workout', desc: 'Set of 5 heavy latex bands for glute activation, shoulder rehab, and home resistance training.', tip: 'Great for warming up glutes before heavy squats.' },
+            { id: 10, title: 'Ergonomic Shaker Bottle (750ml)', category: 'Gym Gear', icon: 'fa-bottle-water', tag: 'BPA-Free Shaker', desc: 'Leak-proof shaker with stainless steel wire whisk ball for lump-free protein shakes.', tip: 'Rinse with cold water immediately after drinking.' }
+        ];
+        let activeResourceCategory = 'all';
+
+        function renderMoreResources() {
+            const listEl = document.getElementById('moreResourcesList');
+            const query = (document.getElementById('moreResourcesSearch')?.value || '').toLowerCase().trim();
+            if (!listEl) return;
+
+            const filtered = gymDietResourcesData.filter(item => {
+                const matchesCategory = activeResourceCategory === 'all' || item.category === activeResourceCategory;
+                const matchesQuery = !query || item.title.toLowerCase().includes(query) || item.desc.toLowerCase().includes(query) || item.tag.toLowerCase().includes(query);
+                return matchesCategory && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-4 text-muted w-100" style="grid-column: 1 / -1;"><i class="fas fa-search fa-2x mb-2"></i><p>No resources found matching your search.</p></div>';
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(item => `
+                <div class="resource-card">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div class="resource-card-icon">
+                            <i class="fas ${item.icon}"></i>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1" style="font-size: 11px; font-weight: 700;">${item.category}</span>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 800; color: #0f172a; font-family: 'Outfit', sans-serif;">${item.title}</h4>
+                        <span style="display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--primary); margin-bottom: 6px;"><i class="fas fa-check-circle me-1"></i>${item.tag}</span>
+                        <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">${item.desc}</p>
+                        <div style="background: #ffffff; padding: 8px 10px; border-radius: 10px; border: 1px dashed #cbd5e1; font-size: 11.5px; color: #475569;">
+                            <strong>Tip:</strong> ${item.tip}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openMoreResourcesModal = function () {
+            const modal = document.getElementById('moreResourcesModal');
+            if (!modal) {
+                console.error('Gym and diet resources modal was not found.');
+                return;
+            }
+
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            }
+
+            activeResourceCategory = 'all';
+            const search = document.getElementById('moreResourcesSearch');
+            if (search) search.value = '';
+            document.querySelectorAll('.more-resources-filter-pills .res-pill').forEach(button => {
+                button.classList.toggle('active', button.textContent.trim() === 'All');
+            });
+
+            renderMoreResources();
+            modal.style.display = 'flex';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeMoreResourcesModal = function () {
+            const modal = document.getElementById('moreResourcesModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        };
+
+        window.filterResourceCategory = function (category, btnEl) {
+            activeResourceCategory = category;
+            document.querySelectorAll('.more-resources-filter-pills .res-pill').forEach(button => button.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+            renderMoreResources();
+        };
+
+        window.filterMoreResources = renderMoreResources;
 
         document.addEventListener("DOMContentLoaded", async () => {
                 window.FNSUserName = '@Name';
@@ -1344,6 +1447,7 @@
                     renderChecklist([]);
                 }
             }
+            window.loadChecklist = loadChecklist;
 
             async function saveChecklist() {
                 const items = Array.from(document.querySelectorAll('.checklist-toggle')).map(input => ({
@@ -1823,52 +1927,6 @@
                 }
             };
 
-            // --- Gym & Diet Resources Library & Popup Handlers ---
-            const gymDietResourcesData = [
-                { id: 1, title: 'Whey Protein Isolate', category: 'Supplements', icon: 'fa-jar', tag: '25g Protein / scoop', desc: 'Ultra-pure fast-absorbing protein ideal for post-workout muscle recovery and repair.', tip: 'Take 1 scoop with 250ml cold water within 30 min after workout.' },
-                { id: 2, title: 'Creatine Monohydrate', category: 'Supplements', icon: 'fa-bolt', tag: 'Strength & Power', desc: 'Clinically proven to increase muscular strength, explosive power, and muscle cell hydration.', tip: '3g-5g daily consistently every morning or post-workout.' },
-                { id: 3, title: 'Pre-Workout Energy Fuel', category: 'Supplements', icon: 'fa-fire-flame-curved', tag: 'Focus & Endurance', desc: 'Combines L-Citrulline, Beta-Alanine, and Caffeine for intense workout energy and muscle pumps.', tip: 'Take 20 minutes before training. Avoid taking late at night.' },
-                { id: 4, title: 'BCAA & Electrolytes', category: 'Supplements', icon: 'fa-droplet', tag: 'Hydration & Anti-Catabolic', desc: 'Essential amino acids to prevent muscle breakdown during long endurance or strength sessions.', tip: 'Sip throughout your workout in 500ml iced water.' },
-                { id: 5, title: 'Heavy-Duty Lifting Straps', category: 'Gym Gear', icon: 'fa-ring', tag: 'Grip Support', desc: 'Padded cotton straps that eliminate grip fatigue on heavy deadlifts, rows, and shrugs.', tip: 'Wrap snugly around the barbell before pulling.' },
-                { id: 6, title: 'Foam Roller & Massage Ball', category: 'Recovery', icon: 'fa-spa', tag: 'Myofascial Release', desc: 'Relieves tight knots in calves, quads, IT bands, and upper back for improved flexibility.', tip: 'Roll slowly over tight areas for 30-60 seconds per muscle.' },
-                { id: 7, title: 'High-Protein Meal Prep Guide', category: 'Diet & Nutrition', icon: 'fa-utensils', tag: 'Macro Balanced', desc: 'Weekly guide with balanced recipes (Chicken breast, Paneer tikka, Quinoa bowls, Eggs).', tip: 'Prep 3 days in advance in airtight glass containers.' },
-                { id: 8, title: 'Omega-3 & Multivitamins', category: 'Supplements', icon: 'fa-capsules', tag: 'Joints & Immunity', desc: 'Essential EPA/DHA fatty acids and micronutrients to support joint lubrication and heart health.', tip: 'Take 1 softgel daily with your largest meal.' },
-                { id: 9, title: 'Resistance Loop Bands Set', category: 'Gym Gear', icon: 'fa-dumbbell', tag: 'Home & Travel Workout', desc: 'Set of 5 heavy latex bands for glute activation, shoulder rehab, and home resistance training.', tip: 'Great for warming up glutes before heavy squats.' },
-                { id: 10, title: 'Ergonomic Shaker Bottle (750ml)', category: 'Gym Gear', icon: 'fa-bottle-water', tag: 'BPA-Free Shaker', desc: 'Leak-proof shaker with stainless steel wire whisk ball for lump-free protein shakes.', tip: 'Rinse with cold water immediately after drinking.' }
-            ];
-
-            let activeResourceCategory = 'all';
-
-            window.openMoreResourcesModal = function () {
-                const modal = document.getElementById('moreResourcesModal');
-                if (modal) {
-                    modal.style.display = 'flex';
-                    modal.classList.add('active');
-                    renderMoreResources();
-                    document.body.style.overflow = 'hidden';
-                }
-            };
-
-            window.closeMoreResourcesModal = function () {
-                const modal = document.getElementById('moreResourcesModal');
-                if (modal) {
-                    modal.style.display = 'none';
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            };
-
-            window.filterResourceCategory = function (category, btnEl) {
-                activeResourceCategory = category;
-                document.querySelectorAll('.more-resources-filter-pills .res-pill').forEach(b => b.classList.remove('active'));
-                if (btnEl) btnEl.classList.add('active');
-                renderMoreResources();
-            };
-
-            window.filterMoreResources = function () {
-                renderMoreResources();
-            };
-
             // --- Edit Profile Modal Handlers ---
             window.toggleEditProfile = function () {
                 openEditProfileModal();
@@ -1968,42 +2026,6 @@
                     if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
                 }
             };
-
-            function renderMoreResources() {
-                const listEl = document.getElementById('moreResourcesList');
-                const query = (document.getElementById('moreResourcesSearch')?.value || '').toLowerCase().trim();
-                if (!listEl) return;
-
-                const filtered = gymDietResourcesData.filter(item => {
-                    const matchesCategory = activeResourceCategory === 'all' || item.category === activeResourceCategory;
-                    const matchesQuery = !query || item.title.toLowerCase().includes(query) || item.desc.toLowerCase().includes(query) || item.tag.toLowerCase().includes(query);
-                    return matchesCategory && matchesQuery;
-                });
-
-                if (filtered.length === 0) {
-                    listEl.innerHTML = '<div class="text-center py-4 text-muted w-100" style="grid-column: 1 / -1;"><i class="fas fa-search fa-2x mb-2"></i><p>No resources found matching your search.</p></div>';
-                    return;
-                }
-
-                listEl.innerHTML = filtered.map(item => `
-                    <div class="resource-card">
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div class="resource-card-icon">
-                                <i class="fas ${item.icon}"></i>
-                            </div>
-                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1" style="font-size: 11px; font-weight: 700;">${item.category}</span>
-                        </div>
-                        <div>
-                            <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 800; color: #0f172a; font-family: 'Outfit', sans-serif;">${item.title}</h4>
-                            <span style="display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--primary); margin-bottom: 6px;"><i class="fas fa-check-circle me-1"></i>${item.tag}</span>
-                            <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">${item.desc}</p>
-                            <div style="background: #ffffff; padding: 8px 10px; border-radius: 10px; border: 1px dashed #cbd5e1; font-size: 11.5px; color: #475569;">
-                                <strong>Tip:</strong> ${item.tip}
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
 
             function renderWorkoutMeals(goalKey) {
                 const box = document.getElementById('workoutMeals');
@@ -2584,20 +2606,30 @@
                 const profileNote = `Personalized for ${escapeHtml(window.FNSUserDiet || 'Balanced')} ${genderKey === 'female' ? 'female' : genderKey === 'male' ? 'male' : 'member'}.`;
 
                 const productCards = products.map(product => `
-                    <div class="exercise-resource-card">
-                        ${product.image ? `<div style="overflow:hidden; border-radius:16px; margin:-16px -16px 12px;"><img src="${product.image}" alt="${escapeHtml(product.name)}" style="width:100%; height:140px; object-fit:cover;"></div>` : ''}
-                        <div>
-                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-                                <h4 style="font-size:14px; font-weight:700; margin:0;">${escapeHtml(product.name)}</h4>
-                                ${Array.isArray(product.dietType) && product.dietType.map(dt => dt.toString().toLowerCase()).includes('vegetarian') ? `<span class="product-badge">Vegetarian-Friendly</span>` : ''}
+                    <div class="exercise-resource-card" style="display:flex; gap:14px; padding:14px; border:1px solid var(--border-color); border-radius:14px; min-width:0;">
+                        ${product.image ? `
+                            <div style="flex:0 0 120px; height:120px; overflow:hidden; border-radius:10px; background:#f1f5f9;">
+                                <img src="${product.image}" alt="${escapeHtml(product.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+                                <div hidden style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#64748b; font-size:12px; text-align:center;">
+                                    <i class="fas fa-dumbbell" aria-hidden="true"></i>
+                                    <span>Image unavailable</span>
+                                </div>
                             </div>
-                            <p style="font-size:12px; color:var(--text-muted); margin:0 0 8px;">${escapeHtml(product.desc)}</p>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:8px;">
-                            <span style="font-weight:700; color:var(--primary);">${escapeHtml(product.price)}</span>
-                            <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                                ${product.amazonLink ? `<a href="${product.amazonLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline" style="font-size:12px; padding:6px 10px;">Amazon</a>` : ''}
-                                ${product.flipkartLink ? `<a href="${product.flipkartLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline" style="font-size:12px; padding:6px 10px;">Flipkart</a>` : ''}
+                        ` : ''}
+                        <div style="flex:1; min-width:0; display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+                            <div>
+                                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                                    <h4 style="font-size:14px; font-weight:700; margin:0;">${escapeHtml(product.name)}</h4>
+                                    ${Array.isArray(product.dietType) && product.dietType.map(dt => dt.toString().toLowerCase()).includes('vegetarian') ? `<span class="product-badge">Vegetarian-Friendly</span>` : ''}
+                                </div>
+                                <p style="font-size:12px; color:var(--text-muted); margin:0;">${escapeHtml(product.desc)}</p>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <span style="font-weight:700; color:var(--primary);">${escapeHtml(product.price)}</span>
+                                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                                    ${product.amazonLink ? `<a href="${product.amazonLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline" style="font-size:12px; padding:6px 10px;">Amazon</a>` : ''}
+                                    ${product.flipkartLink ? `<a href="${product.flipkartLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline" style="font-size:12px; padding:6px 10px;">Flipkart</a>` : ''}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2632,7 +2664,9 @@
                                 <h3 style="font-size:16px; font-weight:700; margin:0;"><i class="fas fa-box-open" style="color:var(--primary); margin-right:6px;"></i>Gym Products</h3>
                                 <button type="button" onclick="openMoreResourcesModal()" class="btn-profile-outline" style="font-size:13px; padding:8px 12px; white-space:nowrap;">Gym & Diet Resources</button>
                             </div>
-                            ${productCards}
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap:12px;">
+                                ${productCards}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2777,69 +2811,6 @@
                 }
             };
 
-            window.openMoreResourcesModal = function () {
-                const modal = document.getElementById('moreResourcesModal');
-                const list = document.getElementById('moreResourcesList');
-                if (!modal || !list) return;
-
-                const renderResources = (resources) => resources.map(item => `
-                    <div class="exercise-popup-card">
-                        <img src="${item.image}" alt="${escapeHtml(item.name)}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x260?text=Image+Unavailable';" />
-                        <div>
-                            <h5>${escapeHtml(item.name)}</h5>
-                            <p>${escapeHtml(item.desc)}</p>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-                                ${item.amazonLink ? `<a href="${item.amazonLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline">Amazon</a>` : ''}
-                                ${item.flipkartLink ? `<a href="${item.flipkartLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline">Flipkart</a>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-
-                list.innerHTML = renderResources(moreResources);
-
-                modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            };
-
-            window.closeMoreResourcesModal = function () {
-                const modal = document.getElementById('moreResourcesModal');
-                if (modal) {
-                    modal.style.display = 'none';
-                    document.body.style.overflow = '';
-                }
-            };
-
-            window.filterMoreResources = function () {
-                const query = document.getElementById('moreResourcesSearch')?.value.trim().toLowerCase() || '';
-                const list = document.getElementById('moreResourcesList');
-                if (!list) return;
-
-                const filtered = moreResources.filter(item => {
-                    const haystack = `${item.name} ${item.desc} ${item.price}`.toLowerCase();
-                    return haystack.includes(query);
-                });
-
-                if (!filtered.length) {
-                    list.innerHTML = `<div class="exercise-popup-card" style="grid-template-columns:1fr; text-align:center;"><p style="margin:0; padding:30px 0; color:var(--text-muted);">No items match your search. Try keywords like fitness, protein, or plan.</p></div>`;
-                    return;
-                }
-
-                list.innerHTML = filtered.map(item => `
-                    <div class="exercise-popup-card">
-                        <img src="${item.image}" alt="${escapeHtml(item.name)}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x260?text=Image+Unavailable';" />
-                        <div>
-                            <h5>${escapeHtml(item.name)}</h5>
-                            <p>${escapeHtml(item.desc)}</p>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-                                ${item.amazonLink ? `<a href="${item.amazonLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline">Amazon</a>` : ''}
-                                ${item.flipkartLink ? `<a href="${item.flipkartLink}" target="_blank" rel="noopener noreferrer" class="btn-profile-outline">Flipkart</a>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            };
-
             document.querySelectorAll('#exercise [data-exercise-goal]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     exerciseState.planGoal = btn.dataset.exerciseGoal;
@@ -2857,26 +2828,15 @@
                 if (response.ok) {
                     const data = await response.json();
                     const streakCount = data.streak ?? 0;
-                    const dob = data.dob;
                     const goal = data.goal || 'Weight Loss';
                     window.FNSUserDiet = (data.diet || window.FNSUserDiet || 'Non-Veg').toString();
                     window.FNSUserGender = (data.gender || window.FNSUserGender || 'all').toString();
-                    
-                    let Age = data.age || "23";
-                    if (!data.age && dob) {
-                        let [d, m, y] = dob.split(" ")[0].split("-");
-                        let birthDate = new Date(y, m - 1, d);
-                        let today = new Date();
-                        let computedAge = today.getFullYear() - birthDate.getFullYear();
-                        if (today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
-                            computedAge--;
-                        }
-                        Age = computedAge;
-                    }
+                    const age = data.age ?? 'N/A';
 
                     document.getElementById("streakText").textContent = `${streakCount}-day`;
                     document.getElementById("streakTextprofile").textContent = streakCount;
-                    document.getElementById("Age").textContent = Age;
+                    document.getElementById("Age").textContent = age;
+                    document.getElementById("ageUnit").textContent = age === 'N/A' ? '' : 'Years';
                     document.getElementById("goal").textContent = goal;
                     
                     // Profile stats (Days Completed & Remaining - Current Month)
@@ -3165,8 +3125,7 @@
 
             // Profile togglers
             window.toggleEditProfile = function () {
-                const form = document.getElementById('editProfileForm');
-                if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                openEditProfileModal();
             };
 
             window.saveProfileChanges = async function() {

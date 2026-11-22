@@ -393,7 +393,22 @@ namespace FNS.Controllers
             }
 
             // Get DOB and Goal
-            string dob = row.Table.Columns.Contains("dob") ? row["dob"]?.ToString() : null;
+            DateTime? dateOfBirth = row.Table.Columns.Contains("dob") && row["dob"] != DBNull.Value
+                ? Convert.ToDateTime(row["dob"]).Date
+                : null;
+            int? age = null;
+            if (dateOfBirth.HasValue && dateOfBirth.Value <= DateTime.Today)
+            {
+                var today = DateTime.Today;
+                var calculatedAge = today.Year - dateOfBirth.Value.Year;
+                if (dateOfBirth.Value > today.AddYears(-calculatedAge))
+                {
+                    calculatedAge--;
+                }
+                age = calculatedAge;
+            }
+
+            string dob = dateOfBirth?.ToString("yyyy-MM-dd");
             string goal = row.Table.Columns.Contains("goal") ? row["goal"]?.ToString() : null;
 
             return Ok(new
@@ -403,7 +418,7 @@ namespace FNS.Controllers
                 goal = goal,
                 weight = row.Table.Columns.Contains("weight") ? Convert.ToDouble(row["weight"]) : 0.0,
                 height = row.Table.Columns.Contains("height") ? Convert.ToDouble(row["height"]) : 0.0,
-                age = row.Table.Columns.Contains("age") ? Convert.ToInt32(row["age"]) : 0,
+                age = age,
                 diet = row.Table.Columns.Contains("diet") ? row["diet"]?.ToString() : "",
                 lifestyle = row.Table.Columns.Contains("lifestyle") ? row["lifestyle"]?.ToString() : "",
                 bloodType = row.Table.Columns.Contains("bloodType") ? row["bloodType"]?.ToString() : "",
