@@ -8,16 +8,19 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Data;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace FNS.Repository
 {
     public class Improve : IImprove
     {
         private readonly NpgsqlConnection _con;
+        private readonly ILogger<Improve> _logger;
 
-        public Improve(NpgsqlConnection con)
+        public Improve(NpgsqlConnection con, ILogger<Improve> logger)
         {
             _con = con;
+            _logger = logger;
         }
 
         public bool SaveHealthInfoAsync(JsonElement healthInfo, string email)
@@ -112,8 +115,7 @@ namespace FNS.Repository
             }
             catch (Exception ex)
             {
-                // Handle the exception (log it, etc.)
-                Console.WriteLine("Error: " + ex.Message);
+                _logger.LogError(ex, "Failed to save health information for {Email}", email);
                 return false;
             }
             finally

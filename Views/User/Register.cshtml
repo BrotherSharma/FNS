@@ -1,6 +1,7 @@
 @model FNS.Models.Register
 @{
     Layout = null;
+    var maxDateOfBirth = DateTime.Today.ToString("yyyy-MM-dd");
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -114,7 +115,7 @@
                         <label for="c_dob" class="form-label text-secondary small fw-semibold mb-1">Date of Birth</label>
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0 text-muted" style="border-top-left-radius:12px; border-bottom-left-radius:12px; border: 1.5px solid #cbd5e1;"><i class="fas fa-calendar-alt"></i></span>
-                            <input type="date" class="form-control border-start-0" id="c_dob" name="c_dob" style="border-top-left-radius:0 !important; border-bottom-left-radius:0 !important;" />
+                            <input type="date" class="form-control border-start-0" id="c_dob" name="c_dob" max="@maxDateOfBirth" required style="border-top-left-radius:0 !important; border-bottom-left-radius:0 !important;" />
                         </div>
                         <span id="dobValidateMessage" class="error-message" hidden></span>
                     </div>
@@ -224,6 +225,10 @@
 
                 if (!dob) {
                     $('#dobValidateMessage').text('Date of birth is required.').removeAttr('hidden');
+                    ok = false;
+                }
+                else if (dob > $('#c_dob').attr('max')) {
+                    $('#dobValidateMessage').text('Date of birth cannot be in the future.').removeAttr('hidden');
                     ok = false;
                 }
 
