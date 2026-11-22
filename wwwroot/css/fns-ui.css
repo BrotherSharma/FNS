@@ -47,6 +47,10 @@ html, body {
 /* Body Layout Shell */
 body.fns-layout-shell {
   min-height: 100vh;
+  height: 100vh;
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
   margin: 0;
   padding: 0;
   background: 
@@ -54,6 +58,24 @@ body.fns-layout-shell {
     radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.15), transparent 40%),
     linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   background-attachment: fixed;
+}
+
+body.fns-layout-shell::-webkit-scrollbar {
+  width: 12px;
+}
+
+body.fns-layout-shell::-webkit-scrollbar-track {
+  background: #eef2f4;
+}
+
+body.fns-layout-shell::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 8px;
+  border: 3px solid #eef2f4;
+}
+
+body.fns-layout-shell::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 body.fns-layout-shell > .container {
@@ -82,9 +104,24 @@ body.fns-layout-shell > .container {
   overflow-x: hidden;
 }
 
+.fns-login-background {
+  background:
+    linear-gradient(135deg, rgba(6, 78, 59, 0.85), rgba(15, 23, 42, 0.92)),
+    var(--fns-bg-image) center / cover no-repeat,
+    var(--fns-bg-fallback) center / cover no-repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.fns-login-background > .container {
+  position: relative;
+  z-index: 1;
+}
+
 .fns-auth-shell::before,
 .fns-payment-shell::before,
-.fns-status-shell::before {
+.fns-status-shell::before,
+.fns-login-background::before {
   content: "";
   position: absolute;
   width: 450px;

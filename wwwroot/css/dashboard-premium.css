@@ -230,13 +230,7 @@ i.fa, i.fas, i.far, i.fab, i.fal, i.fad,
     flex-direction: column;
     gap: 6px;
     flex-grow: 1;
-    min-height: 0;
-    overflow: hidden;
-    scrollbar-width: none;
-}
-
-.sidebar-nav::-webkit-scrollbar {
-    display: none;
+    overflow-y: auto;
 }
 
 .sidebar-nav .nav-link {

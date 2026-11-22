@@ -36,12 +36,18 @@ namespace FNS.Controllers
         private readonly IUserLogin _userLogin;
         private readonly IEmailService _emailService;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IConfiguration _configuration;
 
-        public UserController(IUserLogin userLogin, IEmailService emailService, IWebHostEnvironment webHostEnvironment)
+        public UserController(
+            IUserLogin userLogin,
+            IEmailService emailService,
+            IWebHostEnvironment webHostEnvironment,
+            IConfiguration configuration)
         {
             _userLogin = userLogin;
             _emailService = emailService;
             _webHostEnvironment = webHostEnvironment;
+            _configuration = configuration;
         }
 
 
@@ -313,7 +319,13 @@ namespace FNS.Controllers
                 ViewBag.LastName = lastName;
                 ViewBag.Email = email;
 
-                string loginUrl = $"{Request.Scheme}://{Request.Host}/User/Login";
+                string loginUrl = _configuration["App:PublicHomeUrl"];
+                if (!Uri.TryCreate(loginUrl, UriKind.Absolute, out var publicHomeUri) ||
+                    (publicHomeUri.Scheme != Uri.UriSchemeHttp && publicHomeUri.Scheme != Uri.UriSchemeHttps))
+                {
+                    throw new InvalidOperationException("App:PublicHomeUrl must be configured as an absolute HTTP or HTTPS URL.");
+                }
+
                 bool emailSent = await _emailService.SendRegistrationWelcomeEmailAsync(email, name, loginUrl);
 
                 return Ok(new
