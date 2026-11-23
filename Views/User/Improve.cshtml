@@ -1,8 +1,14 @@
 @{
     ViewData["Title"] = "Personalized Health Profile";
     ViewData["BodyClass"] = "fns-login-background";
-    string Name = ViewBag.Name;
-    string Email = ViewBag.Email;
+    string Name = Context.Session.GetString("Name");
+    string Email = Context.Session.GetString("Email");
+    string FirstName = Context.Session.GetString("FirstName");
+
+    if (string.IsNullOrWhiteSpace(FirstName) && !string.IsNullOrWhiteSpace(Name))
+    {
+        FirstName = Name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+    }
 }
 
 <!-- Google Fonts & FontAwesome -->
@@ -217,6 +223,8 @@
     $(document).ready(function() {
         var name = '@Context.Session.GetString("Name")';
         var email = '@Context.Session.GetString("Email")';
+        var firstName = '@Context.Session.GetString("FirstName")';
+        var lastName = '@Context.Session.GetString("LastName")';
         $('#healthForm').on('submit', function(e) {
             e.preventDefault();
             var age = Number($('#age').val());
@@ -243,6 +251,8 @@
                 alcoholConsumption: $('#alcoholConsumption').val(),
                 name : name,
                 email: email,
+                firstName: firstName,
+                lastName: lastName,
             };
 
             var gender = $('#gender').val();

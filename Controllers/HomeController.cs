@@ -22,6 +22,22 @@ public class HomeController : Controller
         var firstName = HttpContext.Session.GetString("FirstName");
         var lastName = HttpContext.Session.GetString("LastName");
         var email = HttpContext.Session.GetString("Email");
+
+        if (string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(name))
+        {
+            firstName = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "User";
+            HttpContext.Session.SetString("FirstName", firstName);
+        }
+
+        if (string.IsNullOrWhiteSpace(lastName) && !string.IsNullOrWhiteSpace(name))
+        {
+            var nameParts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (nameParts.Length > 1)
+            {
+                lastName = string.Join(" ", nameParts.Skip(1));
+                HttpContext.Session.SetString("LastName", lastName);
+            }
+        }
         
         if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email))
         {

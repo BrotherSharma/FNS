@@ -180,7 +180,9 @@ i.fa, i.fas, i.far, i.fab, i.fal, i.fad,
 .sidebar-top-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    width: 100%;
+    position: relative;
     margin-bottom: 20px;
 }
 
@@ -191,6 +193,8 @@ i.fa, i.fas, i.far, i.fab, i.fal, i.fad,
 .logo-container {
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 100%;
     gap: 12px;
 }
 
@@ -207,6 +211,8 @@ i.fa, i.fas, i.far, i.fab, i.fal, i.fad,
 .logo-text {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .logo-title {
@@ -231,6 +237,16 @@ i.fa, i.fas, i.far, i.fab, i.fal, i.fad,
     gap: 6px;
     flex-grow: 1;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar-nav::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 .sidebar-nav .nav-link {
@@ -322,6 +338,8 @@ i.fa, i.fas, i.far, i.fab, i.fal, i.fad,
     background-color: var(--bg-canvas);
     display: flex;
     flex-direction: column;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .top-header-widget {

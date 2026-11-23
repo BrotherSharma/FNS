@@ -323,6 +323,9 @@ namespace FNS.Controllers
                 string name = firstName + " " + lastName;
                 HttpContext.Session.SetString("Name", name);
                 HttpContext.Session.SetString("Email", email);
+                HttpContext.Session.SetString("FirstName", firstName);
+                HttpContext.Session.SetString("LastName", lastName);
+                HttpContext.Session.SetString("IsPremium", "False");
                 ViewBag.Name = name;
                 ViewBag.FirstName = firstName;
                 ViewBag.LastName = lastName;
