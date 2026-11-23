@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Security.Claims;
@@ -300,16 +301,24 @@ namespace FNS.Controllers
                 var username = credentials.GetProperty("c_username").GetString(); // Added missing username
                 var gender = credentials.GetProperty("c_gender").GetString();
 
-                DateTime dob;
-                if (credentials.TryGetProperty("c_dob", out var dobElement))
+                if (!credentials.TryGetProperty("c_dob", out var dobElement) ||
+                    dobElement.ValueKind != JsonValueKind.String ||
+                    !DateOnly.TryParseExact(
+                        dobElement.GetString(),
+                        "yyyy-MM-dd",
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.None,
+                        out var dobDate))
                 {
-                    dob = dobElement.GetDateTime();
-                }
-                else
-                {
-                    return BadRequest(new { success = false, message = "Date of birth is required." });
+                    return BadRequest(new { success = false, message = "A valid date of birth is required." });
                 }
 
+                if (dobDate > DateOnly.FromDateTime(DateTime.Today))
+                {
+                    return BadRequest(new { success = false, message = "Date of birth cannot be in the future." });
+                }
+
+                DateTime dob = dobDate.ToDateTime(TimeOnly.MinValue);
                 _userLogin.RegisterUser(email, password, firstName, lastName, username, gender, dob);
                 string name = firstName + " " + lastName;
                 HttpContext.Session.SetString("Name", name);
